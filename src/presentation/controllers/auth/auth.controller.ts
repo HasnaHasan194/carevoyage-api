@@ -1,0 +1,469 @@
+import { Request, Response } from "express";
+
+import { inject, injectable } from "tsyringe";
+import { IRegisterUsecase } from "../../../application/usecase/interfaces/auth/register-usecase.interface";
+import { IAuthController } from "../../interfaces/controllers/auth/auth.controller.interfaces";
+
+import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
+import {
+  COOKIES_NAMES,
+  ERROR_MESSAGE,
+  HTTP_STATUS,
+  SUCCESS_MESSAGE,
+} from "../../../shared/constants/constants";
+import { ILoginUsecase } from "../../../application/usecase/interfaces/auth/loginUsecase.interface";
+import { LoginRequestDTO } from "../../../application/dto/request/login-request.dto";
+import { IRegisterAgencyUsecase } from "../../../application/usecase/interfaces/auth/register-agency.interface";
+import { IAgencyLoginUsecase } from "../../../application/usecase/interfaces/auth/agencyloginUsecase.interface";
+import { AgencyLoginRequestDTO } from "../../../application/dto/request/agencylogin-request.dto";
+import { AdminLoginRequestDTO } from "../../../application/dto/request/adminlogin-request.dto";
+import { IAdminLoginUsecase } from "../../../application/usecase/interfaces/auth/adminloginUsecase.interface";
+import { IVerifyOtpAndCreateAgencyUsecase } from "../../../application/usecase/interfaces/auth/verify-otp-agency.usecase.interface";
+import { ISendOtpUsecase } from "../../../application/usecase/interfaces/auth/send-otp.usecase.interface";
+import { IResendOtpUsecase } from "../../../application/usecase/interfaces/auth/resend-otp.usecase.interface";
+import { IVerifyOtpUsecase } from "../../../application/usecase/interfaces/auth/verify-otp.usecase.interface";
+import { IVerifyOtpAndCreateUserUsecase } from "../../../application/usecase/interfaces/auth/verify-otp-user.usecase.interface";
+import { ICheckUserAndSendOtpUsecase } from "../../../application/usecase/interfaces/check-user-verify-usecase.interface";
+import { IGenerateTokenUseCase } from "../../../application/usecase/interfaces/auth/generate-token.usecase.interface";
+import { ILogoutUseCase } from "../../../application/usecase/interfaces/auth/logout-usecase.interface";
+import { IRefreshTokenUsecase } from "../../../application/usecase/interfaces/auth/refresh-token-usecase.interface";
+import { setAuthCookies, clearCookie, updateCookieWithAccessToken } from "../../../shared/utils/cookieHelper";
+import { IVerifyCaretakerInviteUseCase } from "../../../application/usecase/interfaces/caretaker/verify-caretaker-invite.interface";
+import { ICaretakerSignupUseCase } from "../../../application/usecase/interfaces/caretaker/caretaker-signup.interface";
+import { ICaretakerLoginUseCase } from "../../../application/usecase/interfaces/auth/caretaker-login.interface";
+import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caretaker-login-request.dto";
+
+@injectable()
+export class AuthController implements IAuthController {
+  constructor(
+    @inject("IRegisterUsecase")
+    private _registerUsecase: IRegisterUsecase,
+
+    @inject("ILoginUsecase")
+    private _loginUsecase: ILoginUsecase,
+
+    @inject("IRegisterAgencyUsecase")
+    private _registerAgencyUsecase: IRegisterAgencyUsecase,
+
+    @inject("IAgencyLoginUsecase")
+    private _loginAgencyUsecase: IAgencyLoginUsecase,
+
+    @inject("IAdminLoginUsecase")
+    private _loginAdminUsecase: IAdminLoginUsecase,
+
+    @inject("ISendOtpUsecase")
+    private _sendOtpUsecase: ISendOtpUsecase,
+
+    @inject("IResendOtpUsecase")
+    private _resendOtpUsecase: IResendOtpUsecase,
+
+    @inject("IVerifyOtpUsecase")
+    private _verifyOtpUsecase: IVerifyOtpUsecase,
+
+    @inject("IVerifyOtpAndCreateUserUsecase")
+    private _verifyOtpAndCreateUserUsecase: IVerifyOtpAndCreateUserUsecase,
+
+    @inject("IVerifyOtpAndCreateAgencyUsecase")
+    private _verifyOtpAndCreateAgencyUsecase: IVerifyOtpAndCreateAgencyUsecase,
+
+    @inject("ICheckUserAndSendOtpUsecase")
+    private _checkUserAndSendOtpUsecase: ICheckUserAndSendOtpUsecase,
+
+    @inject("IGenerateTokenUseCase")
+    private _generateTokenUseCase: IGenerateTokenUseCase,
+
+    @inject("ILogoutUseCase")
+    private _logoutUseCase: ILogoutUseCase,
+
+    @inject("IRefreshTokenUsecase")
+    private _refreshTokenUsecase: IRefreshTokenUsecase,
+
+    @inject("IVerifyCaretakerInviteUseCase")
+    private _verifyCaretakerInviteUseCase: IVerifyCaretakerInviteUseCase,
+
+    @inject("ICaretakerSignupUseCase")
+    private _caretakerSignupUseCase: ICaretakerSignupUseCase,
+
+    @inject("ICaretakerLoginUseCase")
+    private _caretakerLoginUseCase: ICaretakerLoginUseCase
+  ) {}
+
+  async register(req: Request, res: Response): Promise<void> {
+    const userData = req.body;
+
+    await this._registerUsecase.execute(userData);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.CREATED,
+      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED
+    );
+  }
+
+  async login(req: Request, res: Response): Promise<void> {
+    const userData = req.body;
+
+    const data = await this._loginUsecase.execute(userData as LoginRequestDTO);
+
+    const userId = data.id.toString();
+
+    const tokens = await this._generateTokenUseCase.execute(
+      userId,
+      data.email,
+      data.role
+    );
+
+    setAuthCookies(
+      res,
+      tokens.accessToken,
+      tokens.refreshToken,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN
+    );
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      user: {
+        id: userData,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        role: data.role,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+
+  async registerAgency(req: Request, res: Response): Promise<void> {
+    const userData = req.body;
+
+    await this._registerAgencyUsecase.execute(userData);
+
+    ResponseHelper.success(
+      res,
+      200,
+      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED
+    );
+  }
+  async loginAgency(req: Request, res: Response): Promise<void> {
+    const userData = req.body;
+
+    const data = await this._loginAgencyUsecase.execute(
+      userData as AgencyLoginRequestDTO
+    );
+
+    const userId = data.id.toString();
+
+    const tokens = await this._generateTokenUseCase.execute(
+      userId,
+      data.email,
+      data.role
+    );
+
+    setAuthCookies(
+      res,
+      tokens.accessToken,
+      tokens.refreshToken,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN
+    );
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      user: {
+        id: userData,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        role: data.role,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+  async AdminLogin(req: Request, res: Response): Promise<void> {
+    const userData = req.body;
+    const data = await this._loginAdminUsecase.execute(
+      userData as AdminLoginRequestDTO
+    );
+    const userId = data.id.toString();
+
+    const tokens = await this._generateTokenUseCase.execute(
+      userId,
+      data.email,
+      data.role
+    );
+
+    setAuthCookies(
+      res,
+      tokens.accessToken,
+      tokens.refreshToken,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN
+    );
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      user: {
+        id: userData,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        role: data.role,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+  async sendOtp(req: Request, res: Response): Promise<void> {
+    const { email } = req.body;
+
+    await this._sendOtpUsecase.execute(email);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.AUTHORIZATION.OTP_SEND_SUCCESS
+    );
+  }
+
+  async resendOtp(req: Request, res: Response): Promise<void> {
+    const { email } = req.body;
+
+    await this._resendOtpUsecase.execute(email);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.AUTHORIZATION.OTP_RESENT_SUCCESS
+    );
+  }
+  async verifyOtp(req: Request, res: Response): Promise<void> {
+    const { email, otp } = req.body;
+
+    await this._verifyOtpUsecase.execute(email, otp);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.AUTHORIZATION.OTP_VERIFIED
+    );
+  }
+  async verifyOtpAndCreateUser(req: Request, res: Response): Promise<void> {
+    const { email, otp, userData } = req.body;
+    const user = await this._verifyOtpAndCreateUserUsecase.execute(
+      email,
+      otp,
+      userData
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.CREATED,
+      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED,
+      user
+    );
+  }
+
+  async verifyOtpAndCreateAgency(req: Request, res: Response): Promise<void> {
+    const { email, otp, agencyData } = req.body;
+
+    const agency = await this._verifyOtpAndCreateAgencyUsecase.execute(
+      email,
+      otp,
+      agencyData
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.CREATED,
+      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED,
+      agency
+    );
+  }
+
+  async signupSendOtp(req: Request, res: Response): Promise<void> {
+    const { email, phone, password } = req.body;
+
+    await this._checkUserAndSendOtpUsecase.execute({
+      email,
+      phone,
+    });
+
+    ResponseHelper.success(res, HTTP_STATUS.OK, "OTP sent successfully");
+  }
+
+  async logout(req: Request, res: Response): Promise<void> {
+    await this._logoutUseCase.execute();
+
+    clearCookie(
+      res,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.AUTHORIZATION.LOGOUT_SUCCESS
+    );
+  }
+
+  async refreshToken(req: Request, res: Response): Promise<void> {
+    const refreshToken = req.cookies[COOKIES_NAMES.REFRESH_TOKEN];
+
+    if (!refreshToken) {
+      clearCookie(
+        res,
+        COOKIES_NAMES.ACCESS_TOKEN,
+        COOKIES_NAMES.REFRESH_TOKEN
+      );
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.TOKEN_MISSING,
+        HTTP_STATUS.UNAUTHORIZED
+      );
+      return;
+    }
+
+    try {
+      const result = await this._refreshTokenUsecase.execute(refreshToken);
+
+      updateCookieWithAccessToken(
+        res,
+        result.accessToken,
+        COOKIES_NAMES.ACCESS_TOKEN
+      );
+
+      ResponseHelper.success(
+        res,
+        HTTP_STATUS.OK,
+        "Access token refreshed successfully",
+        {
+          role: result.role,
+        }
+      );
+    } catch (error) {
+      // Clear cookies on refresh failure
+      clearCookie(
+        res,
+        COOKIES_NAMES.ACCESS_TOKEN,
+        COOKIES_NAMES.REFRESH_TOKEN
+      );
+
+      if (error instanceof Error) {
+        ResponseHelper.error(
+          res,
+          error.message,
+          HTTP_STATUS.UNAUTHORIZED
+        );
+      } else {
+        ResponseHelper.error(
+          res,
+          ERROR_MESSAGE.AUTHENTICATION.TOKEN_EXPIRED_REFRESH,
+          HTTP_STATUS.UNAUTHORIZED
+        );
+      }
+    }
+  }
+
+  async verifyCaretakerInvite(req: Request, res: Response): Promise<void> {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      ResponseHelper.error(
+        res,
+        "Token is required",
+        HTTP_STATUS.BAD_REQUEST
+      );
+      return;
+    }
+
+    const result = await this._verifyCaretakerInviteUseCase.execute(token);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Invite token verified successfully",
+      result
+    );
+  }
+
+  async caretakerSignup(req: Request, res: Response): Promise<void> {
+    const signupData = req.body;
+
+    const userData = await this._caretakerSignupUseCase.execute(
+      signupData
+    );
+
+    const tokens = await this._generateTokenUseCase.execute(
+      userData.id,
+      userData.email,
+      userData.role
+    );
+
+    setAuthCookies(
+      res,
+      tokens.accessToken,
+      tokens.refreshToken,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN
+    );
+
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      message: SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED,
+      data: {
+        id: userData.id,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        role: userData.role,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+
+  async caretakerLogin(req: Request, res: Response): Promise<void> {
+    const userData = req.body;
+
+    const data = await this._caretakerLoginUseCase.execute(
+      userData as CaretakerLoginRequestDTO
+    );
+
+    const userId = data.id.toString();
+
+    const tokens = await this._generateTokenUseCase.execute(
+      userId,
+      data.email,
+      data.role
+    );
+
+    setAuthCookies(
+      res,
+      tokens.accessToken,
+      tokens.refreshToken,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN
+    );
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      user: {
+        id: data.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        role: data.role,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+}
