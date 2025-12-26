@@ -58,7 +58,6 @@ export class AuthRoutes extends BaseRoute {
 
     this.router.post(
       "/resend-otp",
-      validationMiddleware(SendOtpRequestDTO),
       asyncHandler(authController.resendOtp.bind(authController))
     );
 

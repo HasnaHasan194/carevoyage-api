@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { eventBus } from "../../../../shared/eventBus";
 import { mailContentProvider } from "../../../../shared/mailContentProvider";
 import { IOtpService } from "../../../../domain/service-interfaces/otp-service.interface";
+import { MAIL_CONTENT_PURPOSE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class ResendOtpUsecase {
@@ -19,7 +20,7 @@ export class ResendOtpUsecase {
       "SENDMAIL",
       email,
       "OTP Resend",
-      mailContentProvider("OTP", otp)
+      mailContentProvider(MAIL_CONTENT_PURPOSE.OTP, otp)
     );
   }
 }

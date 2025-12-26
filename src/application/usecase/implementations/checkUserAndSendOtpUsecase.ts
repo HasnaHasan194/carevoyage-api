@@ -5,6 +5,7 @@ import { ValidationError } from "../../../domain/errors/validationError";
 import { eventBus } from "../../../shared/eventBus";
 import { mailContentProvider } from "../../../shared/mailContentProvider";
 import { ICheckUserAndSendOtpUsecase } from "../interfaces/check-user-verify-usecase.interface";
+import { MAIL_CONTENT_PURPOSE } from "../../../shared/constants/constants";
 
 @injectable()
 export class CheckUserAndSendOtpUsecase implements ICheckUserAndSendOtpUsecase {
@@ -43,7 +44,7 @@ export class CheckUserAndSendOtpUsecase implements ICheckUserAndSendOtpUsecase {
       "SENDMAIL",
       email,
       "OTP Verification",
-      mailContentProvider("OTP", otp)
+      mailContentProvider(MAIL_CONTENT_PURPOSE.OTP, otp)
     );
   }
 }

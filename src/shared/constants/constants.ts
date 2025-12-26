@@ -107,8 +107,4 @@ export const EVENT_EMMITER_TYPE={
 export enum MAIL_CONTENT_PURPOSE {
   LOGIN ="login",
   OTP = "otp",
-  EMAIL_CHANGE = "email change",
-  GUIDE_LOGIN = "guide login",
-  REQUEST_REJECTED = "request rejected",
-  RESET_PASSWORD = "reset password",
 }
