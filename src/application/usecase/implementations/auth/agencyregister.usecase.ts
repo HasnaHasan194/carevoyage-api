@@ -2,53 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
 import { IRegisterAgencyUsecase } from "../../interfaces/auth/register-agency.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
-
-// @injectable()
-// export class RegisterAgencyUsecase implements IRegisterAgencyUsecase{
-//   constructor(
-//     @inject("IAgencyRepository")
-//     private _agencyRepository: IAgencyRepository
-//   ) {}
-
-//   async execute(data: Partial<IAgencyEntity>): Promise<void> {
-//     if (
-//       !data.userId ||
-//       !data.agencyName ||
-//       !data.registrationNumber ||
-//       !data.address
-//     ) {
-//       throw new Error("Required agency fields are missing");
-//     }
-
-
-//     const existingAgency = await this._agencyRepository.findByUserId(
-//       data.userId
-//     );
-
-//     if (existingAgency) {
-//       throw new Error("Agency already exists for this user");
-//     }
-
-   
-//     const existingRegistration =
-//       await this._agencyRepository.findByRegistrationNumber(
-//         data.registrationNumber
-//       );
-
-//     if (existingRegistration) {
-//       throw new Error("Registration number already exists");
-//     }
-
-  
-//     const agencyData: Partial<IAgencyEntity> = {
-//       ...data,
-//       verificationStatus: "pending",
-//       isBlocked: false,
-//     };
-
-//     await this._agencyRepository.save(agencyData);
-//   }
-// }
+// import { CustomError } from "../../../../domain/errors/customError";
 @injectable()
 export class RegisterAgencyUsecase implements IRegisterAgencyUsecase {
   constructor(
@@ -70,6 +24,12 @@ export class RegisterAgencyUsecase implements IRegisterAgencyUsecase {
     registrationNumber: string;
     description?: string;
   }): Promise<void> {
+
+    // const numOfRegistration = await this._userRepository.countNumberOfCom();
+
+    // if(numOfRegistration  > 1){
+    //   throw new CustomError(HTTP_STATUS.BAD_REQUEST,"Only registration allowed")
+    // }
 
     const existingUser = await this._userRepository.findByEmail(data.email);
     if (existingUser) {

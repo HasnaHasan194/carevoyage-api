@@ -22,7 +22,8 @@ export interface IUserRepository extends IBaseRepository<IUserEntity> {
     search?: string
   ): Promise<{ users: IUserEntity[]; total: number }>;
 
-  findById(userId: string): Promise<IUserEntity | null>;
+  // findById(userId: string): Promise<IUserEntity | null>;
+  // countNumberOfCom() : Promise<number>
 }
 // findByRole(
   //   role: IUserEntity["role"],

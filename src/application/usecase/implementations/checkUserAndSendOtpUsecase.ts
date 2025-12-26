@@ -38,7 +38,7 @@ export class CheckUserAndSendOtpUsecase implements ICheckUserAndSendOtpUsecase {
 
     const otp = this._otpService.generateOtp();
     await this._otpService.storeOtp(email, otp);
-
+    console.log(otp,"-->otp")
     eventBus.emit(
       "SENDMAIL",
       email,

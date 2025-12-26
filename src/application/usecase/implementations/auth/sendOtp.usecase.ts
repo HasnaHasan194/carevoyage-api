@@ -14,9 +14,10 @@ export class SendOtpUsecase {
     if (!email) {
       throw new ValidationError("Email is required");
     }
-
+  
     const otp = this._otpService.generateOtp();
     await this._otpService.storeOtp(email, otp);
+    console.log(otp)
 
     eventBus.emit(
       "SENDMAIL",
