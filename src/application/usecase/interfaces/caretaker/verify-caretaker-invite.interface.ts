@@ -4,3 +4,5 @@ export interface IVerifyCaretakerInviteUseCase {
   execute(token: string): Promise<VerifyCaretakerInviteResponseDTO>;
 }
 
+
+

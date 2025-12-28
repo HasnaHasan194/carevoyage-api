@@ -154,6 +154,8 @@ export class AuthController implements IAuthController {
       userData as AgencyLoginRequestDTO
     );
 
+    
+
     const userId = data.id.toString();
 
     const tokens = await this._generateTokenUseCase.execute(

@@ -19,3 +19,5 @@ export interface ICaretakerProfileRepository
   ): Promise<ICaretakerProfileEntity | null>;
 }
 
+
+

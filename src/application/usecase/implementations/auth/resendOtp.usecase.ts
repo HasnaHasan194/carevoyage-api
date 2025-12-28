@@ -15,6 +15,7 @@ export class ResendOtpUsecase {
 
     const otp = this._otpService.generateOtp();
     await this._otpService.storeOtp(email, otp);
+    console.log("otp--->",otp)
 
     eventBus.emit(
       "SENDMAIL",

@@ -2,9 +2,9 @@ import { CaretakerProfileMapper } from "../../../application/mapper/caretaker-pr
 import { ICaretakerProfileEntity } from "../../../domain/entities/caretaker-profile.entity";
 import { ICaretakerProfileRepository } from "../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import {
-  ICaretakerProfileModel,
   caretakerProfileDB,
 } from "../../database/models/caretaker-profile.model";
+import { ICaretakerProfileModel } from "../../database/schemas/caretaker-profile.schema";
 import { BaseRepository } from "../baseRepository";
 
 export class CaretakerProfileRepository

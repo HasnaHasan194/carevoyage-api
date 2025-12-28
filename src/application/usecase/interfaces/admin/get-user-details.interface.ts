@@ -4,3 +4,5 @@ export interface IGetUserDetailsUsecase {
   execute(userId: string): Promise<UserResponseDTO>;
 }
 
+
+

@@ -5,3 +5,5 @@ export interface VerifyCaretakerInviteResponseDTO {
   isValid: boolean;
 }
 
+
+

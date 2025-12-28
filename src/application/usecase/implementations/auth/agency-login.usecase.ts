@@ -24,6 +24,10 @@ export class AgencyLoginUsecase {
 
     const user = await this._userRepository.findByEmail(data.email);
 
+    console.log(user,"-->user")
+
+
+
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_NOT_FOUND);
     }
@@ -46,6 +50,8 @@ export class AgencyLoginUsecase {
 
     const agency = await this._agencyRepository.findByUserId(user._id);
 
+    console.log(agency)
+
     if (!agency) {
       throw new NotFoundError("Agency profile not found");
     }
@@ -54,12 +60,7 @@ export class AgencyLoginUsecase {
       throw new ValidationError("Agency account is blocked");
     }
 
-    // if (agency.verificationStatus !== "verified") {
-    //   throw new ValidationError(
-    //     "Agency account is not verified yet"
-    //   );
-    // }
-
+  
     return AgencyMapper.mapToLoginResponseDto(user);
   }
 }

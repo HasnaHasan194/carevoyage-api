@@ -2,7 +2,6 @@ import { inject, injectable } from "tsyringe";
 import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
 import { IRegisterAgencyUsecase } from "../../interfaces/auth/register-agency.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
-// import { CustomError } from "../../../../domain/errors/customError";
 @injectable()
 export class RegisterAgencyUsecase implements IRegisterAgencyUsecase {
   constructor(
@@ -25,11 +24,7 @@ export class RegisterAgencyUsecase implements IRegisterAgencyUsecase {
     description?: string;
   }): Promise<void> {
 
-    // const numOfRegistration = await this._userRepository.countNumberOfCom();
-
-    // if(numOfRegistration  > 1){
-    //   throw new CustomError(HTTP_STATUS.BAD_REQUEST,"Only registration allowed")
-    // }
+    
 
     const existingUser = await this._userRepository.findByEmail(data.email);
     if (existingUser) {

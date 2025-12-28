@@ -5,3 +5,5 @@ export interface ICaretakerSignupUseCase {
   execute(request: CaretakerSignupRequestDTO): Promise<LoginResponseDTO>;
 }
 
+
+

@@ -10,7 +10,6 @@ import { AgencyLoginRequestDTO } from "../../../application/dto/request/agencylo
 import { AdminLoginRequestDTO } from "../../../application/dto/request/adminlogin-request.dto";
 import { ResendOtpUsecase } from "../../../application/usecase/implementations/auth/resendOtp.usecase";
 import { SendOtpRequestDTO } from "../../../application/dto/request/sentOtpRequestdto";
-import { VerifyOtpAndCreateUserDTO } from "../../../application/dto/request/VerifyOtpandCreateUserdto";
 import { VerifyOtpRequestDTO } from "../../../application/dto/request/verifyotpRequestdto";
 import { VerifyOtpAndCreateAgencyDTO } from "../../../application/dto/request/VerifyotpandcreateAgencydto";
 import { CaretakerSignupRequestDTO } from "../../../application/dto/request/caretaker-signup-request.dto";
@@ -69,12 +68,12 @@ export class AuthRoutes extends BaseRoute {
 
     this.router.post(
       "/verify-createuser",
-      //  validationMiddleware(VerifyOtpAndCreateUserDTO),
+      
       asyncHandler(authController.verifyOtpAndCreateUser.bind(authController))
     );
     this.router.post(
       "/verify-create-agency",
-      // validationMiddleware(VerifyOtpAndCreateAgencyDTO),
+      
       asyncHandler(authController.verifyOtpAndCreateAgency.bind(authController))
     );
 

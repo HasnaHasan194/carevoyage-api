@@ -21,7 +21,7 @@ export class AgencyController implements IAgencyController {
   async inviteCaretaker(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
     const userId = customReq.user.id;
-
+    console.log(userId,"-->userId")
     // Find agency by userId
     const agency = await this._agencyRepository.findByUserId(userId);
     if (!agency) {
@@ -39,4 +39,6 @@ export class AgencyController implements IAgencyController {
     );
   }
 }
+
+
 
