@@ -32,6 +32,12 @@ import { IVerifyCaretakerInviteUseCase } from "../../../application/usecase/inte
 import { ICaretakerSignupUseCase } from "../../../application/usecase/interfaces/caretaker/caretaker-signup.interface";
 import { ICaretakerLoginUseCase } from "../../../application/usecase/interfaces/auth/caretaker-login.interface";
 import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caretaker-login-request.dto";
+import { IForgotPasswordUsecase } from "../../../application/usecase/interfaces/auth/forgot-password.interface";
+import { IResetPasswordUsecase } from "../../../application/usecase/interfaces/auth/reset-password.interface";
+import { IVerifyResetTokenUsecase } from "../../../application/usecase/interfaces/auth/verify-reset-token.interface";
+import { IGoogleAuthUsecase } from "../../../application/usecase/interfaces/auth/google-auth.interface";
+import { GoogleAuthRequestDTO } from "../../../application/dto/request/google-auth-request.dto";
+import { access } from "fs";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -85,7 +91,19 @@ export class AuthController implements IAuthController {
     private _caretakerSignupUseCase: ICaretakerSignupUseCase,
 
     @inject("ICaretakerLoginUseCase")
-    private _caretakerLoginUseCase: ICaretakerLoginUseCase
+    private _caretakerLoginUseCase: ICaretakerLoginUseCase,
+
+    @inject("IForgotPasswordUsecase")
+    private _forgotPasswordUsecase: IForgotPasswordUsecase,
+
+    @inject("IResetPasswordUsecase")
+    private _resetPasswordUsecase: IResetPasswordUsecase,
+
+    @inject("IVerifyResetTokenUsecase")
+    private _verifyResetTokenUsecase: IVerifyResetTokenUsecase,
+
+    @inject("IGoogleAuthUsecase")
+    private _googleAuthUsecase: IGoogleAuthUsecase
   ) {}
 
   async register(req: Request, res: Response): Promise<void> {
@@ -104,14 +122,15 @@ export class AuthController implements IAuthController {
     const userData = req.body;
 
     const data = await this._loginUsecase.execute(userData as LoginRequestDTO);
-
+   console.log("data----->",data)
     const userId = data.id.toString();
-
+     console.log(userId,"userid-------->")
     const tokens = await this._generateTokenUseCase.execute(
       userId,
       data.email,
       data.role
     );
+    console.log(tokens,"---->tokens")
 
     setAuthCookies(
       res,
@@ -463,6 +482,98 @@ export class AuthController implements IAuthController {
         lastName: data.lastName,
         email: data.email,
         role: data.role,
+      },
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    const { email, role } = req.body;
+
+    await this._forgotPasswordUsecase.execute(email, role);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Password reset link has been sent to your email. Please check your inbox."
+    );
+  }
+
+  async resetPassword(req: Request, res: Response): Promise<void> {
+    const { token, password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      ResponseHelper.error(
+        res,
+        "Passwords do not match",
+        HTTP_STATUS.BAD_REQUEST
+      );
+      return;
+    }
+
+    await this._resetPasswordUsecase.execute(token, password);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Password reset successfully. You can now login with your new password."
+    );
+  }
+
+  async verifyResetToken(req: Request, res: Response): Promise<void> {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      ResponseHelper.error(
+        res,
+        "Token is required",
+        HTTP_STATUS.BAD_REQUEST
+      );
+      return;
+    }
+
+    const result = await this._verifyResetTokenUsecase.execute(token);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Reset token is valid",
+      result
+    );
+  }
+
+  async googleAuth(req: Request, res: Response): Promise<void> {
+    const { accessToken } = req.body;
+   console.log(accessToken,"---->,accesstoken")
+    const userData = await this._googleAuthUsecase.execute(accessToken);
+    console.log(userData,"----->,userData")
+    const userId = userData.id.toString();
+      console.log(userId,"----->,useriddddddddd")
+    const tokens = await this._generateTokenUseCase.execute(
+      userId,
+      userData.email,
+      userData.role
+    );
+    console.log(tokens,"----->,useriddddddddd")
+    setAuthCookies(
+      res,
+      tokens.accessToken,
+      tokens.refreshToken,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN
+    );
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      user: {
+        id: userData.id,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        role: userData.role,
+        profileImage: userData.profileImage,
       },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,

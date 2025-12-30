@@ -1,5 +1,8 @@
-import { AgencyLoginRequestDTO } from "../../../dto/request/agencylogin-request.dto";
-import { LoginResponseDTO } from "../../../dto/response/login-response.dto";
-export interface IAgencyLoginUsecase {
-  execute(data: AgencyLoginRequestDTO): Promise<LoginResponseDTO>;
-}
+import { ILoginUsecase } from "./loginUsecase.interface";
+
+/**
+ * Type alias for ILoginUsecase
+ * Maintained for backward compatibility with existing controller code.
+ * All login use cases implement the common ILoginUsecase interface.
+ */
+export type IAgencyLoginUsecase = ILoginUsecase;

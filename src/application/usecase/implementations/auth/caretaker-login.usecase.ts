@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe";
-import { ICaretakerLoginUseCase } from "../../interfaces/auth/caretaker-login.interface";
+import { ILoginUsecase } from "../../interfaces/auth/loginUsecase.interface";
 import { CaretakerLoginRequestDTO } from "../../../dto/request/caretaker-login-request.dto";
+import { BaseLoginRequest } from "../../../dto/request/base-login-request.dto";
 import { LoginResponseDTO } from "../../../dto/response/login-response.dto";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
@@ -11,7 +12,7 @@ import { comparePassword } from "../../../../shared/utils/bcryptHelper";
 import { UserMapper } from "../../../mapper/user.mapper";
 
 @injectable()
-export class CaretakerLoginUseCase implements ICaretakerLoginUseCase {
+export class CaretakerLoginUseCase implements ILoginUsecase {
   constructor(
     @inject("IUserRepository")
     private _userRepository: IUserRepository,
@@ -19,9 +20,11 @@ export class CaretakerLoginUseCase implements ICaretakerLoginUseCase {
     private _caretakerProfileRepository: ICaretakerProfileRepository
   ) {}
 
-  async execute(data: CaretakerLoginRequestDTO): Promise<LoginResponseDTO> {
+  async execute(data: BaseLoginRequest): Promise<LoginResponseDTO> {
+    // Type assertion to CaretakerLoginRequestDTO for internal validation if needed
+    const caretakerLoginData = data as CaretakerLoginRequestDTO;
     // Find user by email
-    const user = await this._userRepository.findByEmail(data.email);
+    const user = await this._userRepository.findByEmail(caretakerLoginData.email);
 
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_NOT_FOUND);
@@ -38,7 +41,7 @@ export class CaretakerLoginUseCase implements ICaretakerLoginUseCase {
     }
 
     // Verify password
-    const isPasswordMatch =  comparePassword(user.password, data.password);
+    const isPasswordMatch =await  comparePassword(caretakerLoginData.password,user.password);
 
     if (!isPasswordMatch) {
       throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.PASSWORD_INCORRECT);
@@ -61,6 +64,7 @@ export class CaretakerLoginUseCase implements ICaretakerLoginUseCase {
     return UserMapper.mapToLoginResponseDto(user);
   }
 }
+
 
 
 

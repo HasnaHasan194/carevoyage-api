@@ -4,4 +4,5 @@ export interface LoginResponseDTO {
   lastName: string;
   email: string;
   role: "client" | "caretaker" | "agency_owner" | "admin";
+  profileImage?: string; 
 }

@@ -22,7 +22,7 @@ export const config = {
     REFRESH_EXPIRES_IN: process.env.REFRESH_EXPIRES_IN || "7d",
 
     RESET_SECRET_KEY: process.env.RESET_SECRET_KEY || "",
-    RESET_EXPIRES_IN: process.env.RESET_EXPIRES_IN || "10m",
+    RESET_EXPIRES_IN: process.env.RESET_EXPIRES_IN || "15m",
 
     INVITE_SECRET_KEY: process.env.INVITE_SECRET_KEY || "",
     INVITE_EXPIRES_IN: process.env.INVITE_EXPIRES_IN || "48h",
@@ -30,5 +30,9 @@ export const config = {
   email:{
     EMAIL:process.env.EMAIL as string,
     PASSWORD:process.env.EMAIL_PASSWORD as string,
+  },
+  google: {
+    CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
+    CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
   },
 };

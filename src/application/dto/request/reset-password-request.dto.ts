@@ -1,14 +1,14 @@
 import {
-  IsEmail,
   IsNotEmpty,
   IsString,
   Matches,
   MinLength,
 } from "class-validator";
 
-export class CaretakerLoginRequestDTO {
-  @IsEmail({}, { message: "Invalid email format" })
-  email!: string;
+export class ResetPasswordRequestDTO {
+  @IsString()
+  @IsNotEmpty({ message: "Token is required" })
+  token!: string;
 
   @IsString()
   @IsNotEmpty({ message: "Password is required" })
@@ -26,8 +26,9 @@ export class CaretakerLoginRequestDTO {
     message: "Password must contain at least one special character",
   })
   password!: string;
+
+  @IsString()
+  @IsNotEmpty({ message: "Confirm password is required" })
+  confirmPassword!: string;
 }
-
-
-
 

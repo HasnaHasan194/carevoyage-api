@@ -31,6 +31,14 @@ import { ICaretakerSignupUseCase } from "../../application/usecase/interfaces/ca
 import { CaretakerSignupUseCase } from "../../application/usecase/implementations/caretaker/caretaker-signup.usecase";
 import { ICaretakerLoginUseCase } from "../../application/usecase/interfaces/auth/caretaker-login.interface";
 import { CaretakerLoginUseCase } from "../../application/usecase/implementations/auth/caretaker-login.usecase";
+import { IForgotPasswordUsecase } from "../../application/usecase/interfaces/auth/forgot-password.interface";
+import { ForgotPasswordUsecase } from "../../application/usecase/implementations/auth/forgot-password.usecase";
+import { IResetPasswordUsecase } from "../../application/usecase/interfaces/auth/reset-password.interface";
+import { ResetPasswordUsecase } from "../../application/usecase/implementations/auth/reset-password.usecase";
+import { IVerifyResetTokenUsecase } from "../../application/usecase/interfaces/auth/verify-reset-token.interface";
+import { VerifyResetTokenUsecase } from "../../application/usecase/implementations/auth/verify-reset-token.usecase";
+import { IGoogleAuthUsecase } from "../../application/usecase/interfaces/auth/google-auth.interface";
+import { GoogleAuthUsecase } from "../../application/usecase/implementations/auth/google-auth.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -121,6 +129,24 @@ export class UsecaseRegistory {
 
     container.register<ICaretakerLoginUseCase>("ICaretakerLoginUseCase", {
       useClass: CaretakerLoginUseCase,
+    });
+
+    // Forgot Password use cases
+    container.register<IForgotPasswordUsecase>("IForgotPasswordUsecase", {
+      useClass: ForgotPasswordUsecase,
+    });
+
+    container.register<IResetPasswordUsecase>("IResetPasswordUsecase", {
+      useClass: ResetPasswordUsecase,
+    });
+
+    container.register<IVerifyResetTokenUsecase>("IVerifyResetTokenUsecase", {
+      useClass: VerifyResetTokenUsecase,
+    });
+
+    // Google Authentication use case
+    container.register<IGoogleAuthUsecase>("IGoogleAuthUsecase", {
+      useClass: GoogleAuthUsecase,
     });
   }
 }

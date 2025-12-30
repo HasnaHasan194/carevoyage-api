@@ -5,4 +5,5 @@ export interface IAdminRepository
   extends IBaseRepository<IAdminEntity> {
   findByEmail(email: string): Promise<IAdminEntity | null>;
   findByNumber(phone: string): Promise<IAdminEntity | null>;
+  updatePassword(id: string, newPassword: string): Promise<IAdminEntity | null>;
 }

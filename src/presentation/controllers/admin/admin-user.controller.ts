@@ -24,8 +24,18 @@ export class AdminUserController implements IAdminUserController {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
     const search = req.query.search as string | undefined;
+    const status = (req.query.status as "all" | "blocked" | "unblocked") || "all";
+    const sort = (req.query.sort as string) || "createdAt";
+    const order = (req.query.order as "asc" | "desc") || "asc";
 
-    const result = await this._getAllUsersUsecase.execute(page, limit, search);
+    const result = await this._getAllUsersUsecase.execute(
+      page,
+      limit,
+      search,
+      status,
+      sort,
+      order
+    );
 
     ResponseHelper.success(res, HTTP_STATUS.OK, "Users retrieved successfully", result);
   }
@@ -62,6 +72,7 @@ export class AdminUserController implements IAdminUserController {
     );
   }
 }
+
 
 
 

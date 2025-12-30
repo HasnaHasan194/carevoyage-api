@@ -48,4 +48,16 @@ export interface IAuthController {
 
   //Caretaker Login
   caretakerLogin(req: Request, res: Response): Promise<void>;
+
+  //Forgot Password
+  forgotPassword(req: Request, res: Response): Promise<void>;
+
+  //Reset Password
+  resetPassword(req: Request, res: Response): Promise<void>;
+
+  //Verify Reset Token
+  verifyResetToken(req: Request, res: Response): Promise<void>;
+
+  //Google Authentication
+  googleAuth(req: Request, res: Response): Promise<void>;
 }

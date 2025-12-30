@@ -34,13 +34,24 @@ export class UserRepository
   async findAllWithSearch(
     page: number,
     limit: number,
-    search?: string
+    search?: string,
+    status: "all" | "blocked" | "unblocked" = "all",
+    sort: string = "createdAt",
+    order: "asc" | "desc" = "asc"
   ): Promise<{ users: IUserEntity[]; total: number }> {
     const skip = (page - 1) * limit;
-    
 
- 
-    const matchConditions: Record<string, unknown> = {role : "client"};
+    const matchConditions: Record<string, unknown> = { role: "client" };
+
+    // Apply status filter
+    if (status === "blocked") {
+      matchConditions.isBlocked = true;
+    } else if (status === "unblocked") {
+      matchConditions.isBlocked = false;
+    }
+    // If status is "all", no filter is applied
+
+    // Apply search filter
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), "i");
       matchConditions.$or = [
@@ -51,13 +62,17 @@ export class UserRepository
       ];
     }
 
+    // Build sort object
+    const sortField = sort || "createdAt";
+    const sortOrder = order === "desc" ? -1 : 1;
+    const sortObject: Record<string, number> = { [sortField]: sortOrder };
 
     const [users, total] = await Promise.all([
       userDB
         .find(matchConditions)
         .skip(skip)
         .limit(limit)
-        .sort({ createdAt: -1 })
+        .sort(sortObject)
         .exec(),
       userDB.countDocuments(matchConditions),
     ]);

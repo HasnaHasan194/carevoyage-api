@@ -1,5 +1,6 @@
-import { LoginRequestDTO } from "../../../dto/request/login-request.dto";
+import { BaseLoginRequest } from "../../../dto/request/base-login-request.dto";
 import { LoginResponseDTO } from "../../../dto/response/login-response.dto";
+
 export interface ILoginUsecase {
-  execute(data: LoginRequestDTO): Promise<LoginResponseDTO>;
+  execute(data: BaseLoginRequest): Promise<LoginResponseDTO>;
 }

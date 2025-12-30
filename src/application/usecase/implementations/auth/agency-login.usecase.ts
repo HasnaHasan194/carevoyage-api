@@ -1,7 +1,9 @@
 import { inject, injectable } from "tsyringe";
+import { ILoginUsecase } from "../../interfaces/auth/loginUsecase.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
 import { AgencyLoginRequestDTO } from "../../../dto/request/agencylogin-request.dto";
+import { BaseLoginRequest } from "../../../dto/request/base-login-request.dto";
 import { LoginResponseDTO } from "../../../dto/response/login-response.dto";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
@@ -10,7 +12,7 @@ import { comparePassword } from "../../../../shared/utils/bcryptHelper";
 import { AgencyMapper } from "../../../mapper/agency.mapper";
 
 @injectable()
-export class AgencyLoginUsecase {
+export class AgencyLoginUsecase implements ILoginUsecase {
   constructor(
     @inject("IUserRepository")
     private _userRepository: IUserRepository,
@@ -19,10 +21,12 @@ export class AgencyLoginUsecase {
     private _agencyRepository: IAgencyRepository
   ) {}
 
-  async execute(data: AgencyLoginRequestDTO): Promise<LoginResponseDTO> {
+  async execute(data: BaseLoginRequest): Promise<LoginResponseDTO> {
+    // Type assertion to AgencyLoginRequestDTO for internal validation if needed
+    const agencyLoginData = data as AgencyLoginRequestDTO;
    
 
-    const user = await this._userRepository.findByEmail(data.email);
+    const user = await this._userRepository.findByEmail(agencyLoginData.email);
 
     console.log(user,"-->user")
 
@@ -40,7 +44,7 @@ export class AgencyLoginUsecase {
       throw new ValidationError("Your account has been blocked. Please contact support.");
     }
 
-    const isPasswordMatch = comparePassword(user.password, data.password);
+    const isPasswordMatch = comparePassword(user.password, agencyLoginData.password);
 
     if (!isPasswordMatch) {
       throw new ValidationError(

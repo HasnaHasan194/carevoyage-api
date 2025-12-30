@@ -19,7 +19,10 @@ export interface IUserRepository extends IBaseRepository<IUserEntity> {
   findAllWithSearch(
     page: number,
     limit: number,
-    search?: string
+    search?: string,
+    status?: "all" | "blocked" | "unblocked",
+    sort?: string,
+    order?: "asc" | "desc"
   ): Promise<{ users: IUserEntity[]; total: number }>;
 
   // findById(userId: string): Promise<IUserEntity | null>;

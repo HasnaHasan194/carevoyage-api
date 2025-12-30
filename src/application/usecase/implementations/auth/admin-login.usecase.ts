@@ -1,7 +1,8 @@
 import { inject, injectable } from "tsyringe";
-import { IAdminLoginUsecase } from "../../../../application/usecase/interfaces/auth/adminloginUsecase.interface";
+import { ILoginUsecase } from "../../interfaces/auth/loginUsecase.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { AdminLoginRequestDTO } from "../../../dto/request/adminlogin-request.dto";
+import { BaseLoginRequest } from "../../../dto/request/base-login-request.dto";
 import { LoginResponseDTO } from "../../../dto/response/login-response.dto";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
@@ -10,14 +11,16 @@ import { comparePassword } from "../../../../shared/utils/bcryptHelper";
 import { UserMapper } from "../../../mapper/user.mapper";
 
 @injectable()
-export class AdminLoginUsecase implements IAdminLoginUsecase {
+export class AdminLoginUsecase implements ILoginUsecase {
   constructor(
     @inject("IUserRepository")
     private _userRepository: IUserRepository
   ) {}
 
-  async execute(data: AdminLoginRequestDTO): Promise<LoginResponseDTO> {
-    const admin = await this._userRepository.findByEmail(data.email);
+  async execute(data: BaseLoginRequest): Promise<LoginResponseDTO> {
+    // Type assertion to AdminLoginRequestDTO for internal validation if needed
+    const adminLoginData = data as AdminLoginRequestDTO;
+    const admin = await this._userRepository.findByEmail(adminLoginData.email);
     if (!admin) {
       throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_NOT_FOUND);
     }
@@ -31,7 +34,7 @@ export class AdminLoginUsecase implements IAdminLoginUsecase {
     }
 
     const isPasswordMatch = await comparePassword(
-      data.password,
+      adminLoginData.password,
       admin.password
     );
 
