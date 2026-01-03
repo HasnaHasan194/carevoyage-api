@@ -11,6 +11,8 @@ import { ICaretakerProfileRepository } from "../../domain/repositoryInterfaces/C
 import { CaretakerProfileRepository } from "../repository/caretaker/caretaker-profile.repository";
 import { ITokenService } from "../../domain/service-interfaces/token-service-interfaces";
 import { TokenService } from "../service/token.service";
+import { IBlockedUserMiddleware } from "../../presentation/interfaces/controllers/user/blocked-user.middleware.interface";
+import { BlockedUserMiddleware } from "../../presentation/middlewares/block.middleware";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -43,5 +45,10 @@ export class RepositoryRegister {
       "ITokenService",
       { useClass: TokenService } as ClassProvider<ITokenService>
     );
+    container.register<IBlockedUserMiddleware>(
+      "IBlockedUserMiddleware",{
+        useClass:BlockedUserMiddleware,
+      }
+    )
   }
 }

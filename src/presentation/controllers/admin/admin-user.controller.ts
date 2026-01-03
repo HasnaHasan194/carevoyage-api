@@ -6,7 +6,7 @@ import { IGetUserDetailsUsecase } from "../../../application/usecase/interfaces/
 import { IBlockUnblockUserUsecase } from "../../../application/usecase/interfaces/admin/blockUnblock.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 import { HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
-
+import { UserStatusFilter ,SortOrder} from "../../../application/dto/request/get-users-request.dto";
 @injectable()
 export class AdminUserController implements IAdminUserController {
   constructor(
@@ -25,9 +25,33 @@ export class AdminUserController implements IAdminUserController {
     const limit = Number(req.query.limit) || 10;
     const search = req.query.search as string | undefined;
 
-    const result = await this._getAllUsersUsecase.execute(page, limit, search);
+    const rawStatus = req.query.status as "all" | "blocked" | "unblocked";
+    const status =
+      rawStatus === "all"
+        ? undefined
+        : rawStatus === "blocked"
+        ? UserStatusFilter.BLOCKED
+        : UserStatusFilter.UNBLOCKED;
 
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Users retrieved successfully", result);
+    const sort = (req.query.sort as string) || "createdAt";
+    const rawOrder = req.query.order as "asc" | "desc" | undefined;
+    const order = rawOrder === "desc" ? SortOrder.DESC : SortOrder.ASC;
+
+    const result = await this._getAllUsersUsecase.execute(
+      page,
+      limit,
+      search,
+      status,
+      sort,
+      order
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Users retrieved successfully",
+      result
+    );
   }
 
   async getUserDetails(req: Request, res: Response): Promise<void> {
@@ -35,7 +59,12 @@ export class AdminUserController implements IAdminUserController {
 
     const user = await this._getUserDetailsUsecase.execute(userId);
 
-    ResponseHelper.success(res, HTTP_STATUS.OK, "User details retrieved successfully", user);
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "User details retrieved successfully",
+      user
+    );
   }
 
   async blockUser(req: Request, res: Response): Promise<void> {
@@ -46,7 +75,8 @@ export class AdminUserController implements IAdminUserController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.USER_BLOCKED || "User blocked successfully"
+      SUCCESS_MESSAGE.AUTHORIZATION.USER_BLOCKED ??
+        "User blocked successfully"
     );
   }
 
@@ -58,10 +88,8 @@ export class AdminUserController implements IAdminUserController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.USER_UNBLOCKED || "User unblocked successfully"
+      SUCCESS_MESSAGE.AUTHORIZATION.USER_UNBLOCKED ??
+        "User unblocked successfully"
     );
   }
 }
-
-
-

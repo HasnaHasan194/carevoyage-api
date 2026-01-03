@@ -1,7 +1,10 @@
 import { injectable } from "tsyringe";
 import { asyncHandler } from "../../../shared/async-handler";
 import { BaseRoute } from "../base.route";
-import { authController } from "../../../infrastructure/dependencyinjection/resolve";
+import {
+  authController,
+  blockedUserMiddleware,
+} from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { LoginRequestDTO } from "../../../application/dto/request/login-request.dto";
 import { RegisterRequestDTO } from "../../../application/dto/request/register-request.dto";
@@ -14,6 +17,10 @@ import { VerifyOtpRequestDTO } from "../../../application/dto/request/verifyotpR
 import { VerifyOtpAndCreateAgencyDTO } from "../../../application/dto/request/VerifyotpandcreateAgencydto";
 import { CaretakerSignupRequestDTO } from "../../../application/dto/request/caretaker-signup-request.dto";
 import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caretaker-login-request.dto";
+import { ForgotPasswordRequestDTO } from "../../../application/dto/request/forgot-password-request.dto";
+import { ResetPasswordRequestDTO } from "../../../application/dto/request/reset-password-request.dto";
+import { VerifyResetTokenRequestDTO } from "../../../application/dto/request/verify-reset-token-request.dto";
+import { GoogleAuthRequestDTO } from "../../../application/dto/request/google-auth-request.dto";
 
 @injectable()
 export class AuthRoutes extends BaseRoute {
@@ -68,12 +75,12 @@ export class AuthRoutes extends BaseRoute {
 
     this.router.post(
       "/verify-createuser",
-      
+
       asyncHandler(authController.verifyOtpAndCreateUser.bind(authController))
     );
     this.router.post(
       "/verify-create-agency",
-      
+
       asyncHandler(authController.verifyOtpAndCreateAgency.bind(authController))
     );
 
@@ -103,5 +110,34 @@ export class AuthRoutes extends BaseRoute {
       validationMiddleware(CaretakerLoginRequestDTO),
       asyncHandler(authController.caretakerLogin.bind(authController))
     );
+
+    this.router.post(
+      "/forgot-password",
+      validationMiddleware(ForgotPasswordRequestDTO),
+      asyncHandler(authController.forgotPassword.bind(authController))
+    );
+
+    this.router.post(
+      "/reset-password",
+      validationMiddleware(ResetPasswordRequestDTO),
+      asyncHandler(authController.resetPassword.bind(authController))
+    );
+
+    this.router.get(
+      "/verify-reset-token",
+      validationMiddleware(VerifyResetTokenRequestDTO),
+      asyncHandler(authController.verifyResetToken.bind(authController))
+    );
+
+    this.router.post(
+      "/google",
+      // validationMiddleware(GoogleAuthRequestDTO),
+      asyncHandler(authController.googleAuth.bind(authController))
+    );
+
+    // this.router.get(
+    //   "/profile",
+    //   asyncHandler(userController.getProfile.bind(userController))
+    // );
   }
 }

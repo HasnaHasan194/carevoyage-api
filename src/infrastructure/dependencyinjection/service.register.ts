@@ -5,6 +5,8 @@ import { IOtpService } from "../../domain/service-interfaces/otp-service.interfa
 import { OtpService } from "../service/otp.service";
 import { ITokenService } from "../../domain/service-interfaces/token-service-interfaces";
 import { TokenService } from "../service/token.service";
+import { IGoogleAuthService } from "../../domain/service-interfaces/google-auth-service.interface";
+import { GoogleAuthService } from "../service/google-auth.service";
 
 export class ServiceRegistery {
   static registerService(): void {
@@ -18,6 +20,10 @@ export class ServiceRegistery {
 
     container.register<ITokenService>("ITokenService", {
       useClass: TokenService,
+    });
+
+    container.register<IGoogleAuthService>("IGoogleAuthService", {
+      useClass: GoogleAuthService,
     });
   }
 }

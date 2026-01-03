@@ -3,6 +3,7 @@ import { ValidationError } from "../../../../domain/errors/validationError";
 import { IOtpService } from "../../../../domain/service-interfaces/otp-service.interface";
 import { IVerifyOtpAndCreateUserUsecase } from "../../interfaces/auth/verify-otp-user.usecase.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
+import { hashPassword } from "../../../../shared/utils/bcryptHelper";
 
 @injectable()
 export class VerifyOtpAndCreateUserUsecase
@@ -33,9 +34,12 @@ export class VerifyOtpAndCreateUserUsecase
 
     await this._otpService.deleteOtp(email);
 
+    const hashedPassword = await hashPassword(userData.password);
+
     await this._userRepository.save({
       ...userData,
       email,
+      password : hashedPassword,
       isBlocked: false,
     });
   }

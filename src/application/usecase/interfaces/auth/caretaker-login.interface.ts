@@ -1,9 +1,12 @@
-import { CaretakerLoginRequestDTO } from "../../../dto/request/caretaker-login-request.dto";
-import { LoginResponseDTO } from "../../../dto/response/login-response.dto";
+import { ILoginUsecase } from "./loginUsecase.interface";
 
-export interface ICaretakerLoginUseCase {
-  execute(data: CaretakerLoginRequestDTO): Promise<LoginResponseDTO>;
-}
+/**
+ * Type alias for ILoginUsecase
+ * Maintained for backward compatibility with existing controller code.
+ * All login use cases implement the common ILoginUsecase interface.
+ */
+export type ICaretakerLoginUseCase = ILoginUsecase;
+
 
 
 
