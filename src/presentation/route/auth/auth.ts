@@ -1,7 +1,10 @@
 import { injectable } from "tsyringe";
 import { asyncHandler } from "../../../shared/async-handler";
 import { BaseRoute } from "../base.route";
-import { authController } from "../../../infrastructure/dependencyinjection/resolve";
+import {
+  authController,
+  blockedUserMiddleware,
+} from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { LoginRequestDTO } from "../../../application/dto/request/login-request.dto";
 import { RegisterRequestDTO } from "../../../application/dto/request/register-request.dto";
@@ -72,12 +75,12 @@ export class AuthRoutes extends BaseRoute {
 
     this.router.post(
       "/verify-createuser",
-      
+
       asyncHandler(authController.verifyOtpAndCreateUser.bind(authController))
     );
     this.router.post(
       "/verify-create-agency",
-      
+
       asyncHandler(authController.verifyOtpAndCreateAgency.bind(authController))
     );
 
@@ -131,5 +134,10 @@ export class AuthRoutes extends BaseRoute {
       // validationMiddleware(GoogleAuthRequestDTO),
       asyncHandler(authController.googleAuth.bind(authController))
     );
+
+    // this.router.get(
+    //   "/profile",
+    //   asyncHandler(userController.getProfile.bind(userController))
+    // );
   }
 }

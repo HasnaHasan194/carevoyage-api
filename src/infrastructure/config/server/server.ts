@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import cors from "cors";
 import { config } from "../../../shared/config";
 import cookieParser from "cookie-parser";
-import { authRoutes, adminRoutes, agencyRoutes, errorMiddleware } from "../../dependencyinjection/resolve";
+import { authRoutes, adminRoutes, agencyRoutes, errorMiddleware, userRoutes } from "../../dependencyinjection/resolve";
 
 export class App {
   private _app: Application;
@@ -34,6 +34,7 @@ export class App {
     this._app.use("/api/v1/auth", authRoutes.router);
     this._app.use("/api/v1/admin", adminRoutes.router);
     this._app.use("/api/v1/agency", agencyRoutes.router);
+    this._app.use("/api/v1/user", userRoutes.router);
   }
 
   private configureErrorMiddleware() {

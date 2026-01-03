@@ -39,6 +39,10 @@ import { IVerifyResetTokenUsecase } from "../../application/usecase/interfaces/a
 import { VerifyResetTokenUsecase } from "../../application/usecase/implementations/auth/verify-reset-token.usecase";
 import { IGoogleAuthUsecase } from "../../application/usecase/interfaces/auth/google-auth.interface";
 import { GoogleAuthUsecase } from "../../application/usecase/implementations/auth/google-auth.usecase";
+import { IGetUserProfileUsecase } from "../../application/usecase/interfaces/user/get-user-profile-usecase.interface";
+import { GetUserProfileUsecase } from "../../application/usecase/implementations/user/get-user-profile.usecase";
+import { UserController } from "../../presentation/controllers/user/user-profile.controller";
+import { BlockedUserMiddleware } from "../../presentation/middlewares/block.middleware";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -148,5 +152,18 @@ export class UsecaseRegistory {
     container.register<IGoogleAuthUsecase>("IGoogleAuthUsecase", {
       useClass: GoogleAuthUsecase,
     });
+
+    container.register<IGetUserProfileUsecase>(
+      "IGetUserProfileUsecase",
+      {
+        useClass:GetUserProfileUsecase,
+      }
+    )
+    container.register("IUserController",{
+       useClass:UserController,
+    })
+    container.register("IBlockedUserMiddleware",{
+      useClass:BlockedUserMiddleware,
+    })
   }
 }

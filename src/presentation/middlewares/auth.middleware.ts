@@ -10,6 +10,10 @@ import {
 
 const tokenService = new TokenService();
 
+/* =======================
+   TYPES
+======================= */
+
 export interface CustomJwtPayload extends JwtPayload {
   id: string;
   email: string;
@@ -21,37 +25,43 @@ export interface AuthenticatedUser extends CustomJwtPayload {
   refreshToken: string;
 }
 
+/**
+ * IMPORTANT:
+ * user MUST be optional because Express does not guarantee it.
+ * It is added dynamically by middleware.
+ */
 export interface CustomRequest extends Request {
-  user: AuthenticatedUser;
+  user?: AuthenticatedUser;
 }
 
-/**
- * Helper: check if a token is blacklisted in Redis
- */
+/* =======================
+   HELPERS
+======================= */
+
 const isBlackListed = async (token: string): Promise<boolean> => {
   try {
     const result = await redisClient.get(token);
     return result !== null;
-  } catch (error) {
-    // If Redis fails, assume token is not blacklisted to avoid blocking valid requests
+  } catch {
+    // Fail-open to avoid blocking valid users if Redis is down
     return false;
   }
 };
 
-/**
- * Middleware: verifyAuth
- * Verifies access token from cookies and sets req.user
- */
+/* =======================
+   verifyAuth Middleware
+======================= */
+
 export const verifyAuth = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
+    const accessToken = req.cookies[COOKIES_NAMES.ACCESS_TOKEN];
     const refreshToken = req.cookies[COOKIES_NAMES.REFRESH_TOKEN];
-    const token = req.cookies[COOKIES_NAMES.ACCESS_TOKEN];
 
-    if (!token) {
+    if (!accessToken) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
         message: ERROR_MESSAGE.AUTHENTICATION.UNAUTHORIZED_ACCESS,
@@ -59,17 +69,7 @@ export const verifyAuth = async (
       return;
     }
 
-    const user = tokenService.verifyAccessToken(token) as CustomJwtPayload | null;
-
-    if (!user || !user.id) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        success: false,
-        message: ERROR_MESSAGE.AUTHENTICATION.UNAUTHORIZED_ACCESS,
-      });
-      return;
-    }
-
-    if (await isBlackListed(token)) {
+    if (await isBlackListed(accessToken)) {
       res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
         message: ERROR_MESSAGE.AUTHENTICATION.TOKEN_BLACK_LISTED,
@@ -85,9 +85,21 @@ export const verifyAuth = async (
       return;
     }
 
+    const payload = tokenService.verifyAccessToken(
+      accessToken
+    ) as CustomJwtPayload | null;
+
+    if (!payload || !payload.id) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        message: ERROR_MESSAGE.AUTHENTICATION.UNAUTHORIZED_ACCESS,
+      });
+      return;
+    }
+
     (req as CustomRequest).user = {
-      ...user,
-      accessToken: token,
+      ...payload,
+      accessToken,
       refreshToken: refreshToken || "",
     };
 
@@ -95,7 +107,8 @@ export const verifyAuth = async (
   } catch (error: unknown) {
     if (
       error instanceof Error &&
-      (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError")
+      (error.name === "TokenExpiredError" ||
+        error.name === "JsonWebTokenError")
     ) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
@@ -111,13 +124,14 @@ export const verifyAuth = async (
   }
 };
 
-/**
- * Middleware: decodeToken
- * Decodes token without verification (for optional auth)
- */
+/* =======================
+   decodeToken Middleware
+   (Optional Auth)
+======================= */
+
 export const decodeToken = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
@@ -129,36 +143,34 @@ export const decodeToken = async (
     }
 
     if (await isBlackListed(token)) {
-      res.status(HTTP_STATUS.FORBIDDEN).json({
-        success: false,
-        message: ERROR_MESSAGE.AUTHENTICATION.TOKEN_BLACK_LISTED,
-      });
+      next();
       return;
     }
 
-    const user = tokenService.decodeAcessToken(token) as CustomJwtPayload | null;
+    const payload = tokenService.decodeAcessToken(
+      token
+    ) as CustomJwtPayload | null;
 
-    if (user && user.id) {
+    if (payload?.id) {
       (req as CustomRequest).user = {
-        id: user.id,
-        email: user.email || "",
-        role: user.role || "",
+        id: payload.id,
+        email: payload.email || "",
+        role: payload.role || "",
         accessToken: token,
         refreshToken: req.cookies[COOKIES_NAMES.REFRESH_TOKEN] || "",
       };
     }
 
     next();
-  } catch (error: unknown) {
-    // If decode fails, continue without user (optional auth)
+  } catch {
     next();
   }
 };
 
-/**
- * Middleware factory: authorizeRole
- * Checks if user has one of the allowed roles
- */
+/* =======================
+   authorizeRole Middleware
+======================= */
+
 export const authorizeRole = (allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const user = (req as CustomRequest).user;
@@ -167,7 +179,7 @@ export const authorizeRole = (allowedRoles: string[]) => {
       res.status(HTTP_STATUS.FORBIDDEN).json({
         success: false,
         message: ERROR_MESSAGE.AUTHENTICATION.FORBIDDEN,
-        userRole: user ? user.role : "None",
+        userRole: user?.role ?? "None",
       });
       return;
     }
@@ -175,7 +187,3 @@ export const authorizeRole = (allowedRoles: string[]) => {
     next();
   };
 };
-
-
-
-

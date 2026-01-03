@@ -3,7 +3,7 @@ import { CustomError } from "../../domain/errors/customError";
 import { NotFoundError } from "../../domain/errors/notFoundError";
 import { ValidationError } from "../../domain/errors/validationError";
 import { HTTP_STATUS,ERROR_MESSAGE } from "../../shared/constants/constants";
-import { IErrorMiddleware } from "../interfaces/middleware/error-middleware.interface";
+import { IErrorMiddleware } from "../interfaces/controllers/auth/error-middleware.interface";
 export class ErrorMiddleware implements IErrorMiddleware {
   public handleError(
     err: Error,

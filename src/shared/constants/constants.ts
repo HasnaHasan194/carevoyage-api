@@ -76,6 +76,7 @@ export const SUCCESS_MESSAGE = {
     OTP_VERIFIED: "Otp verified successfully",
     USER_BLOCKED: "User blocked successfully",
     USER_UNBLOCKED: "User unblocked successfully",
+    NOT_BLOCKED: "User is not blocked. Middleware passed"
   },
 };
 

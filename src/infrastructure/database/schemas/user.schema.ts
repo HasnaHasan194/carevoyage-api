@@ -34,7 +34,6 @@ export const userSchema = new mongoose.Schema<IUserModel>(
 
     gender: {
       type: String,
-      // enum: Object.values(GENDER),   // If constants exist
       default: null,
     },
 
