@@ -58,8 +58,17 @@ export const verifyAuth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const accessToken = req.cookies[COOKIES_NAMES.ACCESS_TOKEN];
+    const authHeader = req.headers.authorization;
+
+    const accessToken =
+      req.cookies[COOKIES_NAMES.ACCESS_TOKEN] ||
+      (authHeader?.startsWith("Bearer ")
+        ? authHeader.split(" ")[1]
+        : undefined);
+
     const refreshToken = req.cookies[COOKIES_NAMES.REFRESH_TOKEN];
+
+    // const accessToken = req.cookies[COOKIES_NAMES.ACCESS_TOKEN];
 
     if (!accessToken) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
@@ -107,8 +116,7 @@ export const verifyAuth = async (
   } catch (error: unknown) {
     if (
       error instanceof Error &&
-      (error.name === "TokenExpiredError" ||
-        error.name === "JsonWebTokenError")
+      (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError")
     ) {
       res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,

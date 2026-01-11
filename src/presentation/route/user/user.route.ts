@@ -15,7 +15,7 @@ export class UserRoutes extends BaseRoute {
 
   protected initializeRoutes(): void {
     this.router.use(verifyAuth);
-    this.router.use(blockedUserMiddleware.checkBlockedUser);
+    this.router.use(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware));
 
     this.router.get(
       "/profile",

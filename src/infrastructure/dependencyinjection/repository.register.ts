@@ -45,10 +45,10 @@ export class RepositoryRegister {
       "ITokenService",
       { useClass: TokenService } as ClassProvider<ITokenService>
     );
-    container.register<IBlockedUserMiddleware>(
-      "IBlockedUserMiddleware",{
-        useClass:BlockedUserMiddleware,
-      }
-    )
+    // container.register<IBlockedUserMiddleware>(
+    //   "IBlockedUserMiddleware",{
+    //     useClass:BlockedUserMiddleware,
+    //   }
+    // )
   }
 }
