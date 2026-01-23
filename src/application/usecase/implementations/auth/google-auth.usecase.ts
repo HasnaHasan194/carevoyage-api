@@ -4,9 +4,9 @@ import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/us
 import { IGoogleAuthService } from "../../../../domain/service-interfaces/google-auth-service.interface";
 import { ITokenService } from "../../../../domain/service-interfaces/token-service-interfaces";
 import { LoginResponseDTO } from "../../../dto/response/login-response.dto";
-import { NotFoundError } from "../../../../domain/errors/notFoundError";
+
 import { ValidationError } from "../../../../domain/errors/validationError";
-import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+
 import { UserMapper } from "../../../mapper/user.mapper";
 import { hashPassword } from "../../../../shared/utils/bcryptHelper";
 
@@ -33,9 +33,9 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
 
     
 
-    // If user doesn't exist, create new user (auto-signup for Google users)
+    // If user doesn't exist, create new user
     if (!user) {
-      // Generate a random password (user won't need it for Google login)
+      // Generate a random password 
       const randomPassword = Math.random().toString(36).slice(-12) + "A1@";
       const hashedPassword = await hashPassword(randomPassword);
 
@@ -50,12 +50,12 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
         lastName,
         email: googleUser.email,
         password: hashedPassword,
-        role: "client", // Only client role can use Google auth
+        role: "client", 
         isBlocked: false,
         profileImage: googleUser.picture,
       });
     } else {
-      // User exists - verify it's a client role
+      
       if (user.role !== "client") {
         throw new ValidationError(
           "Google authentication is only available for client accounts. Please use your regular login."
@@ -81,4 +81,8 @@ export class GoogleAuthUsecase implements IGoogleAuthUsecase {
     return UserMapper.mapToLoginResponseDto(user);
   }
 }
+
+
+
+
 

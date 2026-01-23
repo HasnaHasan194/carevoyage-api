@@ -17,7 +17,13 @@ export interface ICaretakerProfileRepository
     profileId: string,
     userId: string
   ): Promise<ICaretakerProfileEntity | null>;
+  getVerificationStatus(
+    userId: string
+  ): Promise<"pending" | "verified" | "rejected" | null>;
 }
+
+
+
 
 
 

@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   MinLength,
   Matches,
-  IsPhoneNumber,
 } from "class-validator";
 
 export class CaretakerSignupRequestDTO {
@@ -32,6 +31,10 @@ export class CaretakerSignupRequestDTO {
   @IsNotEmpty({ message: "Phone is required" })
   phone!: string;
 }
+
+
+
+
 
 
 

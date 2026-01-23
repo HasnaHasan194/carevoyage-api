@@ -3,7 +3,6 @@ import { asyncHandler } from "../../../shared/async-handler";
 import { BaseRoute } from "../base.route";
 import {
   authController,
-  blockedUserMiddleware,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { LoginRequestDTO } from "../../../application/dto/request/login-request.dto";
@@ -11,16 +10,16 @@ import { RegisterRequestDTO } from "../../../application/dto/request/register-re
 import { AgencyRegisterRequestDTO } from "../../../application/dto/request/agencyregister-request.dto";
 import { AgencyLoginRequestDTO } from "../../../application/dto/request/agencylogin-request.dto";
 import { AdminLoginRequestDTO } from "../../../application/dto/request/adminlogin-request.dto";
-import { ResendOtpUsecase } from "../../../application/usecase/implementations/auth/resendOtp.usecase";
+
 import { SendOtpRequestDTO } from "../../../application/dto/request/sentOtpRequestdto";
 import { VerifyOtpRequestDTO } from "../../../application/dto/request/verifyotpRequestdto";
-import { VerifyOtpAndCreateAgencyDTO } from "../../../application/dto/request/VerifyotpandcreateAgencydto";
+
 import { CaretakerSignupRequestDTO } from "../../../application/dto/request/caretaker-signup-request.dto";
 import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caretaker-login-request.dto";
 import { ForgotPasswordRequestDTO } from "../../../application/dto/request/forgot-password-request.dto";
 import { ResetPasswordRequestDTO } from "../../../application/dto/request/reset-password-request.dto";
 import { VerifyResetTokenRequestDTO } from "../../../application/dto/request/verify-reset-token-request.dto";
-import { GoogleAuthRequestDTO } from "../../../application/dto/request/google-auth-request.dto";
+
 
 @injectable()
 export class AuthRoutes extends BaseRoute {
@@ -135,9 +134,6 @@ export class AuthRoutes extends BaseRoute {
       asyncHandler(authController.googleAuth.bind(authController))
     );
 
-    // this.router.get(
-    //   "/profile",
-    //   asyncHandler(userController.getProfile.bind(userController))
-    // );
+ 
   }
 }

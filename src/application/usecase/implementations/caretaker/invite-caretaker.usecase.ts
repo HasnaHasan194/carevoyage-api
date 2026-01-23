@@ -66,11 +66,12 @@ export class InviteCaretakerUseCase implements IInviteCaretakerUseCase {
     });
 
     // Create caretaker profile with status "invited"
-    // Nationality and address will be collected during signup or profile completion
+    // Email is temporarily stored for invite matching, will be removed after signup
+    // Nationality and address will be collected during verification
     await this._caretakerProfileRepository.save({
       agencyId: agency._id,
-      email: request.email,
-      userId: undefined,
+      email: request.email, // Temp=> only for invite matching
+      userId: undefined, // Will be set during signup
       languages: [],
       experienceYears: 0,
       documents: [],
@@ -78,6 +79,7 @@ export class InviteCaretakerUseCase implements IInviteCaretakerUseCase {
       kycDocs: [],
       rating: 0,
       reviewCount: 0,
+      verificationStatus: undefined, 
     });
 
     // Send invitation email

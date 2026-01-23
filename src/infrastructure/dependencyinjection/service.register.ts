@@ -7,6 +7,8 @@ import { ITokenService } from "../../domain/service-interfaces/token-service-int
 import { TokenService } from "../service/token.service";
 import { IGoogleAuthService } from "../../domain/service-interfaces/google-auth-service.interface";
 import { GoogleAuthService } from "../service/google-auth.service";
+import { ILogger } from "../../domain/service-interfaces/logger.interface";
+import { WinstonLoggerAdapter } from "../service/winston-logger.adapter";
 
 export class ServiceRegistery {
   static registerService(): void {
@@ -25,5 +27,9 @@ export class ServiceRegistery {
     container.register<IGoogleAuthService>("IGoogleAuthService", {
       useClass: GoogleAuthService,
     });
+
+    container.register<ILogger>("ILogger",{
+      useClass:WinstonLoggerAdapter,
+    })
   }
 }

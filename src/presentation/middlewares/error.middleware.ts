@@ -9,6 +9,7 @@ export class ErrorMiddleware implements IErrorMiddleware {
     err: Error,
     req: Request,
     res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _next: NextFunction
   ): void {
     let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;

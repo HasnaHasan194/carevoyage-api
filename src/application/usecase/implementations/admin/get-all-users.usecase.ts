@@ -20,7 +20,6 @@ export class GetAllUsersUsecase implements IGetAllUsersUsecase {
     sort: string = "createdAt",
     order: SortOrder = SortOrder.ASC
   ): Promise<PaginatedUsersResponseDTO> {
-    // Convert enum to string literal for repository
     const statusFilter: "all" | "blocked" | "unblocked" =
       status === UserStatusFilter.ALL
         ? "all"

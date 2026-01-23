@@ -32,7 +32,7 @@ export const adminAuth = (
     }
 
     next();
-  } catch (error: unknown) {
+  } catch {
     res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: "Admin authorization failed",

@@ -73,9 +73,9 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
       role: user.role,
     });
 
-    // Store token in Redis with 10 minutes expiry (single-use token)
+    // Store token in Redis with 10 minutes expiry 
     const tokenKey = `reset_token:${resetToken}`;
-    await redisClient.set(tokenKey, user.id, { EX: 600 }); // 10 minutes
+    await redisClient.set(tokenKey, user.id, { EX: 600 }); 
 
     // Generate reset link
     const resetLink = `${config.client.URI}/reset-password?token=${resetToken}`;
@@ -121,4 +121,8 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     `;
   }
 }
+
+
+
+
 

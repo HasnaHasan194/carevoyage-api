@@ -11,8 +11,18 @@ import { ICaretakerProfileRepository } from "../../domain/repositoryInterfaces/C
 import { CaretakerProfileRepository } from "../repository/caretaker/caretaker-profile.repository";
 import { ITokenService } from "../../domain/service-interfaces/token-service-interfaces";
 import { TokenService } from "../service/token.service";
-import { IBlockedUserMiddleware } from "../../presentation/interfaces/controllers/user/blocked-user.middleware.interface";
-import { BlockedUserMiddleware } from "../../presentation/middlewares/block.middleware";
+import { IPackageRepository } from "../../domain/repositoryInterfaces/Package/package.repository.interface";
+import { PackageRepository } from "../repository/package/package.repository";
+import { IItineraryRepository } from "../../domain/repositoryInterfaces/Itinerary/itinerary.repository.interface";
+import { ItineraryRepository } from "../repository/itinerary/itinerary.repository";
+import { IActivityRepository } from "../../domain/repositoryInterfaces/Activity/activity.repository.interface";
+import { ActivityRepository } from "../repository/activity/activity.repository";
+import { IS3Service } from "../../domain/service-interfaces/s3-service.interface";
+import { S3Service } from "../service/s3.service";
+import { IDBSession } from "../../infrastructure/interface/session.interface";
+import { MongooseDBSession } from "../../infrastructure/database/mongooseDBSession/mongooseDBSession";
+
+
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -45,10 +55,30 @@ export class RepositoryRegister {
       "ITokenService",
       { useClass: TokenService } as ClassProvider<ITokenService>
     );
-    container.register<IBlockedUserMiddleware>(
-      "IBlockedUserMiddleware",{
-        useClass:BlockedUserMiddleware,
-      }
-    )
+
+    container.register<IPackageRepository>(
+      "IPackageRepository",
+      { useClass: PackageRepository } as ClassProvider<IPackageRepository>
+    );
+
+    container.register<IItineraryRepository>(
+      "IItineraryRepository",
+      { useClass: ItineraryRepository } as ClassProvider<IItineraryRepository>
+    );
+
+    container.register<IActivityRepository>(
+      "IActivityRepository",
+      { useClass: ActivityRepository } as ClassProvider<IActivityRepository>
+    );
+
+    container.register<IS3Service>(
+      "IS3Service",
+      { useClass: S3Service } as ClassProvider<IS3Service>
+    );
+
+    container.register<IDBSession>(
+      "IDBSession",
+      { useClass: MongooseDBSession } as ClassProvider<IDBSession>
+    );
   }
 }

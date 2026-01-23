@@ -9,6 +9,7 @@ export class MatchPasswordConstraint
   implements ValidatorConstraintInterface
 {
   validate(confirmPassword: string, args: ValidationArguments) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const object = args.object as any;
     return confirmPassword === object.password;
   }

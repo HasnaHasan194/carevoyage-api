@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { ICaretakerProfileEntity } from "../../../domain/entities/caretaker-profile.entity";
 
 export interface ICaretakerProfileModel
@@ -19,21 +19,23 @@ const addressSchema = new Schema(
 export const caretakerProfileSchema = new Schema<ICaretakerProfileModel>(
   {
     userId: {
-      type: Types.ObjectId,
+      type: String,
       ref: "users",
-      default: null,
+      default: null, 
     },
     agencyId: {
-      type: Types.ObjectId,
+      type: String,
       ref: "agencies",
       required: true,
     },
     email: {
       type: String,
-      required: true,
+      required: false, 
       lowercase: true,
       trim: true,
+      default: null,
     },
+   
     nationality: {
       type: String,
       required: false,
@@ -69,7 +71,13 @@ export const caretakerProfileSchema = new Schema<ICaretakerProfileModel>(
       type: String,
       enum: ["invited", "active", "blocked"],
       required: true,
-      default: "invited",
+      default: "invited", // Set to "invited" during invite, "active" during signup
+    },
+    verificationStatus: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+      default: null, // Changed from "pending" - only set when verification submitted
+      index: true,
     },
     kycDocs: {
       type: [String],

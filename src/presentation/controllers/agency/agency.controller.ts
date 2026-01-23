@@ -4,7 +4,9 @@ import { IAgencyController } from "../../interfaces/controllers/agency/agency.co
 import { IInviteCaretakerUseCase } from "../../../application/usecase/interfaces/caretaker/invite-caretaker.interface";
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
+import {
+  HTTP_STATUS,
+} from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
 import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
 import { NotFoundError } from "../../../domain/errors/notFoundError";
@@ -20,8 +22,11 @@ export class AgencyController implements IAgencyController {
 
   async inviteCaretaker(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
+    if (!customReq.user) {
+      throw new NotFoundError("User not authenticated");
+    }
     const userId = customReq.user.id;
-    console.log(userId,"-->userId")
+    console.log(userId, "-->userId");
     // Find agency by userId
     const agency = await this._agencyRepository.findByUserId(userId);
     if (!agency) {
@@ -39,7 +44,6 @@ export class AgencyController implements IAgencyController {
     );
   }
 }
-
 
 
 

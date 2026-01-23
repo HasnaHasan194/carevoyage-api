@@ -1,6 +1,12 @@
+import { ClientSession } from "mongoose";
+
 export interface IBaseRepository<TEntity> {
-  findById(id: string): Promise<TEntity | null>;
-  save(data: Partial<TEntity>): Promise<TEntity>;
-  updateById(id: string,data : Partial<TEntity>): Promise<TEntity | null>;
-  deleteById(id: string): Promise<TEntity | null>;
+  findById(id: string, session?: ClientSession): Promise<TEntity | null>;
+  save(data: Partial<TEntity>, session?: ClientSession): Promise<TEntity>;
+  updateById(
+    id: string,
+    data: Partial<TEntity>,
+    session?: ClientSession
+  ): Promise<TEntity | null>;
+  deleteById(id: string, session?: ClientSession): Promise<TEntity | null>;
 }

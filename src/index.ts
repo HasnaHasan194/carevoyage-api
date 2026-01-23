@@ -4,10 +4,13 @@ import { App } from "./infrastructure/config/server/server";
 import { config } from "./shared/config";
 import { MongoConnect } from "./infrastructure/database/mongoDB/mongoConnect";
 import { connectRedis } from "./infrastructure/config/redis.config";
+import { ServiceRegistery } from "./infrastructure/dependencyinjection/service.register";
+
 dotenv.config();
 
 async function startServer() {
   try {
+    ServiceRegistery.registerService();
     await connectRedis();
     console.log("Redis connected");
 

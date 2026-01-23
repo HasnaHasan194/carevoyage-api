@@ -66,6 +66,7 @@ export class CaretakerProfileRepository
             userId,
             status: "active",
             joinedAt: new Date(),
+            email: null, // Clear email after signup since we now have userId
           },
         },
         { new: true }
@@ -73,6 +74,13 @@ export class CaretakerProfileRepository
       .exec();
 
     return doc ? CaretakerProfileMapper.toEntity(doc) : null;
+  }
+
+  async getVerificationStatus(
+    userId: string
+  ): Promise<"pending" | "verified" | "rejected" | null> {
+    const profile = await this.findByUserId(userId);
+    return profile?.verificationStatus || null;
   }
 }
 
