@@ -59,7 +59,7 @@ export class TokenService implements ITokenService {
   verifyAccessToken(token: string): JwtPayload | null {
     try {
       return jwt.verify(token, this._accessSecretKey) as JwtPayload;
-    } catch (error) {
+    } catch {
       // Token verification failed - return null for invalid/expired tokens
       return null;
     }
@@ -68,7 +68,7 @@ export class TokenService implements ITokenService {
   verifyRefreshToken(token: string): JwtPayload | null {
     try {
       return jwt.verify(token, this._refreshSecretKey) as JwtPayload;
-    } catch (error) {
+    } catch {
       // Refresh token verification failed - return null for invalid/expired tokens
       return null;
     }
@@ -80,7 +80,7 @@ export class TokenService implements ITokenService {
       if (!decoded)
         throw new CustomError(HTTP_STATUS.BAD_REQUEST, "Invalid Token");
       return decoded as JwtPayload;
-    } catch (error) {
+    } catch {
       // Reset token verification failed - return null for invalid/expired tokens
       return null;
     }
@@ -89,7 +89,7 @@ export class TokenService implements ITokenService {
   decodeAcessToken(token: string): JwtPayload | null {
     try {
       return jwt.decode(token) as JwtPayload;
-    } catch (error) {
+    } catch {
       // Token decode failed - return null
       return null;
     }
@@ -98,7 +98,7 @@ export class TokenService implements ITokenService {
   decodeResetToken(token: string): JwtPayload | null {
     try {
       return jwt.decode(token) as JwtPayload;
-    } catch (error) {
+    } catch {
       // Token decode failed - return null
       return null;
     }
@@ -131,7 +131,7 @@ export class TokenService implements ITokenService {
         );
       }
       return jwt.verify(token, this._inviteSecretKey) as JwtPayload;
-    } catch (error) {
+    } catch {
       // Invite token verification failed - return null for invalid/expired tokens
       return null;
     }

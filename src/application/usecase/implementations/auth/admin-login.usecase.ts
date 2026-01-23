@@ -18,7 +18,6 @@ export class AdminLoginUsecase implements ILoginUsecase {
   ) {}
 
   async execute(data: BaseLoginRequest): Promise<LoginResponseDTO> {
-    // Type assertion to AdminLoginRequestDTO for internal validation if needed
     const adminLoginData = data as AdminLoginRequestDTO;
     const admin = await this._userRepository.findByEmail(adminLoginData.email);
     if (!admin) {

@@ -6,10 +6,6 @@ export interface IUserRepository extends IBaseRepository<IUserEntity> {
   findByPhone(phone: string): Promise<IUserEntity | null>;
 
   updatePassword(id: string, newPassword: string): Promise<IUserEntity | null>;
-  //   findAll(
-  //   page: number,
-  //   limit: number
-  // ): Promise<{ users: IUserEntity[]; total: number }>;
 
   updateBlockStatus(
     userId: string,
@@ -26,10 +22,5 @@ export interface IUserRepository extends IBaseRepository<IUserEntity> {
   ): Promise<{ users: IUserEntity[]; total: number }>;
 
   findById(userId: string): Promise<IUserEntity | null>;
-  // countNumberOfCom() : Promise<number>
+  
 }
-// findByRole(
-  //   role: IUserEntity["role"],
-  //   pageNumber: number,
-  //   pageSize: number
-  // ): Promise<{ users: IUserEntity[]; total: number }>;

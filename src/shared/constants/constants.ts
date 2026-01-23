@@ -63,6 +63,9 @@ export const ERROR_MESSAGE = {
       TOKEN_EXPIRED_ACCESS: "Access token expired",
       INVALID_TOKEN: "Invalid token",
   },
+  PACKAGE : {
+    CANNOT_COMPLETETE_PACKAGE_BEFORE_TRIP_END : "Cannot complete package before the trip end date",
+  }
 };
 
 //SUCCESS MESSAGE CONSTANTS

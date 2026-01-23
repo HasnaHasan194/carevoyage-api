@@ -1,8 +1,8 @@
 export interface ICaretakerProfileEntity {
   _id: string;
-  userId?: string;
+  userId?: string; 
   agencyId: string;
-  email: string;
+  email?: string; 
   nationality?: string;
   alternatePhone?: string;
   dob?: Date;
@@ -11,6 +11,7 @@ export interface ICaretakerProfileEntity {
   profileImage?: string;
   documents: string[];
   status: "invited" | "active" | "blocked";
+  verificationStatus?: "pending" | "verified" | "rejected";
   kycDocs: string[];
   rating: number;
   reviewCount: number;

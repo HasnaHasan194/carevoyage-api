@@ -13,4 +13,13 @@ export interface IAgencyRepository extends IBaseRepository<IAgencyEntity> {
   findByRegistrationNumber(
     registrationNumber: string
   ): Promise<IAgencyEntity | null>;
+
+  findAllWithSearch(
+    page: number,
+    limit: number,
+    search?: string,
+    status?: "all" | "blocked" | "unblocked",
+    sort?: string,
+    order?: "asc" | "desc"
+  ): Promise<{ agencies: IAgencyEntity[]; total: number }>;
 }

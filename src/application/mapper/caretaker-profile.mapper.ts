@@ -7,7 +7,7 @@ export class CaretakerProfileMapper {
       _id: String(doc._id),
       userId: doc.userId ? String(doc.userId) : undefined,
       agencyId: String(doc.agencyId),
-      email: doc.email,
+      email: doc.email || undefined, // Temp =>only for invite matching
       nationality: doc.nationality || "",
       alternatePhone: doc.alternatePhone,
       dob: doc.dob,
@@ -16,6 +16,7 @@ export class CaretakerProfileMapper {
       profileImage: doc.profileImage,
       documents: doc.documents,
       status: doc.status,
+      verificationStatus: doc.verificationStatus,
       kycDocs: doc.kycDocs,
       rating: doc.rating,
       reviewCount: doc.reviewCount,
@@ -40,4 +41,3 @@ export class CaretakerProfileMapper {
     };
   }
 }
-

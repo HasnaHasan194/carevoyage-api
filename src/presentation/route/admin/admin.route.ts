@@ -1,9 +1,13 @@
 import { injectable } from "tsyringe";
 import { asyncHandler } from "../../../shared/async-handler";
 import { BaseRoute } from "../base.route";
-import { adminUserController } from "../../../infrastructure/dependencyinjection/resolve";
+import {
+  adminUserController,
+  adminAgencyController,
+} from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { GetUsersRequestDTO } from "../../../application/dto/request/get-users-request.dto";
+import { GetAgenciesRequestDTO } from "../../../application/dto/request/get-agencies-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { adminAuth } from "../../middlewares/adminAuth-middleware";
 
@@ -14,6 +18,7 @@ export class AdminRoutes extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
+    // User Management Routes
     this.router.get(
       "/users",
       asyncHandler(verifyAuth),
@@ -41,6 +46,40 @@ export class AdminRoutes extends BaseRoute {
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(adminUserController.unblockUser.bind(adminUserController))
+    );
+
+    // Agency Management Routes
+    this.router.get(
+      "/agencies",
+      asyncHandler(verifyAuth),
+      adminAuth,
+      validationMiddleware(GetAgenciesRequestDTO),
+      asyncHandler(adminAgencyController.getAgencies.bind(adminAgencyController))
+    );
+
+    this.router.get(
+      "/agencies/:agencyId",
+      asyncHandler(verifyAuth),
+      adminAuth,
+      asyncHandler(
+        adminAgencyController.getAgencyDetails.bind(adminAgencyController)
+      )
+    );
+
+    this.router.patch(
+      "/agencies/:agencyId/block",
+      asyncHandler(verifyAuth),
+      adminAuth,
+      asyncHandler(adminAgencyController.blockAgency.bind(adminAgencyController))
+    );
+
+    this.router.patch(
+      "/agencies/:agencyId/unblock",
+      asyncHandler(verifyAuth),
+      adminAuth,
+      asyncHandler(
+        adminAgencyController.unblockAgency.bind(adminAgencyController)
+      )
     );
   }
 }

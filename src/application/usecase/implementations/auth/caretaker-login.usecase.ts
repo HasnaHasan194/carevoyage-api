@@ -21,7 +21,6 @@ export class CaretakerLoginUseCase implements ILoginUsecase {
   ) {}
 
   async execute(data: BaseLoginRequest): Promise<LoginResponseDTO> {
-    // Type assertion to CaretakerLoginRequestDTO for internal validation if needed
     const caretakerLoginData = data as CaretakerLoginRequestDTO;
     // Find user by email
     const user = await this._userRepository.findByEmail(caretakerLoginData.email);

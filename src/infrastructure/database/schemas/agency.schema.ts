@@ -1,6 +1,6 @@
-import mongoose, { Schema, Types } from "mongoose";
+import { Schema, Types } from "mongoose";
 import {
-  IAgencyEntity,
+
   TVerificationStatus,
 } from "../../../domain/entities/Agency.entity";
 import { IAgencyModel } from "../models/agency.model";

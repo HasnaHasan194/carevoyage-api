@@ -1,6 +1,7 @@
-import { config } from "./config";
+
 import { MAIL_CONTENT_PURPOSE } from "./constants/constants";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mailContentProvider(purpose: string, data?: any): string {
   const {
     LOGIN,

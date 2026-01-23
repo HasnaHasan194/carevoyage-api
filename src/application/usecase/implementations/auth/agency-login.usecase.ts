@@ -22,7 +22,6 @@ export class AgencyLoginUsecase implements ILoginUsecase {
   ) {}
 
   async execute(data: BaseLoginRequest): Promise<LoginResponseDTO> {
-    // Type assertion to AgencyLoginRequestDTO for internal validation if needed
     const agencyLoginData = data as AgencyLoginRequestDTO;
    
 

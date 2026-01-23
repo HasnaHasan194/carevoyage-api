@@ -43,6 +43,44 @@ import { IGetUserProfileUsecase } from "../../application/usecase/interfaces/use
 import { GetUserProfileUsecase } from "../../application/usecase/implementations/user/get-user-profile.usecase";
 import { UserController } from "../../presentation/controllers/user/user-profile.controller";
 import { BlockedUserMiddleware } from "../../presentation/middlewares/block.middleware";
+import { IGetAllAgenciesUsecase } from "../../application/usecase/interfaces/admin/getallagencies.interface";
+import { GetAllAgenciesUsecase } from "../../application/usecase/implementations/admin/get-all-agencies.usecase";
+import { IGetAgencyDetailsUsecase } from "../../application/usecase/interfaces/admin/get-agency-details.interface";
+import { GetAgencyDetailsUsecase } from "../../application/usecase/implementations/admin/get-agency-details.usecase";
+import { IBlockUnblockAgencyUsecase } from "../../application/usecase/interfaces/admin/blockUnblockAgency.interface";
+import { BlockUnblockAgencyUsecase } from "../../application/usecase/implementations/admin/block-unblock-agency.usecase";
+import { ICreatePackageUsecase } from "../../application/usecase/interfaces/package/create-package.interface";
+import { CreatePackageUsecase } from "../../application/usecase/implementations/package/create-package.usecase";
+import { IUpdatePackageUsecase } from "../../application/usecase/interfaces/package/update-package.interface";
+import { UpdatePackageUsecase } from "../../application/usecase/implementations/package/update-package.usecase";
+import { IPublishPackageUsecase } from "../../application/usecase/interfaces/package/publish-package.interface";
+import { PublishPackageUsecase } from "../../application/usecase/implementations/package/publish-package.usecase";
+import { IGetAgencyPackagesUsecase } from "../../application/usecase/interfaces/package/get-agency-packages.interface";
+import { GetAgencyPackagesUsecase } from "../../application/usecase/implementations/package/get-agency-packages.usecase";
+import { IGetPackageByIdUsecase } from "../../application/usecase/interfaces/package/get-package-by-id.interface";
+import { GetPackageByIdUsecase } from "../../application/usecase/implementations/package/get-package-by-id.usecase";
+import { IUpdatePackageBasicUsecase } from "../../application/usecase/interfaces/package/update-package-basic.interface";
+import { UpdatePackageBasicUsecase } from "../../application/usecase/implementations/package/update-package-basic.usecase";
+import { IUpdatePackageImagesUsecase } from "../../application/usecase/interfaces/package/update-package-images.interface";
+import { UpdatePackageImagesUsecase } from "../../application/usecase/implementations/package/update-package-images.usecase";
+import { IUpdatePackageItineraryUsecase } from "../../application/usecase/interfaces/package/update-package-itinerary.interface";
+import { UpdatePackageItineraryUsecase } from "../../application/usecase/implementations/package/update-package-itinerary.usecase";
+import { IDeletePackageUsecase } from "../../application/usecase/interfaces/package/delete-package.interface";
+import { DeletePackageUsecase } from "../../application/usecase/implementations/package/delete-package.usecase";
+import { ICompletePackageUsecase } from "../../application/usecase/interfaces/package/complete-package.interface";
+import { CompletePackageUsecase } from "../../application/usecase/implementations/package/complete-package.usecase";
+import { ICancelPackageUsecase } from "../../application/usecase/interfaces/package/cancel-package.interface";
+import { CancelPackageUsecase } from "../../application/usecase/implementations/package/cancel-package.usecase";
+import { ICreateActivityUsecase } from "../../application/usecase/interfaces/activity/create-activity.interface";
+import { CreateActivityUsecase } from "../../application/usecase/implementations/activity/create-activity.usecase";
+import { IGetAllActivitiesUsecase } from "../../application/usecase/interfaces/activity/get-all-activities.interface";
+import { GetAllActivitiesUsecase } from "../../application/usecase/implementations/activity/get-all-activities.usecase";
+import { ISubmitCaretakerVerificationUsecase } from "../../application/usecase/interfaces/caretaker/submit-verification.interface";
+import { SubmitCaretakerVerificationUsecase } from "../../application/usecase/implementations/caretaker/submit-verification.usecase";
+import { IGetCaretakerProfileUsecase } from "../../application/usecase/interfaces/caretaker/get-caretaker-profile.interface";
+import { GetCaretakerProfileUsecase } from "../../application/usecase/implementations/caretaker/get-caretaker-profile.usecase";
+import { IBrowsePackagesUsecase } from "../../application/usecase/interfaces/package/browse-packages.interface";
+import { BrowsePackagesUsecase } from "../../application/usecase/implementations/package/browse-packages.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -135,6 +173,14 @@ export class UsecaseRegistory {
       useClass: CaretakerLoginUseCase,
     });
 
+    container.register<ISubmitCaretakerVerificationUsecase>("ISubmitCaretakerVerificationUsecase", {
+      useClass: SubmitCaretakerVerificationUsecase,
+    });
+
+    container.register<IGetCaretakerProfileUsecase>("IGetCaretakerProfileUsecase", {
+      useClass: GetCaretakerProfileUsecase,
+    });
+
     // Forgot Password use cases
     container.register<IForgotPasswordUsecase>("IForgotPasswordUsecase", {
       useClass: ForgotPasswordUsecase,
@@ -159,6 +205,78 @@ export class UsecaseRegistory {
         useClass:GetUserProfileUsecase,
       }
     )
+
+    // Admin Agency use cases
+    container.register<IGetAllAgenciesUsecase>("IGetAllAgenciesUsecase", {
+      useClass: GetAllAgenciesUsecase,
+    });
+
+    container.register<IGetAgencyDetailsUsecase>("IGetAgencyDetailsUsecase", {
+      useClass: GetAgencyDetailsUsecase,
+    });
+
+    container.register<IBlockUnblockAgencyUsecase>("IBlockUnblockAgencyUsecase", {
+      useClass: BlockUnblockAgencyUsecase,
+    });
+
+    // Package use cases
+    container.register<ICreatePackageUsecase>("ICreatePackageUsecase", {
+      useClass: CreatePackageUsecase,
+    });
+
+    container.register<IUpdatePackageUsecase>("IUpdatePackageUsecase", {
+      useClass: UpdatePackageUsecase,
+    });
+
+    container.register<IPublishPackageUsecase>("IPublishPackageUsecase", {
+      useClass: PublishPackageUsecase,
+    });
+
+    container.register<IGetAgencyPackagesUsecase>("IGetAgencyPackagesUsecase", {
+      useClass: GetAgencyPackagesUsecase,
+    });
+
+    container.register<IGetPackageByIdUsecase>("IGetPackageByIdUsecase", {
+      useClass: GetPackageByIdUsecase,
+    });
+
+    container.register<IUpdatePackageBasicUsecase>("IUpdatePackageBasicUsecase", {
+      useClass: UpdatePackageBasicUsecase,
+    });
+
+    container.register<IUpdatePackageImagesUsecase>("IUpdatePackageImagesUsecase", {
+      useClass: UpdatePackageImagesUsecase,
+    });
+
+    container.register<IUpdatePackageItineraryUsecase>("IUpdatePackageItineraryUsecase", {
+      useClass: UpdatePackageItineraryUsecase,
+    });
+
+    container.register<IDeletePackageUsecase>("IDeletePackageUsecase", {
+      useClass: DeletePackageUsecase,
+    });
+
+    container.register<ICompletePackageUsecase>("ICompletePackageUsecase", {
+      useClass: CompletePackageUsecase,
+    });
+
+    container.register<ICancelPackageUsecase>("ICancelPackageUsecase", {
+      useClass: CancelPackageUsecase,
+    });
+
+    container.register<ICreateActivityUsecase>("ICreateActivityUsecase", {
+      useClass: CreateActivityUsecase,
+    });
+
+    container.register<IGetAllActivitiesUsecase>("IGetAllActivitiesUsecase", {
+      useClass: GetAllActivitiesUsecase,
+    });
+
+    // Browse Packages use case
+    container.register("IBrowsePackagesUsecase", {
+      useClass: BrowsePackagesUsecase,
+    });
+
     container.register("IUserController",{
        useClass:UserController,
     })

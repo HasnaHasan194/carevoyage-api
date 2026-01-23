@@ -36,8 +36,8 @@ import { IForgotPasswordUsecase } from "../../../application/usecase/interfaces/
 import { IResetPasswordUsecase } from "../../../application/usecase/interfaces/auth/reset-password.interface";
 import { IVerifyResetTokenUsecase } from "../../../application/usecase/interfaces/auth/verify-reset-token.interface";
 import { IGoogleAuthUsecase } from "../../../application/usecase/interfaces/auth/google-auth.interface";
-import { GoogleAuthRequestDTO } from "../../../application/dto/request/google-auth-request.dto";
-import { access } from "fs";
+
+
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -308,7 +308,7 @@ export class AuthController implements IAuthController {
   }
 
   async signupSendOtp(req: Request, res: Response): Promise<void> {
-    const { email, phone, password } = req.body;
+    const { email, phone } = req.body;
 
     await this._checkUserAndSendOtpUsecase.execute({
       email,
