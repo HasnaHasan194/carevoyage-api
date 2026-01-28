@@ -16,8 +16,7 @@ export class CaretakerProfileResponseMapper {
       }
       return undefined;
     };
-    // Map kycDocs array to documents object
-    // Assuming kycDocs[0] = caretakerLicense, kycDocs[1] = governmentIdProof, kycDocs[2] = firstAidCertificate
+    
     const documents: {
       caretakerLicense?: string;
       governmentIdProof?: string;
@@ -25,7 +24,7 @@ export class CaretakerProfileResponseMapper {
     } = {};
 
     if (profile.kycDocs && profile.kycDocs.length > 0) {
-      // Try to match documents by checking if they contain keywords
+    
       profile.kycDocs.forEach((doc) => {
         const docLower = doc.toLowerCase();
         if (docLower.includes("license") || docLower.includes("caretaker")) {

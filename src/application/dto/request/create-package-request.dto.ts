@@ -8,8 +8,19 @@ import {
   IsOptional,
   ValidateNested,
   IsBoolean,
+  IsIn,
+  Matches,
+  MinLength,
+  MaxLength,
+  ArrayMinSize,
+  Validate,
 } from "class-validator";
-import { Type } from "class-transformer";
+import { Type, Transform } from "class-transformer";
+import { PACKAGE_CATEGORIES } from "../../../domain/constants/package-categories";
+import {
+  IsNotPastDateConstraint,
+  IsEndDateAfterStartDateConstraint,
+} from "./date.validators";
 
 class MealDTO {
   @IsBoolean()
@@ -24,19 +35,25 @@ class MealDTO {
 
 class ActivityDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Activity name is required" })
+  @MinLength(2, { message: "Activity name must be at least 2 characters" })
+  @MaxLength(100, { message: "Activity name must not exceed 100 characters" })
+  @Transform(({ value }) => value?.trim())
   name!: string;
 
   @IsString()
-  @IsNotEmpty()
-  description!: string;
+  @IsOptional()
+  @Transform(({ value }) => value?.trim() || "")
+  description?: string;
 
   @IsNumber()
-  @Min(1)
+  @Min(1, { message: "Duration must be at least 1 minute" })
   duration!: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Activity category is required" })
+  @MinLength(2, { message: "Category must be at least 2 characters" })
+  @Transform(({ value }) => value?.trim())
   category!: string;
 
   @IsOptional()
@@ -46,25 +63,31 @@ class ActivityDTO {
 
 class ItineraryDayDTO {
   @IsNumber()
-  @Min(1)
+  @Min(1, { message: "Day number must be at least 1" })
   dayNumber!: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Day title is required" })
+  @MinLength(2, { message: "Day title must be at least 2 characters" })
+  @MaxLength(200, { message: "Day title must not exceed 200 characters" })
+  @Transform(({ value }) => value?.trim())
   title!: string;
 
   @IsString()
-  @IsNotEmpty()
-  description!: string;
+  @IsOptional()
+  @Transform(({ value }) => value?.trim() || "")
+  description?: string;
 
   @IsArray()
+  @ArrayMinSize(1, { message: "At least one activity is required for each day" })
   @ValidateNested({ each: true })
   @Type(() => ActivityDTO)
-  activities!: ActivityDTO[]; // Changed from string[] to ActivityDTO[]
+  activities!: ActivityDTO[];
 
   @IsString()
-  @IsNotEmpty()
-  accommodation!: string;
+  @IsOptional()
+  @Transform(({ value }) => value?.trim() || "")
+  accommodation?: string;
 
   @ValidateNested()
   @Type(() => MealDTO)
@@ -76,17 +99,32 @@ class ItineraryDayDTO {
   transfers?: string[];
 }
 
+
 export class CreatePackageRequestDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Package name is required" })
+  @MinLength(3, { message: "Package name must be at least 3 characters" })
+  @MaxLength(100, { message: "Package name must not exceed 100 characters" })
+  @Matches(/^[A-Za-z\s]+$/, {
+    message: "Package name can only contain alphabets and spaces",
+  })
+  @Transform(({ value }) => value?.trim())
   PackageName!: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Description is required" })
+  @MinLength(10, { message: "Description must be at least 10 characters" })
+  @MaxLength(1000, { message: "Description must not exceed 1000 characters" })
+  @Transform(({ value }) => value?.trim())
   description!: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Category is required" })
+  @IsIn(PACKAGE_CATEGORIES, {
+    message:
+      "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage",
+  })
+  @Transform(({ value }) => value?.trim())
   category!: string;
 
   @IsArray()
@@ -95,26 +133,32 @@ export class CreatePackageRequestDTO {
   tags?: string[];
 
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: "Meeting point is required" })
+  @MinLength(3, { message: "Meeting point must be at least 3 characters" })
+  @MaxLength(200, { message: "Meeting point must not exceed 200 characters" })
+  @Transform(({ value }) => value?.trim())
   meetingPoint!: string;
 
   @IsArray()
+  @ArrayMinSize(1, { message: "At least one image is required" })
   @IsString({ each: true })
-  @IsOptional()
-  images?: string[];
+  images!: string[];
 
   @IsNumber()
-  @Min(1)
+  @Min(1, { message: "Max group size must be at least 1" })
   maxGroupSize!: number;
 
   @IsNumber()
-  @Min(0)
+  @Min(0.01, { message: "Base price must be greater than 0" })
   basePrice!: number;
 
-  @IsDateString()
+  @IsDateString({}, { message: "Start date must be a valid date string" })
+  @Validate(IsNotPastDateConstraint)
   startDate!: string;
 
-  @IsDateString()
+  @IsDateString({}, { message: "End date must be a valid date string" })
+  @Validate(IsNotPastDateConstraint)
+  @Validate(IsEndDateAfterStartDateConstraint)
   endDate!: string;
 
   @IsArray()
@@ -128,6 +172,7 @@ export class CreatePackageRequestDTO {
   exclusions?: string[];
 
   @IsArray()
+  @ArrayMinSize(1, { message: "At least one itinerary day is required" })
   @ValidateNested({ each: true })
   @Type(() => ItineraryDayDTO)
   itineraryDays!: ItineraryDayDTO[];

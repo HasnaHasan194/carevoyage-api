@@ -6,12 +6,23 @@ import {
   IsEnum,
   IsNumber,
   IsDateString,
+  IsIn,
 } from "class-validator";
 import { Type } from "class-transformer";
+import { PACKAGE_CATEGORIES } from "../../../domain/constants/package-categories";
 
 export enum SortOrder {
   ASC = "asc",
   DESC = "desc",
+}
+
+export enum PackageSortKey {
+  PRICE_ASC = "price_asc",
+  PRICE_DESC = "price_desc",
+  NEWEST = "newest",
+  OLDEST = "oldest",
+  DURATION_ASC = "duration_asc",
+  DURATION_DESC = "duration_desc",
 }
 
 export class BrowsePackagesRequestDTO {
@@ -21,6 +32,10 @@ export class BrowsePackagesRequestDTO {
 
   @IsOptional()
   @IsString()
+  @IsIn(PACKAGE_CATEGORIES, {
+    message:
+      "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage",
+  })
   category?: string;
 
   @IsOptional()
@@ -59,6 +74,21 @@ export class BrowsePackagesRequestDTO {
   @IsString()
   sortBy?: string = "basePrice";
 
+  /**
+   * Preferred sorting API (OCP-friendly):
+   * - price_asc, price_desc
+   * - newest, oldest
+   * - duration_asc, duration_desc (duration computed as endDate - startDate)
+   *
+   * If provided, this overrides sortBy/sortOrder while keeping backward compatibility.
+   */
+  @IsOptional()
+  @IsEnum(PackageSortKey, {
+    message:
+      "sortKey must be one of: price_asc, price_desc, newest, oldest, duration_asc, duration_desc",
+  })
+  sortKey?: PackageSortKey;
+
   @IsOptional()
   @IsEnum(SortOrder, {
     message: "sortOrder must be one of: asc, desc",
@@ -77,5 +107,6 @@ export class BrowsePackagesRequestDTO {
   @Min(1)
   limit?: number = 10;
 }
+
 
 

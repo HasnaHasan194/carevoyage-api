@@ -41,7 +41,7 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
         };
       }
     } else {
-      // For client, caretaker, agency_owner - all in users collection
+      // For client, caretaker, agency_owner - in users collection
       const foundUser = await this._userRepository.findByEmail(email);
 
       if (foundUser) {
@@ -63,7 +63,7 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     }
 
     if (user.isBlocked) {
-      throw new ValidationError("Your account has been blocked. Please contact support.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.USER_BLOCKED);
     }
 
     // Generate reset token
@@ -121,6 +121,9 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     `;
   }
 }
+
+
+
 
 
 

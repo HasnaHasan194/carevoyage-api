@@ -6,6 +6,7 @@ import { IItineraryRepository } from "../../../../domain/repositoryInterfaces/It
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class PublishPackageUsecase implements IPublishPackageUsecase {
@@ -26,19 +27,17 @@ export class PublishPackageUsecase implements IPublishPackageUsecase {
     );
 
     if (!existingPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     // Validate package has itinerary
     if (!existingPackage.itineraryId) {
-      throw new ValidationError(
-        "Package must have an itinerary before publishing"
-      );
+      throw new ValidationError(ERROR_MESSAGE.PACKAGE.MUST_HAVE_ITINERARY_BEFORE_PUBLISHING);
     }
 
     // Check if already published
     if (existingPackage.status === "published") {
-      throw new ValidationError("Package is already published");
+      throw new ValidationError(ERROR_MESSAGE.PACKAGE.ALREADY_PUBLISHED);
     }
 
     // Cannot publish if completed or cancelled
@@ -47,7 +46,7 @@ export class PublishPackageUsecase implements IPublishPackageUsecase {
       existingPackage.status === "cancelled"
     ) {
       throw new ValidationError(
-        `Cannot publish package with status: ${existingPackage.status}`
+        ERROR_MESSAGE.PACKAGE.CANNOT_PUBLISH_STATUS(existingPackage.status)
       );
     }
 
@@ -58,7 +57,7 @@ export class PublishPackageUsecase implements IPublishPackageUsecase {
     );
 
     if (!publishedPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     // Fetch itinerary
@@ -69,5 +68,8 @@ export class PublishPackageUsecase implements IPublishPackageUsecase {
     return PackageMapper.toPackageResponseDto(publishedPackage, itinerary);
   }
 }
+
+
+
 
 

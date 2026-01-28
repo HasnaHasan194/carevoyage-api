@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, PipelineStage } from "mongoose";
 import { PackageMapper } from "../../../application/mapper/package.mapper";
 import { IPackageEntity, TPackageStatus } from "../../../domain/entities/package.entity";
 import { IPackageModel, packageDB } from "../../database/models/package.model";
@@ -123,16 +123,23 @@ export class PackageRepository
       maxDuration,
       sortBy = "basePrice",
       sortOrder = "asc",
-      page,
-      limit,
     } = filters;
+
+ 
+    const page = Math.max(1, Math.floor(filters.page) || 1);
+    const limit = Math.max(1, Math.floor(filters.limit) || 2);
 
     const skip = (page - 1) * limit;
 
-    // Build match conditions
+    console.log(`[browsePackages] page=${page}, limit=${limit}, skip=${skip}`);
+
+    
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    
     const matchConditions: Record<string, unknown> = {
       isDeleted: false,
-      status: "published", // Only show published packages
+      status: "published",
     };
 
     // Category filter
@@ -142,25 +149,36 @@ export class PackageRepository
 
     // Price range filter
     if (minPrice !== undefined || maxPrice !== undefined) {
-      matchConditions.basePrice = {};
+      const priceFilter: Record<string, number> = {};
       if (minPrice !== undefined) {
-        matchConditions.basePrice.$gte = minPrice;
+        priceFilter.$gte = minPrice;
       }
       if (maxPrice !== undefined) {
-        matchConditions.basePrice.$lte = maxPrice;
+        priceFilter.$lte = maxPrice;
       }
+      matchConditions.basePrice = priceFilter;
     }
 
-    // Date range filter (overlap check)
-    if (startDate || endDate) {
-      const dateFilter: Record<string, unknown> = {};
-      if (endDate) {
-        dateFilter.startDate = { $lte: endDate };
-      }
-      if (startDate) {
-        dateFilter.endDate = { $gte: startDate };
-      }
-      Object.assign(matchConditions, dateFilter);
+   
+    
+    // Normalize user-provided dates to start of day for consistent comparison
+    let normalizedStartDate: Date | undefined;
+    if (startDate) {
+      normalizedStartDate = new Date(startDate);
+      normalizedStartDate.setUTCHours(0, 0, 0, 0);
+    }
+    
+
+    const minEndDate = normalizedStartDate && normalizedStartDate > today 
+      ? normalizedStartDate 
+      : today;
+    
+    matchConditions.endDate = { $gte: minEndDate };
+   
+    if (endDate) {
+      const normalizedEndDate = new Date(endDate);
+      normalizedEndDate.setUTCHours(23, 59, 59, 999);
+      matchConditions.startDate = { $lte: normalizedEndDate };
     }
 
     // Search filter (PackageName, Category, Tags)
@@ -174,19 +192,19 @@ export class PackageRepository
     }
 
     // Build aggregation pipeline
-    const pipeline: unknown[] = [
-      // Stage 1: Match published, non-deleted packages
+    const pipeline: PipelineStage[] = [
+     
       {
         $match: matchConditions,
       },
-      // Stage 2: Calculate duration in days
+     
       {
         $addFields: {
           duration: {
             $ceil: {
               $divide: [
                 { $subtract: ["$endDate", "$startDate"] },
-                86400000, // milliseconds in a day (1000 * 60 * 60 * 24)
+                86400000,
               ],
             },
           },
@@ -215,8 +233,8 @@ export class PackageRepository
       {
         $facet: {
           packages: [
-            { $skip: skip },
-            { $limit: limit },
+            { $skip: Number(skip) },
+            { $limit: Number(limit) },
           ],
           totalCount: [{ $count: "count" }],
         },
@@ -245,7 +263,7 @@ export class PackageRepository
 
     const { packages: packageDocs, total } = result[0];
 
-    const packages = packageDocs.map((doc) => PackageMapper.toEntity(doc));
+    const packages = packageDocs.map((doc: IPackageModel) => PackageMapper.toEntity(doc));
 
     return { packages, total };
   }

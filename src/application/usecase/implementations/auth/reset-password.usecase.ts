@@ -28,7 +28,7 @@ export class ResetPasswordUsecase implements IResetPasswordUsecase {
     const decoded = this._tokenService.verifyResetToken(token);
 
     if (!decoded || !decoded.id || !decoded.email || !decoded.role) {
-      throw new ValidationError("Invalid or expired reset token. Please request a new password reset.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_OR_EXPIRED_RESET_TOKEN_REQUEST_NEW);
     }
 
     const payload = decoded as JwtPayload & { id: string; email: string; role: string };
@@ -38,12 +38,12 @@ export class ResetPasswordUsecase implements IResetPasswordUsecase {
     const storedUserId = await redisClient.get(tokenKey);
 
     if (!storedUserId) {
-      throw new ValidationError("Reset token has already been used or expired. Please request a new password reset.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.RESET_TOKEN_USED_OR_EXPIRED_REQUEST_NEW);
     }
 
     // Verify token belongs to the user
     if (storedUserId !== payload.id) {
-      throw new ValidationError("Invalid reset token.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_RESET_TOKEN);
     }
 
     // Hash new password
@@ -53,14 +53,14 @@ export class ResetPasswordUsecase implements IResetPasswordUsecase {
     if (payload.role === "admin") {
       const admin = await this._adminRepository.findById(payload.id);
       if (!admin) {
-        throw new NotFoundError("Admin not found");
+        throw new NotFoundError(ERROR_MESSAGE.ADMIN.NOT_FOUND);
       }
       await this._adminRepository.updatePassword(payload.id, hashedPassword);
     } else {
       // For client, caretaker, agency_owner - all in users collection
       const user = await this._userRepository.findById(payload.id);
       if (!user) {
-        throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.USER_NOT_FOUND);
+        throw new NotFoundError(ERROR_MESSAGE.USER.NOT_FOUND);
       }
       await this._userRepository.updatePassword(payload.id, hashedPassword);
     }

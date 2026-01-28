@@ -4,3 +4,6 @@ export interface IGetCaretakerProfileUsecase {
   execute(userId: string): Promise<CaretakerProfileResponseDTO>;
 }
 
+
+
+

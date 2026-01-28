@@ -19,6 +19,8 @@ import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caret
 import { ForgotPasswordRequestDTO } from "../../../application/dto/request/forgot-password-request.dto";
 import { ResetPasswordRequestDTO } from "../../../application/dto/request/reset-password-request.dto";
 import { VerifyResetTokenRequestDTO } from "../../../application/dto/request/verify-reset-token-request.dto";
+import { verifyAuth } from "../../middlewares/auth.middleware";
+import { blockedUserMiddleware } from "../../../infrastructure/dependencyinjection/resolve";
 
 
 @injectable()
@@ -134,6 +136,13 @@ export class AuthRoutes extends BaseRoute {
       asyncHandler(authController.googleAuth.bind(authController))
     );
 
- 
+    // Server-validated session check (used by frontend guards)
+    this.router.get(
+      "/me",
+      asyncHandler(verifyAuth),
+      asyncHandler(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware)),
+      asyncHandler(authController.getMe.bind(authController))
+    );
+
   }
 }

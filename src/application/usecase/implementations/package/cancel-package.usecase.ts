@@ -6,6 +6,7 @@ import { IItineraryRepository } from "../../../../domain/repositoryInterfaces/It
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class CancelPackageUsecase implements ICancelPackageUsecase {
@@ -26,13 +27,13 @@ export class CancelPackageUsecase implements ICancelPackageUsecase {
     );
 
     if (!existingPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     //  Only published packages can be cancelled
     if (existingPackage.status !== "published") {
       throw new ValidationError(
-        `Cannot cancel package with status "${existingPackage.status}". Only published packages can be cancelled.`
+        ERROR_MESSAGE.PACKAGE.CANNOT_CANCEL_STATUS(existingPackage.status)
       );
     }
 
@@ -43,7 +44,7 @@ export class CancelPackageUsecase implements ICancelPackageUsecase {
     );
 
     if (!cancelledPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     // Fetch itinerary
@@ -54,5 +55,8 @@ export class CancelPackageUsecase implements ICancelPackageUsecase {
     return PackageMapper.toPackageResponseDto(cancelledPackage, itinerary);
   }
 }
+
+
+
 
 

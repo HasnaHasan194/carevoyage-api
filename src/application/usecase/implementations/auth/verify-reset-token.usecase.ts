@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IVerifyResetTokenUsecase } from "../../interfaces/auth/verify-reset-token.interface";
 import { ITokenService } from "../../../../domain/service-interfaces/token-service-interfaces";
 import { ValidationError } from "../../../../domain/errors/validationError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 import { JwtPayload } from "jsonwebtoken";
 import { redisClient } from "../../../../infrastructure/config/redis.config";
 
@@ -17,7 +18,7 @@ export class VerifyResetTokenUsecase implements IVerifyResetTokenUsecase {
     const decoded = this._tokenService.verifyResetToken(token);
 
     if (!decoded || !decoded.id || !decoded.email || !decoded.role) {
-      throw new ValidationError("Invalid or expired reset token.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_OR_EXPIRED_RESET_TOKEN);
     }
 
     const payload = decoded as JwtPayload & { id: string; email: string; role: string };
@@ -27,12 +28,12 @@ export class VerifyResetTokenUsecase implements IVerifyResetTokenUsecase {
     const storedUserId = await redisClient.get(tokenKey);
 
     if (!storedUserId) {
-      throw new ValidationError("Reset token has already been used or expired.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.RESET_TOKEN_USED_OR_EXPIRED);
     }
 
     // Verify token belongs to the user
     if (storedUserId !== payload.id) {
-      throw new ValidationError("Invalid reset token.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_RESET_TOKEN);
     }
 
     return {
@@ -41,6 +42,9 @@ export class VerifyResetTokenUsecase implements IVerifyResetTokenUsecase {
     };
   }
 }
+
+
+
 
 
 

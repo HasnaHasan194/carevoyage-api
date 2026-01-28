@@ -36,11 +36,11 @@ export class AgencyLoginUsecase implements ILoginUsecase {
     }
 
     if (user.role !== "agency_owner") {
-      throw new ValidationError("Not an agency account");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_ACCOUNT_TYPE_NOT_AGENCY);
     }
 
     if (user.isBlocked) {
-      throw new ValidationError("Your account has been blocked. Please contact support.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.USER_BLOCKED);
     }
 
     const isPasswordMatch = comparePassword(user.password, agencyLoginData.password);
@@ -56,11 +56,11 @@ export class AgencyLoginUsecase implements ILoginUsecase {
     console.log(agency)
 
     if (!agency) {
-      throw new NotFoundError("Agency profile not found");
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.PROFILE_NOT_FOUND);
     }
 
     if (agency.isBlocked) {
-      throw new ValidationError("Agency account is blocked");
+      throw new ValidationError(ERROR_MESSAGE.AGENCY.ACCOUNT_BLOCKED);
     }
 
   

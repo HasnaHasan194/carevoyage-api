@@ -27,7 +27,11 @@ import { ICheckUserAndSendOtpUsecase } from "../../../application/usecase/interf
 import { IGenerateTokenUseCase } from "../../../application/usecase/interfaces/auth/generate-token.usecase.interface";
 import { ILogoutUseCase } from "../../../application/usecase/interfaces/auth/logout-usecase.interface";
 import { IRefreshTokenUsecase } from "../../../application/usecase/interfaces/auth/refresh-token-usecase.interface";
-import { setAuthCookies, clearCookie, updateCookieWithAccessToken } from "../../../shared/utils/cookieHelper";
+import {
+  setAuthCookies,
+  clearCookie,
+  updateCookieWithAccessToken,
+} from "../../../shared/utils/cookieHelper";
 import { IVerifyCaretakerInviteUseCase } from "../../../application/usecase/interfaces/caretaker/verify-caretaker-invite.interface";
 import { ICaretakerSignupUseCase } from "../../../application/usecase/interfaces/caretaker/caretaker-signup.interface";
 import { ICaretakerLoginUseCase } from "../../../application/usecase/interfaces/auth/caretaker-login.interface";
@@ -36,8 +40,8 @@ import { IForgotPasswordUsecase } from "../../../application/usecase/interfaces/
 import { IResetPasswordUsecase } from "../../../application/usecase/interfaces/auth/reset-password.interface";
 import { IVerifyResetTokenUsecase } from "../../../application/usecase/interfaces/auth/verify-reset-token.interface";
 import { IGoogleAuthUsecase } from "../../../application/usecase/interfaces/auth/google-auth.interface";
-
-
+import { IGetCurrentUserUsecase } from "../../../application/usecase/interfaces/auth/get-current-user.interface";
+import { CustomRequest } from "../../middlewares/auth.middleware";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -103,7 +107,10 @@ export class AuthController implements IAuthController {
     private _verifyResetTokenUsecase: IVerifyResetTokenUsecase,
 
     @inject("IGoogleAuthUsecase")
-    private _googleAuthUsecase: IGoogleAuthUsecase
+    private _googleAuthUsecase: IGoogleAuthUsecase,
+
+    @inject("IGetCurrentUserUsecase")
+    private _getCurrentUserUsecase: IGetCurrentUserUsecase,
   ) {}
 
   async register(req: Request, res: Response): Promise<void> {
@@ -114,7 +121,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.CREATED,
-      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED
+      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED,
     );
   }
 
@@ -122,22 +129,21 @@ export class AuthController implements IAuthController {
     const userData = req.body;
 
     const data = await this._loginUsecase.execute(userData as LoginRequestDTO);
-   console.log("data----->",data)
+
     const userId = data.id.toString();
-     console.log(userId,"userid-------->")
+
     const tokens = await this._generateTokenUseCase.execute(
       userId,
       data.email,
-      data.role
+      data.role,
     );
-    console.log(tokens,"---->tokens")
 
     setAuthCookies(
       res,
       tokens.accessToken,
       tokens.refreshToken,
       COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN
+      COOKIES_NAMES.REFRESH_TOKEN,
     );
 
     res.status(HTTP_STATUS.OK).json({
@@ -163,24 +169,22 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       200,
-      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED
+      SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED,
     );
   }
   async loginAgency(req: Request, res: Response): Promise<void> {
     const userData = req.body;
 
     const data = await this._loginAgencyUsecase.execute(
-      userData as AgencyLoginRequestDTO
+      userData as AgencyLoginRequestDTO,
     );
-
-    
 
     const userId = data.id.toString();
 
     const tokens = await this._generateTokenUseCase.execute(
       userId,
       data.email,
-      data.role
+      data.role,
     );
 
     setAuthCookies(
@@ -188,7 +192,7 @@ export class AuthController implements IAuthController {
       tokens.accessToken,
       tokens.refreshToken,
       COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN
+      COOKIES_NAMES.REFRESH_TOKEN,
     );
 
     res.status(HTTP_STATUS.OK).json({
@@ -208,14 +212,14 @@ export class AuthController implements IAuthController {
   async AdminLogin(req: Request, res: Response): Promise<void> {
     const userData = req.body;
     const data = await this._loginAdminUsecase.execute(
-      userData as AdminLoginRequestDTO
+      userData as AdminLoginRequestDTO,
     );
     const userId = data.id.toString();
 
     const tokens = await this._generateTokenUseCase.execute(
       userId,
       data.email,
-      data.role
+      data.role,
     );
 
     setAuthCookies(
@@ -223,7 +227,7 @@ export class AuthController implements IAuthController {
       tokens.accessToken,
       tokens.refreshToken,
       COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN
+      COOKIES_NAMES.REFRESH_TOKEN,
     );
 
     res.status(HTTP_STATUS.OK).json({
@@ -248,7 +252,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.OTP_SEND_SUCCESS
+      SUCCESS_MESSAGE.AUTHORIZATION.OTP_SEND_SUCCESS,
     );
   }
 
@@ -260,7 +264,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.OTP_RESENT_SUCCESS
+      SUCCESS_MESSAGE.AUTHORIZATION.OTP_RESENT_SUCCESS,
     );
   }
   async verifyOtp(req: Request, res: Response): Promise<void> {
@@ -271,7 +275,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.OTP_VERIFIED
+      SUCCESS_MESSAGE.AUTHORIZATION.OTP_VERIFIED,
     );
   }
   async verifyOtpAndCreateUser(req: Request, res: Response): Promise<void> {
@@ -279,14 +283,14 @@ export class AuthController implements IAuthController {
     const user = await this._verifyOtpAndCreateUserUsecase.execute(
       email,
       otp,
-      userData
+      userData,
     );
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.CREATED,
       SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED,
-      user
+      user,
     );
   }
 
@@ -296,14 +300,14 @@ export class AuthController implements IAuthController {
     const agency = await this._verifyOtpAndCreateAgencyUsecase.execute(
       email,
       otp,
-      agencyData
+      agencyData,
     );
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.CREATED,
       SUCCESS_MESSAGE.AUTHORIZATION.ACCOUNT_CREATED,
-      agency
+      agency,
     );
   }
 
@@ -321,16 +325,12 @@ export class AuthController implements IAuthController {
   async logout(req: Request, res: Response): Promise<void> {
     await this._logoutUseCase.execute();
 
-    clearCookie(
-      res,
-      COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN
-    );
+    clearCookie(res, COOKIES_NAMES.ACCESS_TOKEN, COOKIES_NAMES.REFRESH_TOKEN);
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.LOGOUT_SUCCESS
+      SUCCESS_MESSAGE.AUTHORIZATION.LOGOUT_SUCCESS,
     );
   }
 
@@ -338,15 +338,11 @@ export class AuthController implements IAuthController {
     const refreshToken = req.cookies[COOKIES_NAMES.REFRESH_TOKEN];
 
     if (!refreshToken) {
-      clearCookie(
-        res,
-        COOKIES_NAMES.ACCESS_TOKEN,
-        COOKIES_NAMES.REFRESH_TOKEN
-      );
+      clearCookie(res, COOKIES_NAMES.ACCESS_TOKEN, COOKIES_NAMES.REFRESH_TOKEN);
       ResponseHelper.error(
         res,
         ERROR_MESSAGE.AUTHENTICATION.TOKEN_MISSING,
-        HTTP_STATUS.UNAUTHORIZED
+        HTTP_STATUS.UNAUTHORIZED,
       );
       return;
     }
@@ -357,7 +353,7 @@ export class AuthController implements IAuthController {
       updateCookieWithAccessToken(
         res,
         result.accessToken,
-        COOKIES_NAMES.ACCESS_TOKEN
+        COOKIES_NAMES.ACCESS_TOKEN,
       );
 
       ResponseHelper.success(
@@ -366,27 +362,19 @@ export class AuthController implements IAuthController {
         "Access token refreshed successfully",
         {
           role: result.role,
-        }
+        },
       );
     } catch (error) {
       // Clear cookies on refresh failure
-      clearCookie(
-        res,
-        COOKIES_NAMES.ACCESS_TOKEN,
-        COOKIES_NAMES.REFRESH_TOKEN
-      );
+      clearCookie(res, COOKIES_NAMES.ACCESS_TOKEN, COOKIES_NAMES.REFRESH_TOKEN);
 
       if (error instanceof Error) {
-        ResponseHelper.error(
-          res,
-          error.message,
-          HTTP_STATUS.UNAUTHORIZED
-        );
+        ResponseHelper.error(res, error.message, HTTP_STATUS.UNAUTHORIZED);
       } else {
         ResponseHelper.error(
           res,
           ERROR_MESSAGE.AUTHENTICATION.TOKEN_EXPIRED_REFRESH,
-          HTTP_STATUS.UNAUTHORIZED
+          HTTP_STATUS.UNAUTHORIZED,
         );
       }
     }
@@ -396,11 +384,7 @@ export class AuthController implements IAuthController {
     const { token } = req.query;
 
     if (!token || typeof token !== "string") {
-      ResponseHelper.error(
-        res,
-        "Token is required",
-        HTTP_STATUS.BAD_REQUEST
-      );
+      ResponseHelper.error(res, "Token is required", HTTP_STATUS.BAD_REQUEST);
       return;
     }
 
@@ -410,21 +394,19 @@ export class AuthController implements IAuthController {
       res,
       HTTP_STATUS.OK,
       "Invite token verified successfully",
-      result
+      result,
     );
   }
 
   async caretakerSignup(req: Request, res: Response): Promise<void> {
     const signupData = req.body;
 
-    const userData = await this._caretakerSignupUseCase.execute(
-      signupData
-    );
+    const userData = await this._caretakerSignupUseCase.execute(signupData);
 
     const tokens = await this._generateTokenUseCase.execute(
       userData.id,
       userData.email,
-      userData.role
+      userData.role,
     );
 
     setAuthCookies(
@@ -432,7 +414,7 @@ export class AuthController implements IAuthController {
       tokens.accessToken,
       tokens.refreshToken,
       COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN
+      COOKIES_NAMES.REFRESH_TOKEN,
     );
 
     res.status(HTTP_STATUS.CREATED).json({
@@ -454,7 +436,7 @@ export class AuthController implements IAuthController {
     const userData = req.body;
 
     const data = await this._caretakerLoginUseCase.execute(
-      userData as CaretakerLoginRequestDTO
+      userData as CaretakerLoginRequestDTO,
     );
 
     const userId = data.id.toString();
@@ -462,7 +444,7 @@ export class AuthController implements IAuthController {
     const tokens = await this._generateTokenUseCase.execute(
       userId,
       data.email,
-      data.role
+      data.role,
     );
 
     setAuthCookies(
@@ -470,7 +452,7 @@ export class AuthController implements IAuthController {
       tokens.accessToken,
       tokens.refreshToken,
       COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN
+      COOKIES_NAMES.REFRESH_TOKEN,
     );
 
     res.status(HTTP_STATUS.OK).json({
@@ -496,7 +478,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Password reset link has been sent to your email. Please check your inbox."
+      "Password reset link has been sent to your email. Please check your inbox.",
     );
   }
 
@@ -507,7 +489,7 @@ export class AuthController implements IAuthController {
       ResponseHelper.error(
         res,
         "Passwords do not match",
-        HTTP_STATUS.BAD_REQUEST
+        HTTP_STATUS.BAD_REQUEST,
       );
       return;
     }
@@ -517,7 +499,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Password reset successfully. You can now login with your new password."
+      "Password reset successfully. You can now login with your new password.",
     );
   }
 
@@ -525,43 +507,34 @@ export class AuthController implements IAuthController {
     const { token } = req.query;
 
     if (!token || typeof token !== "string") {
-      ResponseHelper.error(
-        res,
-        "Token is required",
-        HTTP_STATUS.BAD_REQUEST
-      );
+      ResponseHelper.error(res, "Token is required", HTTP_STATUS.BAD_REQUEST);
       return;
     }
 
     const result = await this._verifyResetTokenUsecase.execute(token);
 
-    ResponseHelper.success(
-      res,
-      HTTP_STATUS.OK,
-      "Reset token is valid",
-      result
-    );
+    ResponseHelper.success(res, HTTP_STATUS.OK, "Reset token is valid", result);
   }
 
   async googleAuth(req: Request, res: Response): Promise<void> {
     const { accessToken } = req.body;
-   console.log(accessToken,"---->,accesstoken")
+    console.log(accessToken, "---->,accesstoken");
     const userData = await this._googleAuthUsecase.execute(accessToken);
-    console.log(userData,"----->,userData")
+    console.log(userData, "----->,userData");
     const userId = userData.id.toString();
-      console.log(userId,"----->,useriddddddddd")
+    console.log(userId, "----->,useriddddddddd");
     const tokens = await this._generateTokenUseCase.execute(
       userId,
       userData.email,
-      userData.role
+      userData.role,
     );
-    console.log(tokens,"----->,useriddddddddd")
+    console.log(tokens, "----->,useriddddddddd");
     setAuthCookies(
       res,
       tokens.accessToken,
       tokens.refreshToken,
       COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN
+      COOKIES_NAMES.REFRESH_TOKEN,
     );
 
     res.status(HTTP_STATUS.OK).json({
@@ -578,5 +551,25 @@ export class AuthController implements IAuthController {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
+  }
+
+  async getMe(req: Request, res: Response): Promise<void> {
+    const authUser = (req as CustomRequest).user;
+    if (!authUser?.id) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.UNAUTHORIZED_ACCESS,
+        HTTP_STATUS.UNAUTHORIZED,
+      );
+      return;
+    }
+
+    const currentUser = await this._getCurrentUserUsecase.execute(authUser.id);
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Current user retrieved successfully",
+      currentUser,
+    );
   }
 }

@@ -14,9 +14,9 @@ const daySchema = new Schema(
   {
     dayNumber: { type: Number, required: true, min: 1 },
     title: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String, default: "" },
     activities: [{ type: Types.ObjectId, ref: "activity" }],
-    accommodation: { type: String, required: true },
+    accommodation: { type: String, default: "" },
     meals: { type: mealSchema, required: true },
     transfers: { type: [String], default: [] },
   },
@@ -30,7 +30,7 @@ export const itinerarySchema = new Schema<IItineraryModel>(
       ref: "package",
       required: true,
       unique: true,
-      index: true,
+      // index: true,
     },
     days: {
       type: [daySchema],
@@ -47,7 +47,4 @@ export const itinerarySchema = new Schema<IItineraryModel>(
     timestamps: true,
   }
 );
-
-itinerarySchema.index({ packageId: 1 });
-
 

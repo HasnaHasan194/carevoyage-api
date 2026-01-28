@@ -30,3 +30,6 @@ export interface CaretakerProfileResponseDTO {
   joinedAt?: string;
 }
 
+
+
+

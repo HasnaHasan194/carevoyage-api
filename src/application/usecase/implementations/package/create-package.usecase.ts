@@ -9,6 +9,7 @@ import { PackageMapper } from "../../../mapper/package.mapper";
 import { IActivityRepository } from "../../../../domain/repositoryInterfaces/Activity/activity.repository.interface";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { IActivityEntity } from "../../../../domain/entities/activity.entity";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class CreatePackageUsecase implements ICreatePackageUsecase {
@@ -93,18 +94,18 @@ export class CreatePackageUsecase implements ICreatePackageUsecase {
       const itineraryDaysWithIds = data.itineraryDays.map((day) => ({
         dayNumber: day.dayNumber,
         title: day.title,
-        description: day.description,
+        description: day.description || "",
         activities: day.activities.map((activityData) => {
           const key = `${activityData.name}-${activityData.description}`;
           const activityId = activityKeyToIdMap.get(key);
           if (!activityId) {
             throw new ValidationError(
-              `Activity "${activityData.name}" not found in created activities`
+              ERROR_MESSAGE.PACKAGE.ACTIVITY_NOT_FOUND_IN_CREATED(activityData.name)
             );
           }
           return activityId;
         }),
-        accommodation: day.accommodation,
+        accommodation: day.accommodation || "",
         meals: day.meals,
         transfers: day.transfers || [],
       }));
@@ -126,7 +127,7 @@ export class CreatePackageUsecase implements ICreatePackageUsecase {
       );
 
       if (!updatedPackage) {
-        throw new ValidationError("Failed to update package with itinerary");
+        throw new ValidationError(ERROR_MESSAGE.PACKAGE.FAILED_TO_UPDATE_WITH_ITINERARY);
       }
 
       //  Commit transaction

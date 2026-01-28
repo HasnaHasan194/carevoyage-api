@@ -7,6 +7,8 @@ import { IItineraryRepository } from "../../../../domain/repositoryInterfaces/It
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
+import { isPackageEditable } from "../../../../domain/constants/package-categories";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class UpdatePackageImagesUsecase implements IUpdatePackageImagesUsecase {
@@ -28,13 +30,13 @@ export class UpdatePackageImagesUsecase implements IUpdatePackageImagesUsecase {
     );
 
     if (!existingPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
-    
-    if (existingPackage.status === "published") {
+    // Only allow editing for draft and published statuses
+    if (!isPackageEditable(existingPackage.status)) {
       throw new ValidationError(
-        "Cannot edit published packages. Please unpublish first."
+        ERROR_MESSAGE.PACKAGE.CANNOT_EDIT_STATUS(existingPackage.status)
       );
     }
 
@@ -43,7 +45,7 @@ export class UpdatePackageImagesUsecase implements IUpdatePackageImagesUsecase {
     });
 
     if (!updatedPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     const itinerary = updatedPackage.itineraryId
@@ -53,5 +55,8 @@ export class UpdatePackageImagesUsecase implements IUpdatePackageImagesUsecase {
     return PackageMapper.toPackageResponseDto(updatedPackage, itinerary);
   }
 }
+
+
+
 
 

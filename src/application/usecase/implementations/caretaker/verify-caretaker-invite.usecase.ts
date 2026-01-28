@@ -38,12 +38,12 @@ export class VerifyCaretakerInviteUseCase
 
     // Validate token type
     if (payload.type !== "caretaker_invite") {
-      throw new ValidationError("Invalid invite token type");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_INVITE_TOKEN_TYPE);
     }
 
     // Validate role
     if (payload.role !== "caretaker") {
-      throw new ValidationError("Invalid role in invite token");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_ROLE_IN_INVITE_TOKEN);
     }
 
     // Check if caretaker profile exists with status "invited" for this email
@@ -53,9 +53,7 @@ export class VerifyCaretakerInviteUseCase
     );
 
     if (!invitedProfile || invitedProfile.status !== "invited" || invitedProfile.userId) {
-      throw new NotFoundError(
-        "No pending invitation found for this email and agency"
-      );
+      throw new NotFoundError(ERROR_MESSAGE.CARETAKER.NO_PENDING_INVITATION_FOR_EMAIL_AND_AGENCY);
     }
 
     return {

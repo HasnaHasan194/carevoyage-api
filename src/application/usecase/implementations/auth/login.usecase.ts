@@ -27,18 +27,19 @@ export class LoginUsecase implements ILoginUsecase {
   async execute(data: BaseLoginRequest): Promise<LoginResponseDTO> {
     const isEmailExist = await this._userRepository.findByEmail(data.email);
    
+   
     if (!isEmailExist) {
       throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_NOT_FOUND);
     }
 
     // Verify role is "client" (role-based security check)
     if (isEmailExist.role !== "client") {
-      throw new ValidationError("Invalid account type. This is not a client account.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_ACCOUNT_TYPE_NOT_CLIENT);
     }
 
     // Check if user is blocked
     if (isEmailExist.isBlocked) {
-      throw new ValidationError("Your account has been blocked. Please contact support.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.USER_BLOCKED);
     }
 
     // Verify password
@@ -46,6 +47,8 @@ export class LoginUsecase implements ILoginUsecase {
        data.password,
        isEmailExist.password
     );
+
+    console.log(isPasswordMatch,"000")
 
     if (!isPasswordMatch) {
       throw new ValidationError(

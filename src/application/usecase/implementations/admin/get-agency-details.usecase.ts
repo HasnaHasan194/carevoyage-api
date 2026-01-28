@@ -5,6 +5,7 @@ import { AgencyResponseDTO } from "../../../dto/response/agency-response.dto";
 import { AgencyMapper } from "../../../mapper/agency.mapper";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class GetAgencyDetailsUsecase implements IGetAgencyDetailsUsecase {
@@ -19,7 +20,7 @@ export class GetAgencyDetailsUsecase implements IGetAgencyDetailsUsecase {
     const agency = await this._agencyRepository.findById(agencyId);
 
     if (!agency) {
-      throw new NotFoundError("Agency not found");
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
     }
 
     const owner = await this._userRepository.findById(agency.userId);
@@ -31,5 +32,8 @@ export class GetAgencyDetailsUsecase implements IGetAgencyDetailsUsecase {
     );
   }
 }
+
+
+
 
 

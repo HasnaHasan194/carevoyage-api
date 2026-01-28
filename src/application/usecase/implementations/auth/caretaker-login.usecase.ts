@@ -31,12 +31,12 @@ export class CaretakerLoginUseCase implements ILoginUsecase {
 
     // Verify role is caretaker
     if (user.role !== "caretaker") {
-      throw new ValidationError("Invalid account type. This is not a caretaker account.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_ACCOUNT_TYPE_NOT_CARETAKER);
     }
 
     // Check if user is blocked
     if (user.isBlocked) {
-      throw new ValidationError("Your account has been blocked. Please contact support.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.USER_BLOCKED);
     }
 
     // Verify password
@@ -50,14 +50,12 @@ export class CaretakerLoginUseCase implements ILoginUsecase {
     const caretakerProfile = await this._caretakerProfileRepository.findByUserId(user._id);
 
     if (!caretakerProfile) {
-      throw new NotFoundError("Caretaker profile not found. Please contact support.");
+      throw new NotFoundError(ERROR_MESSAGE.CARETAKER.PROFILE_NOT_FOUND_CONTACT_SUPPORT);
     }
 
     // Verify caretaker profile status is active
     if (caretakerProfile.status !== "active") {
-      throw new ValidationError(
-        "Your caretaker profile is not active. Please contact your agency or support."
-      );
+      throw new ValidationError(ERROR_MESSAGE.CARETAKER.PROFILE_NOT_ACTIVE);
     }
 
     return UserMapper.mapToLoginResponseDto(user);

@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { IOtpService } from "../../../../domain/service-interfaces/otp-service.interface";
+import { ERROR_MESSAGE, SUCCESS_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class VerifyOtpUsecase {
@@ -12,12 +13,12 @@ export class VerifyOtpUsecase {
     const isValid = await this._otpService.verifyOtp({ email, otp });
 
     if (!isValid) {
-      throw new ValidationError("Invalid OTP");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_OTP);
     }
 
     return {
       success: true,
-      message: "OTP Verified",
+      message: SUCCESS_MESSAGE.AUTHORIZATION.OTP_VERIFIED,
     };
   }
 }

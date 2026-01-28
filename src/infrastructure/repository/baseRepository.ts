@@ -28,7 +28,7 @@ export class BaseRepository<TDoc extends Document, TEntity>
 
     const doc = new this.model(modelData);
 
-    // Use session if provided (for transactions)
+    
     if (session) {
       await doc.save({ session });
     } else {

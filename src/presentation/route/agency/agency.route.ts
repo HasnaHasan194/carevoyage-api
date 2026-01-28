@@ -6,6 +6,7 @@ import {
   agencyPackageController,
   agencyActivityController,
   agencyUploadController,
+  blockedUserMiddleware,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
@@ -26,6 +27,8 @@ export class AgencyRoutes extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
+
+     this.router.use(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware));
     // Caretaker Management Routes
     this.router.post(
       "/caretakers/invite",

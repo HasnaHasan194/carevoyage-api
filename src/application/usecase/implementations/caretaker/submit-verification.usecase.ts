@@ -5,6 +5,7 @@ import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterf
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class SubmitCaretakerVerificationUsecase
@@ -24,13 +25,13 @@ export class SubmitCaretakerVerificationUsecase
     // Find caretaker profile
     const profile = await this._caretakerProfileRepository.findByUserId(userId);
     if (!profile) {
-      throw new NotFoundError("Caretaker profile not found");
+      throw new NotFoundError(ERROR_MESSAGE.CARETAKER.PROFILE_NOT_FOUND);
     }
 
     // Find user
     const user = await this._userRepository.findById(userId);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError(ERROR_MESSAGE.USER.NOT_FOUND);
     }
 
     // Validate age (must be >= 18)
@@ -43,7 +44,7 @@ export class SubmitCaretakerVerificationUsecase
     }
 
     if (age < 18) {
-      throw new ValidationError("Age must be at least 18 years");
+      throw new ValidationError(ERROR_MESSAGE.CARETAKER.AGE_MUST_BE_18);
     }
 
     // Update USER entity with personal info (redundant fields)

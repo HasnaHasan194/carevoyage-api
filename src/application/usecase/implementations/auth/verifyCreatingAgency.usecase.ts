@@ -4,6 +4,7 @@ import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/us
 import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { hashPassword } from "../../../../shared/utils/bcryptHelper";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class VerifyOtpAndCreateAgencyUsecase {
@@ -32,7 +33,7 @@ export class VerifyOtpAndCreateAgencyUsecase {
     }
   ) {
     const isValid = await this._otpService.verifyOtp({ email, otp });
-    if (!isValid) throw new ValidationError("Invalid OTP");
+    if (!isValid) throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_OTP);
 
     await this._otpService.deleteOtp(email);
     const hashedPassword=await hashPassword(data.userData.password)

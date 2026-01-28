@@ -3,7 +3,7 @@ export interface IActivityEntity {
   packageId: string; 
   name: string;
   description: string;
-  duration: number; // in minutes
+  duration: number;
   category: string;
   priceIncluded: boolean;
   createdAt: Date;

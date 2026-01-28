@@ -60,4 +60,7 @@ export interface IAuthController {
 
   //Google Authentication
   googleAuth(req: Request, res: Response): Promise<void>;
+
+  // Current authenticated user (server-validated session)
+  getMe(req: Request, res: Response): Promise<void>;
 }

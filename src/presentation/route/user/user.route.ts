@@ -7,6 +7,8 @@ import {
   userController,
   profileUploadController,
 } from "../../../infrastructure/dependencyinjection/resolve";
+import { validationMiddleware } from "../../middlewares/validation.middleware";
+import { UpdateUserProfileRequestDTO } from "../../../application/dto/request/update-user-profile-request.dto";
 import multer from "multer";
 
 @injectable()
@@ -24,10 +26,16 @@ export class UserRoutes extends BaseRoute {
       asyncHandler(userController.getProfile.bind(userController))
     );
 
-    // File upload configuration
+    this.router.put(
+      "/profile",
+      validationMiddleware(UpdateUserProfileRequestDTO),
+      asyncHandler(userController.updateProfile.bind(userController))
+    );
+
+    
     const upload = multer({
       storage: multer.memoryStorage(),
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      limits: { fileSize: 5 * 1024 * 1024 }, 
       fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith("image/")) {
           cb(null, true);
@@ -39,10 +47,10 @@ export class UserRoutes extends BaseRoute {
 
     const documentUpload = multer({
       storage: multer.memoryStorage(),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB for documents
+      limits: { fileSize: 10 * 1024 * 1024 }, 
     });
 
-    // Profile image upload (PRIVATE)
+    
     this.router.post(
       "/upload/profile-image",
       upload.single("image"),
@@ -51,7 +59,7 @@ export class UserRoutes extends BaseRoute {
       )
     );
 
-    // Documents/KYC upload (PRIVATE)
+    // Documents/KYC upload 
     this.router.post(
       "/upload/documents",
       documentUpload.array("documents", 10),
@@ -60,7 +68,7 @@ export class UserRoutes extends BaseRoute {
       )
     );
 
-    // Get signed URL for private image/document
+    
     this.router.get(
       "/signed-url",
       asyncHandler(

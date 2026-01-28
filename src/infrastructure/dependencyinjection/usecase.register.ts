@@ -39,8 +39,12 @@ import { IVerifyResetTokenUsecase } from "../../application/usecase/interfaces/a
 import { VerifyResetTokenUsecase } from "../../application/usecase/implementations/auth/verify-reset-token.usecase";
 import { IGoogleAuthUsecase } from "../../application/usecase/interfaces/auth/google-auth.interface";
 import { GoogleAuthUsecase } from "../../application/usecase/implementations/auth/google-auth.usecase";
+import { IGetCurrentUserUsecase } from "../../application/usecase/interfaces/auth/get-current-user.interface";
+import { GetCurrentUserUsecase } from "../../application/usecase/implementations/auth/get-current-user.usecase";
 import { IGetUserProfileUsecase } from "../../application/usecase/interfaces/user/get-user-profile-usecase.interface";
 import { GetUserProfileUsecase } from "../../application/usecase/implementations/user/get-user-profile.usecase";
+import { IUpdateUserProfileUsecase } from "../../application/usecase/interfaces/user/update-user-profile.interface";
+import { UpdateUserProfileUsecase } from "../../application/usecase/implementations/user/update-user-profile.usecase";
 import { UserController } from "../../presentation/controllers/user/user-profile.controller";
 import { BlockedUserMiddleware } from "../../presentation/middlewares/block.middleware";
 import { IGetAllAgenciesUsecase } from "../../application/usecase/interfaces/admin/getallagencies.interface";
@@ -199,12 +203,24 @@ export class UsecaseRegistory {
       useClass: GoogleAuthUsecase,
     });
 
+    // Session / current user
+    container.register<IGetCurrentUserUsecase>("IGetCurrentUserUsecase", {
+      useClass: GetCurrentUserUsecase,
+    });
+
     container.register<IGetUserProfileUsecase>(
       "IGetUserProfileUsecase",
       {
         useClass:GetUserProfileUsecase,
       }
-    )
+    );
+
+    container.register<IUpdateUserProfileUsecase>(
+      "IUpdateUserProfileUsecase",
+      {
+        useClass: UpdateUserProfileUsecase,
+      }
+    );
 
     // Admin Agency use cases
     container.register<IGetAllAgenciesUsecase>("IGetAllAgenciesUsecase", {

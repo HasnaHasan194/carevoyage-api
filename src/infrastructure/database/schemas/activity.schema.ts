@@ -16,7 +16,7 @@ export const activitySchema = new Schema<IActivityModel>(
     },
     description: {
       type: String,
-      required: true,
+      default: "",
     },
     duration: {
       type: Number,
@@ -42,5 +42,4 @@ export const activitySchema = new Schema<IActivityModel>(
 // Compound indexes for package-specific queries
 activitySchema.index({ packageId: 1, name: 1 });
 activitySchema.index({ packageId: 1, category: 1 });
-activitySchema.index({ category: 1 });
 

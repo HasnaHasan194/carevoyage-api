@@ -6,6 +6,7 @@ import { IItineraryRepository } from "../../../../domain/repositoryInterfaces/It
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class CompletePackageUsecase implements ICompletePackageUsecase {
@@ -26,22 +27,20 @@ export class CompletePackageUsecase implements ICompletePackageUsecase {
     );
 
     if (!existingPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
    
     if (existingPackage.status !== "published") {
       throw new ValidationError(
-        `Cannot complete package with status "${existingPackage.status}". Only published packages can be completed.`
+        ERROR_MESSAGE.PACKAGE.CANNOT_COMPLETE_STATUS(existingPackage.status)
       );
     }
 
     // Check if trip has ended
     const now = new Date();
     if (new Date(existingPackage.endDate) > now) {
-      throw new ValidationError(
-        "Cannot complete package before the trip end date"
-      );
+      throw new ValidationError(ERROR_MESSAGE.PACKAGE.CANNOT_COMPLETE_BEFORE_TRIP_END);
     }
 
     // Mark as completed
@@ -51,7 +50,7 @@ export class CompletePackageUsecase implements ICompletePackageUsecase {
     );
 
     if (!completedPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     // Fetch itinerary
@@ -62,5 +61,8 @@ export class CompletePackageUsecase implements ICompletePackageUsecase {
     return PackageMapper.toPackageResponseDto(completedPackage, itinerary);
   }
 }
+
+
+
 
 

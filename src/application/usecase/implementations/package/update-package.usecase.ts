@@ -9,6 +9,8 @@ import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { IActivityRepository } from "../../../../domain/repositoryInterfaces/Activity/activity.repository.interface";
 import { IPackageEntity } from "../../../../domain/entities/package.entity";
+import { isPackageEditable } from "../../../../domain/constants/package-categories";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class UpdatePackageUsecase implements IUpdatePackageUsecase {
@@ -26,20 +28,20 @@ export class UpdatePackageUsecase implements IUpdatePackageUsecase {
     agencyId: string,
     data: UpdatePackageRequestDTO
   ): Promise<PackageResponseDTO> {
-    // Find package and verify ownership
+    // Find package and verify 
     const existingPackage = await this._packageRepository.findByIdAndAgencyId(
       packageId,
       agencyId
     );
 
     if (!existingPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
-   
-    if (existingPackage.status === "published") {
+    // Only allow editing for draft and published statuses
+    if (!isPackageEditable(existingPackage.status)) {
       throw new ValidationError(
-        "Cannot edit published packages. Please unpublish first or create a new package."
+        ERROR_MESSAGE.PACKAGE.CANNOT_EDIT_STATUS(existingPackage.status)
       );
     }
 
@@ -54,7 +56,7 @@ export class UpdatePackageUsecase implements IUpdatePackageUsecase {
           packageId
         );
         if (activities.length !== uniqueActivityIds.length) {
-          throw new NotFoundError("One or more activities not found");
+          throw new NotFoundError(ERROR_MESSAGE.PACKAGE.ACTIVITIES_NOT_FOUND);
         }
       }
     }
@@ -90,7 +92,7 @@ export class UpdatePackageUsecase implements IUpdatePackageUsecase {
     );
 
     if (!updatedPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     // Update itinerary if provided

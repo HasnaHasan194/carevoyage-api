@@ -34,7 +34,7 @@ export class ActivityRepository
   ): Promise<IActivityEntity[]> {
     const query = activityDB.find({
       _id: { $in: activityIds },
-      packageId, // Ensure activities belong to the package
+      packageId, 
     });
 
     if (session) {

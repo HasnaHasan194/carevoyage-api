@@ -23,6 +23,7 @@ export const packageSchema = new Schema<IPackageModel>(
       type: String,
       required: true,
       trim: true,
+      // index: true,
     },
     tags: {
       type: [String],
@@ -32,7 +33,7 @@ export const packageSchema = new Schema<IPackageModel>(
       type: String,
       enum: ["draft", "published", "completed", "cancelled"] as TPackageStatus[],
       default: "draft",
-      index: true,
+      // index: true,
     },
     meetingPoint: {
       type: String,
@@ -61,7 +62,7 @@ export const packageSchema = new Schema<IPackageModel>(
       type: Date,
       required: true,
       validate: {
-        validator: function (this: IPackageModel, value: Date) {
+        validator: function (this: any, value: Date) {
           return value > this.startDate;
         },
         message: "End date must be after start date",
@@ -98,7 +99,6 @@ export const packageSchema = new Schema<IPackageModel>(
 // Indexes
 packageSchema.index({ agencyId: 1, status: 1 });
 packageSchema.index({ status: 1 });
-packageSchema.index({ category: 1 });
 packageSchema.index({ basePrice: 1 });
 packageSchema.index({ startDate: 1, endDate: 1 });
 packageSchema.index({ PackageName: "text", category: "text", tags: "text" });

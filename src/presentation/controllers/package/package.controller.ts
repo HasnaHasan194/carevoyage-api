@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../../../shared/constants/constants";
 import { IBrowsePackagesUsecase } from "../../../application/usecase/interfaces/package/browse-packages.interface";
-import { BrowsePackagesRequestDTO, SortOrder } from "../../../application/dto/request/browse-packages-request.dto";
+import { BrowsePackagesRequestDTO, PackageSortKey, SortOrder } from "../../../application/dto/request/browse-packages-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 @injectable()
 export class PackageController {
@@ -12,6 +12,15 @@ export class PackageController {
   ) {}
 
   async browsePackages(req: Request, res: Response): Promise<void> {
+   
+    const rawPage = req.query.page;
+    const rawLimit = req.query.limit;
+    
+    const page = rawPage ? Math.max(1, parseInt(String(rawPage), 10) || 1) : 1;
+    const limit = rawLimit ? Math.max(1, parseInt(String(rawLimit), 10) || 10) : 10;
+
+    console.log(`[PackageController.browsePackages] rawPage=${rawPage}, rawLimit=${rawLimit}, page=${page}, limit=${limit}`);
+
     const filters: BrowsePackagesRequestDTO = {
       search: req.query.search as string | undefined,
       category: req.query.category as string | undefined,
@@ -29,10 +38,13 @@ export class PackageController {
       maxDuration: req.query.maxDuration
         ? Number(req.query.maxDuration)
         : undefined,
+      sortKey: req.query.sortKey
+        ? (String(req.query.sortKey) as PackageSortKey)
+        : undefined,
       sortBy: (req.query.sortBy as string) || "basePrice",
       sortOrder: (req.query.sortOrder === "desc" ? SortOrder.DESC : SortOrder.ASC),
-      page: req.query.page ? Number(req.query.page) : 1,
-      limit: req.query.limit ? Number(req.query.limit) : 10,
+      page,
+      limit,
     };
 
     const result = await this._browsePackagesUsecase.execute(filters);

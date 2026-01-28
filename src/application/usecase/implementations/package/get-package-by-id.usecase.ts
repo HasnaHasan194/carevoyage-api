@@ -7,6 +7,7 @@ import { IActivityRepository } from "../../../../domain/repositoryInterfaces/Act
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { IActivityEntity } from "../../../../domain/entities/activity.entity";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class GetPackageByIdUsecase implements IGetPackageByIdUsecase {
@@ -26,7 +27,7 @@ export class GetPackageByIdUsecase implements IGetPackageByIdUsecase {
     );
 
     if (!packageEntity) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
     // Fetch itinerary if exists
@@ -54,5 +55,8 @@ export class GetPackageByIdUsecase implements IGetPackageByIdUsecase {
     return PackageMapper.toPackageResponseDto(packageEntity, itinerary, activitiesMap);
   }
 }
+
+
+
 
 

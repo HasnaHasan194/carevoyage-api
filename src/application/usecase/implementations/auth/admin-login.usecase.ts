@@ -29,7 +29,7 @@ export class AdminLoginUsecase implements ILoginUsecase {
     }
 
     if (admin.isBlocked) {
-      throw new ValidationError("Your account has been blocked. Please contact support.");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.USER_BLOCKED);
     }
 
     const isPasswordMatch = await comparePassword(

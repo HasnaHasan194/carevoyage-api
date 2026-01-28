@@ -5,7 +5,7 @@ import { ValidationError } from "../../../domain/errors/validationError";
 import { eventBus } from "../../../shared/eventBus";
 import { mailContentProvider } from "../../../shared/mailContentProvider";
 import { ICheckUserAndSendOtpUsecase } from "../interfaces/check-user-verify-usecase.interface";
-import { MAIL_CONTENT_PURPOSE } from "../../../shared/constants/constants";
+import { MAIL_CONTENT_PURPOSE, ERROR_MESSAGE } from "../../../shared/constants/constants";
 
 @injectable()
 export class CheckUserAndSendOtpUsecase implements ICheckUserAndSendOtpUsecase {
@@ -24,17 +24,17 @@ export class CheckUserAndSendOtpUsecase implements ICheckUserAndSendOtpUsecase {
     const { email, phone } = data;
 
     if (!email || !phone) {
-      throw new ValidationError("Email and phone are required");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_AND_PHONE_REQUIRED);
     }
 
     const existingEmail = await this._userRepository.findByEmail(email);
     if (existingEmail) {
-      throw new ValidationError("Email already exists");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_EXISTS);
     }
 
     const existingPhone = await this._userRepository.findByPhone(phone);
     if (existingPhone) {
-      throw new ValidationError("Phone number already exists");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.PHONE_NUMBER_EXISTS);
     }
 
     const otp = this._otpService.generateOtp();

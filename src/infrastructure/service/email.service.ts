@@ -35,6 +35,6 @@ export class EmailService implements IEmailService {
     };
 
     await this.transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully");
+    console.log("Email sent successfully");
   }
 }

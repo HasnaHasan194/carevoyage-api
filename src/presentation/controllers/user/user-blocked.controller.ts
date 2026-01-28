@@ -54,7 +54,7 @@ export class BlockedUserController {
       ) {
         res.status(HTTP_STATUS.NOT_FOUND).json({
           success: false,
-          message: ERROR_MESSAGE.AUTHENTICATION.USER_NOT_FOUND
+          message: ERROR_MESSAGE.USER.NOT_FOUND
         });
         return true;
       }

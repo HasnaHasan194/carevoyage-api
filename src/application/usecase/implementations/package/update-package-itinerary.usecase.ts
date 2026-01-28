@@ -10,6 +10,8 @@ import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { IActivityEntity } from "../../../../domain/entities/activity.entity";
+import { isPackageEditable } from "../../../../domain/constants/package-categories";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUsecase {
@@ -19,31 +21,32 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
     @inject("IItineraryRepository")
     private _itineraryRepository: IItineraryRepository,
     @inject("IActivityRepository")
-    private _activityRepository: IActivityRepository
+    private _activityRepository: IActivityRepository,
   ) {}
 
   async execute(
     packageId: string,
     agencyId: string,
-    data: UpdatePackageItineraryDTO
+    data: UpdatePackageItineraryDTO,
   ): Promise<PackageResponseDTO> {
     const existingPackage = await this._packageRepository.findByIdAndAgencyId(
       packageId,
-      agencyId
+      agencyId,
     );
 
     if (!existingPackage) {
-      throw new NotFoundError("Package not found");
+      throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
-    if (existingPackage.status === "published") {
+    // Only allow editing for draft and published statuses
+    if (!isPackageEditable(existingPackage.status)) {
       throw new ValidationError(
-        "Cannot edit published packages. Please unpublish first."
+        ERROR_MESSAGE.PACKAGE.CANNOT_EDIT_STATUS(existingPackage.status),
       );
     }
 
     if (!data.itineraryDays || !existingPackage.itineraryId) {
-      throw new ValidationError("Itinerary not found for this package");
+      throw new ValidationError(ERROR_MESSAGE.PACKAGE.ITINERARY_NOT_FOUND);
     }
 
     // Start transaction for atomic updates
@@ -51,18 +54,17 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
     await session.startTransaction();
 
     try {
-      // Separate activities into three categories:
-      // 1. Existing activities to UPDATE (have ID + new data)
-      // 2. Existing activities to KEEP (have ID, no data changes)
-      // 3. New activities to CREATE (no ID)
-      const activitiesToUpdate: Map<string, {
-        id: string;
-        name: string;
-        description: string;
-        duration: number;
-        category: string;
-        priceIncluded: boolean;
-      }> = new Map();
+      const activitiesToUpdate: Map<
+        string,
+        {
+          id: string;
+          name: string;
+          description: string;
+          duration: number;
+          category: string;
+          priceIncluded: boolean;
+        }
+      > = new Map();
       const existingActivityIds: string[] = [];
       const newActivities: Array<{
         name: string;
@@ -75,29 +77,36 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
       data.itineraryDays.forEach((day) => {
         day.activities?.forEach((activity) => {
           if (activity.id) {
-            // Existing activity - check if it has data to update
-            // Description can be empty string, but name, duration, and category are required
-            if (activity.name && activity.duration && activity.category && 
-                activity.description !== undefined && activity.description !== null) {
-              // Has ID + data = UPDATE
+            if (
+              activity.name &&
+              activity.duration &&
+              activity.category &&
+              activity.description !== undefined &&
+              activity.description !== null
+            ) {
               activitiesToUpdate.set(activity.id, {
                 id: activity.id,
                 name: activity.name,
-                description: activity.description || "", 
+                description: activity.description || "",
                 duration: activity.duration,
                 category: activity.category,
                 priceIncluded: activity.priceIncluded ?? true,
               });
             } else {
-              // Has ID but no data = just use ID (no update needed)
+              
               existingActivityIds.push(activity.id);
             }
-          } else if (activity.name && activity.duration && activity.category && 
-                     activity.description !== undefined && activity.description !== null) {
+          } else if (
+            activity.name &&
+            activity.duration &&
+            activity.category &&
+            activity.description !== undefined &&
+            activity.description !== null
+          ) {
             // New activity - create it
             newActivities.push({
               name: activity.name,
-              description: activity.description || "", 
+              description: activity.description || "",
               duration: activity.duration,
               category: activity.category,
               priceIncluded: activity.priceIncluded ?? true,
@@ -107,32 +116,40 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
       });
 
       // Validate all existing activities (both to update and to keep) exist
-      const allExistingIds = [...new Set([...Array.from(activitiesToUpdate.keys()), ...existingActivityIds])];
+      const allExistingIds = [
+        ...new Set([
+          ...Array.from(activitiesToUpdate.keys()),
+          ...existingActivityIds,
+        ]),
+      ];
       if (allExistingIds.length > 0) {
         const existingActivities = await this._activityRepository.findByIds(
           allExistingIds,
           packageId,
-          session
+          session,
         );
         if (existingActivities.length !== allExistingIds.length) {
-          throw new NotFoundError("One or more existing activities not found or do not belong to this package");
+          throw new NotFoundError(
+            ERROR_MESSAGE.PACKAGE.ACTIVITIES_NOT_FOUND_OR_NOT_BELONG,
+          );
         }
       }
 
       // Update existing activities that have new data
       if (activitiesToUpdate.size > 0) {
-        const updatePromises = Array.from(activitiesToUpdate.values()).map((activity) =>
-          this._activityRepository.updateById(
-            activity.id,
-            {
-              name: activity.name,
-              description: activity.description,
-              duration: activity.duration,
-              category: activity.category,
-              priceIncluded: activity.priceIncluded,
-            },
-            session
-          )
+        const updatePromises = Array.from(activitiesToUpdate.values()).map(
+          (activity) =>
+            this._activityRepository.updateById(
+              activity.id,
+              {
+                name: activity.name,
+                description: activity.description,
+                duration: activity.duration,
+                category: activity.category,
+                priceIncluded: activity.priceIncluded,
+              },
+              session,
+            ),
         );
         await Promise.all(updatePromises);
       }
@@ -146,10 +163,13 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
         category: string;
         priceIncluded: boolean;
       }> = [];
-      
+
       if (newActivities.length > 0) {
         // Create unique activities map by name+description to avoid duplicates
-        const uniqueActivitiesMap = new Map<string, typeof newActivities[0]>();
+        const uniqueActivitiesMap = new Map<
+          string,
+          (typeof newActivities)[0]
+        >();
         newActivities.forEach((activity) => {
           const key = `${activity.name}-${activity.description}`;
           if (!uniqueActivitiesMap.has(key)) {
@@ -167,7 +187,7 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
             category: activityData.category,
             priceIncluded: activityData.priceIncluded,
           })),
-          session
+          session,
         );
         createdActivities.push(...created);
       }
@@ -188,16 +208,18 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
         title: day.title!,
         description: day.description!,
         activities: day.activities!.map((activity) => {
-          // If activity has ID, use it 
+          // If activity has ID, use it
           if (activity.id) {
             return activity.id;
           }
-          // Otherwise, find the created activity by name+description
+          //  find the created activity by name+description
           const key = `${activity.name}-${activity.description}`;
           const activityId = activityKeyToIdMap.get(key);
           if (!activityId) {
             throw new ValidationError(
-              `Activity "${activity.name}" not found in created activities`
+              ERROR_MESSAGE.PACKAGE.ACTIVITY_NOT_FOUND_IN_CREATED(
+                activity.name!,
+              ),
             );
           }
           return activityId;
@@ -215,7 +237,7 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
       await this._itineraryRepository.updateDays(
         existingPackage.itineraryId,
         itineraryDaysWithIds,
-        session
+        session,
       );
 
       // Commit transaction
@@ -224,29 +246,33 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
       // Fetch updated package and itinerary
       const updatedPackage = await this._packageRepository.findById(packageId);
       if (!updatedPackage) {
-        throw new NotFoundError("Package not found");
+        throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
       }
 
       const itinerary = await this._itineraryRepository.findById(
-        existingPackage.itineraryId
+        existingPackage.itineraryId,
       );
 
       // Fetch all activities for response
       let activitiesMap: Map<string, IActivityEntity> | undefined = undefined;
       if (itinerary) {
-        const allActivityIds = itinerary.days.flatMap(day => day.activities);
+        const allActivityIds = itinerary.days.flatMap((day) => day.activities);
         const uniqueActivityIds = [...new Set(allActivityIds)];
-        
+
         if (uniqueActivityIds.length > 0) {
           const activities = await this._activityRepository.findByIds(
             uniqueActivityIds,
-            packageId
+            packageId,
           );
-          activitiesMap = new Map(activities.map(a => [a._id, a]));
+          activitiesMap = new Map(activities.map((a) => [a._id, a]));
         }
       }
 
-      return PackageMapper.toPackageResponseDto(updatedPackage, itinerary, activitiesMap);
+      return PackageMapper.toPackageResponseDto(
+        updatedPackage,
+        itinerary,
+        activitiesMap,
+      );
     } catch (error) {
       // Rollback transaction on any error
       await session.abortTransaction();
@@ -257,4 +283,3 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
     }
   }
 }
-

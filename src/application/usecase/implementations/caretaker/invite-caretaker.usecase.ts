@@ -33,7 +33,7 @@ export class InviteCaretakerUseCase implements IInviteCaretakerUseCase {
     // Verify agency exists
     const agency = await this._agencyRepository.findById(agencyId);
     if (!agency) {
-      throw new NotFoundError("Agency not found");
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
     }
 
     // Check if user with this email already exists
@@ -49,10 +49,10 @@ export class InviteCaretakerUseCase implements IInviteCaretakerUseCase {
     );
     if (existingProfile) {
       if (existingProfile.status === "invited" && !existingProfile.userId) {
-        throw new ValidationError("Invitation already sent to this email");
+        throw new ValidationError(ERROR_MESSAGE.CARETAKER.INVITATION_ALREADY_SENT);
       }
       if (existingProfile.status === "active") {
-        throw new ValidationError("Caretaker already registered with this email");
+        throw new ValidationError(ERROR_MESSAGE.CARETAKER.ALREADY_REGISTERED);
       }
     }
 
@@ -65,13 +65,11 @@ export class InviteCaretakerUseCase implements IInviteCaretakerUseCase {
       type: "caretaker_invite",
     });
 
-    // Create caretaker profile with status "invited"
-    // Email is temporarily stored for invite matching, will be removed after signup
-    // Nationality and address will be collected during verification
+    
     await this._caretakerProfileRepository.save({
       agencyId: agency._id,
-      email: request.email, // Temp=> only for invite matching
-      userId: undefined, // Will be set during signup
+      email: request.email,
+      userId: undefined,
       languages: [],
       experienceYears: 0,
       documents: [],

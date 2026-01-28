@@ -11,8 +11,14 @@ dotenv.config();
 async function startServer() {
   try {
     ServiceRegistery.registerService();
-    await connectRedis();
-    console.log("Redis connected");
+    
+    
+    try {
+      await connectRedis();
+      console.log("Redis connected");
+    } catch (redisError) {
+      console.warn("Redis connection failed, continuing without Redis:", (redisError as Error).message);
+    }
 
     const mongo = new MongoConnect();
     await mongo.connectDB();
@@ -32,4 +38,6 @@ async function startServer() {
   }
 }
 
+
 startServer();
+

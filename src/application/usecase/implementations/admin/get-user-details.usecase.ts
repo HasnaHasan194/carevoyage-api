@@ -4,6 +4,7 @@ import { IGetUserDetailsUsecase } from "../../interfaces/admin/get-user-details.
 import { UserResponseDTO } from "../../../dto/response/user-response.dto";
 import { UserMapper } from "../../../mapper/user.mapper";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class GetUserDetailsUsecase implements IGetUserDetailsUsecase {
@@ -16,12 +17,15 @@ export class GetUserDetailsUsecase implements IGetUserDetailsUsecase {
     const user = await this._userRepository.findById(userId);
 
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError(ERROR_MESSAGE.USER.NOT_FOUND);
     }
 
     return UserMapper.toUserResponseDto(user);
   }
 }
+
+
+
 
 
 

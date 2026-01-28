@@ -49,7 +49,6 @@ class ActivityDTO {
   @IsBoolean()
   priceIncluded?: boolean;
 
-  // For existing activities - if ID is provided, use it; otherwise create new
   @IsString()
   @IsOptional()
   id?: string;

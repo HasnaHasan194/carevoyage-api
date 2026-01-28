@@ -79,8 +79,7 @@ export class AdminAgencyController implements IAdminAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.USER_BLOCKED ??
-        "Agency blocked successfully"
+      SUCCESS_MESSAGE.AGENCY.BLOCKED
     );
   }
 
@@ -92,10 +91,12 @@ export class AdminAgencyController implements IAdminAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      SUCCESS_MESSAGE.AUTHORIZATION.USER_UNBLOCKED ??
-        "Agency unblocked successfully"
+      SUCCESS_MESSAGE.AGENCY.UNBLOCKED
     );
   }
 }
+
+
+
 
 

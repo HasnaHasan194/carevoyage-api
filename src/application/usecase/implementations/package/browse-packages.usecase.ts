@@ -7,6 +7,8 @@ import { IItineraryRepository } from "../../../../domain/repositoryInterfaces/It
 import { IActivityRepository } from "../../../../domain/repositoryInterfaces/Activity/activity.repository.interface";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { ValidationError } from "../../../../domain/errors/validationError";
+import { PackageSortFactory } from "../../../sorting/package/package-sort.factory";
+import { normalizePackageCategory } from "../../../../domain/constants/package-categories";
 
 
 @injectable()
@@ -23,6 +25,16 @@ export class BrowsePackagesUsecase implements IBrowsePackagesUsecase {
   async execute(
     filters: BrowsePackagesRequestDTO
   ): Promise<BrowsePackagesResponseDTO> {
+    // Normalize and validate category 
+    if (filters.category) {
+      const normalized = normalizePackageCategory(filters.category);
+      if (!normalized) {
+        throw new ValidationError(
+          "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage"
+        );
+      }
+      filters.category = normalized;
+    }
     // Validate price range
     if (
       filters.minPrice !== undefined &&
@@ -56,15 +68,25 @@ export class BrowsePackagesUsecase implements IBrowsePackagesUsecase {
       }
     }
 
-    // Validate sortBy field
-    const allowedSortFields = ["basePrice", "startDate", "endDate", "createdAt"];
-    if (filters.sortBy && !allowedSortFields.includes(filters.sortBy)) {
-      throw new ValidationError(
-        `sortBy must be one of: ${allowedSortFields.join(", ")}`
-      );
+
+    const allowedSortFields = [
+      "basePrice",
+      "startDate",
+      "endDate",
+      "createdAt",
+      "duration",
+    ];
+    if (!filters.sortKey && filters.sortBy && !allowedSortFields.includes(filters.sortBy)) {
+      throw new ValidationError(`sortBy must be one of: ${allowedSortFields.join(", ")}`);
     }
 
-    // Prepare repository filters
+    const sortSpec = PackageSortFactory.resolve({
+      sortKey: filters.sortKey,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
+    });
+
+    // repository filters
     const repositoryFilters = {
       search: filters.search,
       category: filters.category,
@@ -74,10 +96,10 @@ export class BrowsePackagesUsecase implements IBrowsePackagesUsecase {
       endDate: filters.endDate ? new Date(filters.endDate) : undefined,
       minDuration: filters.minDuration,
       maxDuration: filters.maxDuration,
-      sortBy: filters.sortBy || "basePrice",
-      sortOrder: (filters.sortOrder || SortOrder.ASC) as "asc" | "desc",
+      sortBy: sortSpec.sortBy,
+      sortOrder: sortSpec.sortOrder,
       page: filters.page || 1,
-      limit: filters.limit || 10,
+      limit: filters.limit || 2,
     };
 
     // Call repository
@@ -85,7 +107,7 @@ export class BrowsePackagesUsecase implements IBrowsePackagesUsecase {
       repositoryFilters
     );
 
-    // Fetch itineraries and activities for packages that have them
+    // Fetching itineraries and activities for packages that have them
     const packagesWithDetails = await Promise.all(
       packages.map(async (pkg) => {
         let itinerary = null;

@@ -28,7 +28,7 @@ export class GetUserProfileUsecase implements IGetUserProfileUsecase {
     if (!user) {
       throw new CustomError(
         HTTP_STATUS.NOT_FOUND,
-        ERROR_MESSAGE.AUTHENTICATION.USER_NOT_FOUND
+        ERROR_MESSAGE.USER.NOT_FOUND
       );
     }
 

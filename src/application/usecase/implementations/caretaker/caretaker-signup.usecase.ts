@@ -44,12 +44,12 @@ export class CaretakerSignupUseCase implements ICaretakerSignupUseCase {
 
     // Validate token type
     if (payload.type !== "caretaker_invite") {
-      throw new ValidationError("Invalid invite token type");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_INVITE_TOKEN_TYPE);
     }
 
     // Validate role
     if (payload.role !== "caretaker") {
-      throw new ValidationError("Invalid role in invite token");
+      throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.INVALID_ROLE_IN_INVITE_TOKEN);
     }
 
     // Check if user already exists
@@ -71,9 +71,7 @@ export class CaretakerSignupUseCase implements ICaretakerSignupUseCase {
     );
 
     if (!invitedProfile || invitedProfile.status !== "invited" || invitedProfile.userId) {
-      throw new NotFoundError(
-        "No pending invitation found. Please request a new invitation."
-      );
+      throw new NotFoundError(ERROR_MESSAGE.CARETAKER.NO_PENDING_INVITATION);
     }
 
     // Hash password

@@ -72,13 +72,14 @@ export class AgencyRepository
     } else if (status === "unblocked") {
       matchConditions.isBlocked = false;
     }
-    // If status is "all", no filter is applied
+
 
     // Apply search filter
     if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), "i");
+      const trimmedSearch = search.trim();
+      const searchRegex = new RegExp(trimmedSearch, "i");
       
-      // First, find user IDs that match the search (by email)
+      //  find user IDs that match the search (by email)
       const matchingUsers = await userDB
         .find({
           role: "agency_owner",
@@ -93,16 +94,20 @@ export class AgencyRepository
 
       const matchingUserIds = matchingUsers.map((user) => user._id);
 
-      // Search in agency fields or by userId
+     
+      const escapedSearch = trimmedSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const exactRegistrationNumberRegex = new RegExp(`^${escapedSearch}$`, "i");
+      
       matchConditions.$or = [
+        { registrationNumber: exactRegistrationNumberRegex }, // Exact match for registration number (prioritized)
         { agencyName: searchRegex },
-        { registrationNumber: searchRegex },
         { address: searchRegex },
+        { registrationNumber: searchRegex }, // Fallback partial match for registration number
         ...(matchingUserIds.length > 0 ? [{ userId: { $in: matchingUserIds } }] : []),
       ];
     }
 
-    // Build sort object
+    //  sort object
     const sortField = sort || "createdAt";
     const sortOrder: SortOrder = order === "desc" ? -1 : 1;
     const sortObject: Record<string, SortOrder> = {

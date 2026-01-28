@@ -136,7 +136,7 @@ export class S3Service implements IS3Service {
    * Extract S3 key from URL (for both public and private URLs)
    */
   private extractS3Key(urlOrKey: string): string {
-    // If it's already a key (no http), return as is
+    
     if (!urlOrKey.startsWith("http")) {
       return urlOrKey;
     }

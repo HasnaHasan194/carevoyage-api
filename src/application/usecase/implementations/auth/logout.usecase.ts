@@ -4,10 +4,12 @@ import { ILogoutUseCase } from "../../interfaces/auth/logout-usecase.interface";
 @injectable()
 export class LogoutUseCase implements ILogoutUseCase {
   async execute(): Promise<void> {
-    // Logout logic is handled at the controller level (cookie clearing)
     return Promise.resolve();
   }
 }
+
+
+
 
 
 
