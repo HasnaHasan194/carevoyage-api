@@ -85,6 +85,12 @@ import { IGetCaretakerProfileUsecase } from "../../application/usecase/interface
 import { GetCaretakerProfileUsecase } from "../../application/usecase/implementations/caretaker/get-caretaker-profile.usecase";
 import { IBrowsePackagesUsecase } from "../../application/usecase/interfaces/package/browse-packages.interface";
 import { BrowsePackagesUsecase } from "../../application/usecase/implementations/package/browse-packages.usecase";
+import { IGetUpcomingClientPackagesUsecase } from "../../application/usecase/interfaces/package/get-upcoming-client-packages.interface";
+import { GetUpcomingClientPackagesUsecase } from "../../application/usecase/implementations/package/get-upcoming-client-packages.usecase";
+import { IGetAgencyProfileUsecase } from "../../application/usecase/interfaces/agency/get-agency-profile.interface";
+import { GetAgencyProfileUsecase } from "../../application/usecase/implementations/agency/get-agency-profile.usecase";
+import { IUpdateAgencyProfileUsecase } from "../../application/usecase/interfaces/agency/update-agency-profile.interface";
+import { UpdateAgencyProfileUsecase } from "../../application/usecase/implementations/agency/update-agency-profile.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -235,6 +241,15 @@ export class UsecaseRegistory {
       useClass: BlockUnblockAgencyUsecase,
     });
 
+    // Agency Profile use cases
+    container.register<IGetAgencyProfileUsecase>("IGetAgencyProfileUsecase", {
+      useClass: GetAgencyProfileUsecase,
+    });
+
+    container.register<IUpdateAgencyProfileUsecase>("IUpdateAgencyProfileUsecase", {
+      useClass: UpdateAgencyProfileUsecase,
+    });
+
     // Package use cases
     container.register<ICreatePackageUsecase>("ICreatePackageUsecase", {
       useClass: CreatePackageUsecase,
@@ -291,6 +306,11 @@ export class UsecaseRegistory {
     // Browse Packages use case
     container.register("IBrowsePackagesUsecase", {
       useClass: BrowsePackagesUsecase,
+    });
+
+    // Client-only: upcoming packages (startDate > today)
+    container.register("IGetUpcomingClientPackagesUsecase", {
+      useClass: GetUpcomingClientPackagesUsecase,
     });
 
     container.register("IUserController",{

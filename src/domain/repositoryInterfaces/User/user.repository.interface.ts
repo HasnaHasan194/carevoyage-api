@@ -22,5 +22,7 @@ export interface IUserRepository extends IBaseRepository<IUserEntity> {
   ): Promise<{ users: IUserEntity[]; total: number }>;
 
   findById(userId: string): Promise<IUserEntity | null>;
+
+
   
 }

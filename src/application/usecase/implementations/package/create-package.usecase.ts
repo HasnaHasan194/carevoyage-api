@@ -9,7 +9,8 @@ import { PackageMapper } from "../../../mapper/package.mapper";
 import { IActivityRepository } from "../../../../domain/repositoryInterfaces/Activity/activity.repository.interface";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { IActivityEntity } from "../../../../domain/entities/activity.entity";
-import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS } from "../../../../shared/constants/constants";
+import { CustomError } from "../../../../domain/errors/customError";
 
 @injectable()
 export class CreatePackageUsecase implements ICreatePackageUsecase {
@@ -26,6 +27,12 @@ export class CreatePackageUsecase implements ICreatePackageUsecase {
     agencyId: string,
     data: CreatePackageRequestDTO
   ): Promise<PackageResponseDTO> {
+
+    // const packages = await this._packageRepository.findPackagesToday(agencyId);
+
+    // if(packages.length > 2){
+    //   throw new CustomError(HTTP_STATUS.BAD_REQUEST,"ONLY TWO PACKAGES ALLOWED")
+    // }
     // Create a new session for this transaction
     const session: ClientSession = await mongoose.startSession();
 

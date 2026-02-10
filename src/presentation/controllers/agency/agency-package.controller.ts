@@ -67,14 +67,14 @@ export class AgencyPackageController implements IAgencyPackageController {
     const agencyId = await this.getAgencyId(req);
     const packageData = req.body as CreatePackageRequestDTO;
 
-    const createdPackage = await this._createPackageUsecase.execute(
+     const createdPackage = await this._createPackageUsecase.execute(
       agencyId,
       packageData
     );
 
     ResponseHelper.success(
       res,
-      HTTP_STATUS.CREATED,
+      HTTP_STATUS.CREATED, 
       "Package created successfully",
       createdPackage
     );
@@ -263,3 +263,4 @@ export class AgencyPackageController implements IAgencyPackageController {
   }
 }
 
+ 

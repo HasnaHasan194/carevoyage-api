@@ -10,13 +10,14 @@ import { IAdminUserController } from "../../presentation/interfaces/controllers/
 import { AdminAgencyController } from "../../presentation/controllers/admin/admin-agency.controller";
 import { IAdminAgencyController } from "../../presentation/interfaces/controllers/admin/admin-agency.controller.interface";
 import { AdminRoutes } from "../../presentation/route/admin/admin.route";
-import { AgencyController } from "../../presentation/controllers/agency/agency.controller";
+import { AgencyController } from "../../presentation/controllers/agency/agencycaretaker.controller";
 import { IAgencyController } from "../../presentation/interfaces/controllers/agency/agency.controller.interface";
 import { AgencyPackageController } from "../../presentation/controllers/agency/agency-package.controller";
 import { IAgencyPackageController } from "../../presentation/interfaces/controllers/agency/agency-package.controller.interface";
 import { AgencyActivityController } from "../../presentation/controllers/agency/agency-activity.controller";
 import { IAgencyActivityController } from "../../presentation/interfaces/controllers/agency/agency-activity.controller.interface";
 import { AgencyUploadController } from "../../presentation/controllers/agency/agency-upload.controller";
+import { AgencyProfileController } from "../../presentation/controllers/agency/agency-profile.controller";
 import { AgencyRoutes } from "../../presentation/route/agency/agency.route";
 import { IBlockedUserMiddleware } from "../../presentation/interfaces/controllers/user/blocked-user.middleware.interface";
 import { BlockedUserMiddleware } from "../../presentation/middlewares/block.middleware";
@@ -105,6 +106,12 @@ export const agencyActivityController =
  */
 export const agencyUploadController =
   container.resolve(AgencyUploadController);
+
+/**
+ * Agency Profile controller
+ */
+export const agencyProfileController =
+  container.resolve(AgencyProfileController);
 
 /**
  * Agency routes

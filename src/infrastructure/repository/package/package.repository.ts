@@ -160,8 +160,7 @@ export class PackageRepository
     }
 
    
-    
-    // Normalize user-provided dates to start of day for consistent comparison
+  
     let normalizedStartDate: Date | undefined;
     if (startDate) {
       normalizedStartDate = new Date(startDate);
@@ -267,5 +266,142 @@ export class PackageRepository
 
     return { packages, total };
   }
+
+  /**
+   * Client-only: returns packages where startDate > today (UTC).
+   * Excludes ongoing and expired packages. Does not affect admin/agency APIs.
+   */
+  async findUpcomingClientPackages(filters: {
+    search?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    minDuration?: number;
+    maxDuration?: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    page: number;
+    limit: number;
+  }): Promise<{ packages: IPackageEntity[]; total: number }> {
+    const {
+      search,
+      category,
+      minPrice,
+      maxPrice,
+      minDuration,
+      maxDuration,
+      sortBy = "basePrice",
+      sortOrder = "asc",
+    } = filters;
+
+    const page = Math.max(1, Math.floor(filters.page) || 1);
+    const limit = Math.max(1, Math.floor(filters.limit) || 10);
+    const skip = (page - 1) * limit;
+
+  //  packages must  startDate > today
+    const todayStartUTC = new Date();
+    todayStartUTC.setUTCHours(0, 0, 0, 0);
+
+    const matchConditions: Record<string, unknown> = {
+      isDeleted: false,
+      status: "published",
+      startDate: { $gt: todayStartUTC },
+      endDate: { $gte: todayStartUTC },
+    };
+
+    if (category) {
+      matchConditions.category = new RegExp(category.trim(), "i");
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      const priceFilter: Record<string, number> = {};
+      if (minPrice !== undefined) priceFilter.$gte = minPrice;
+      if (maxPrice !== undefined) priceFilter.$lte = maxPrice;
+      matchConditions.basePrice = priceFilter;
+    }
+
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      matchConditions.$or = [
+        { PackageName: searchRegex },
+        { category: searchRegex },
+        { tags: { $in: [searchRegex] } },
+      ];
+    }
+
+    const pipeline: PipelineStage[] = [
+      { $match: matchConditions },
+      {
+        $addFields: {
+          duration: {
+            $ceil: {
+              $divide: [
+                { $subtract: ["$endDate", "$startDate"] },
+                86400000,
+              ],
+            },
+          },
+        },
+      },
+      ...(minDuration !== undefined || maxDuration !== undefined
+        ? [
+            {
+              $match: {
+                duration: {
+                  ...(minDuration !== undefined && { $gte: minDuration }),
+                  ...(maxDuration !== undefined && { $lte: maxDuration }),
+                },
+              },
+            },
+          ]
+        : []),
+      {
+        $sort: {
+          [sortBy]: sortOrder === "asc" ? 1 : -1,
+        },
+      },
+      {
+        $facet: {
+          packages: [
+            { $skip: Number(skip) },
+            { $limit: Number(limit) },
+          ],
+          totalCount: [{ $count: "count" }],
+        },
+      },
+      {
+        $unwind: {
+          path: "$totalCount",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          packages: 1,
+          total: { $ifNull: ["$totalCount.count", 0] },
+        },
+      },
+    ];
+
+    const result = await packageDB.aggregate(pipeline).exec();
+
+    if (!result || result.length === 0) {
+      return { packages: [], total: 0 };
+    }
+
+    const { packages: packageDocs, total } = result[0];
+    const packages = packageDocs.map((doc: IPackageModel) =>
+      PackageMapper.toEntity(doc)
+    );
+
+    return { packages, total };
+  }
+
+  // async findPackagesToday(agencyId : string) : Promise<IPackageEntity[]>{
+  //   const today = new Date();
+  //   return await packageDB.find({agencyId,createdAt : today})
+  // }
+
+  
 }
 

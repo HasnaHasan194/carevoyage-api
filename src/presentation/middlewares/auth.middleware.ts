@@ -54,12 +54,13 @@ export const verifyAuth = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
+    const tokenFromHeader = authHeader?.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : undefined;
 
+    // prefer =>Authorization header over cookie - client may send fresh token after refresh
     const accessToken =
-      req.cookies[COOKIES_NAMES.ACCESS_TOKEN] ||
-      (authHeader?.startsWith("Bearer ")
-        ? authHeader.split(" ")[1]
-        : undefined);
+      tokenFromHeader || req.cookies[COOKIES_NAMES.ACCESS_TOKEN];
 
     const refreshToken = req.cookies[COOKIES_NAMES.REFRESH_TOKEN];
 
@@ -105,7 +106,7 @@ export const verifyAuth = async (
       ...payload,
       accessToken,
       refreshToken: refreshToken || "",
-    };
+    }; 
 
     next();
   } catch (error: unknown) {

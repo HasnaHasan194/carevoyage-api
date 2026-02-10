@@ -12,6 +12,13 @@ export class PackageRoutes extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
+    //  upcoming packages (startDate > today) 
+    this.router.get(
+      "/upcoming",
+      validationMiddleware(BrowsePackagesRequestDTO),
+      asyncHandler(packageController.getUpcomingPackages.bind(packageController))
+    );
+
     this.router.get(
       "/",
       validationMiddleware(BrowsePackagesRequestDTO),

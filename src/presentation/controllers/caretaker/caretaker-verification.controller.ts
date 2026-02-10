@@ -21,7 +21,7 @@ export class CaretakerVerificationController {
     @inject("IS3Service")
     private _s3Service: IS3Service,
   ) {}
-
+  
   async submitVerification(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
       ResponseHelper.error(
@@ -87,7 +87,7 @@ export class CaretakerVerificationController {
     try {
       const profileDTO = await this._getCaretakerProfileUsecase.execute(req.user.id);
 
-      // Generate signed URLs for profile image and documents if they're S3 keys
+      // Generate signed URLs for profile image and documents =>(if they're S3 keys)
       if (profileDTO.profileImage && !profileDTO.profileImage.startsWith("http")) {
         try {
           profileDTO.profileImage = await this._s3Service.getSignedUrl(profileDTO.profileImage);
