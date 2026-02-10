@@ -43,7 +43,7 @@ export class AgencyLoginUsecase implements ILoginUsecase {
       throw new ValidationError(ERROR_MESSAGE.AUTHENTICATION.USER_BLOCKED);
     }
 
-    const isPasswordMatch = comparePassword(user.password, agencyLoginData.password);
+    const isPasswordMatch = await comparePassword(agencyLoginData.password,user.password,);
 
     if (!isPasswordMatch) {
       throw new ValidationError(
@@ -64,6 +64,6 @@ export class AgencyLoginUsecase implements ILoginUsecase {
     }
 
   
-    return AgencyMapper.mapToLoginResponseDto(user);
+    return AgencyMapper.mapToLoginResponseDto(user);//=>controller
   }
 }

@@ -3,6 +3,7 @@ import { IUserEntity } from "../../../../domain/entities/user.entity";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { hashPassword } from "../../../../shared/utils/bcryptHelper";
 import { IRegisterUsecase } from "../../interfaces/auth/register-usecase.interface";
+import { CustomError } from "../../../../domain/errors/customError";
 
 @injectable()
 export class RegisterUsecase implements IRegisterUsecase {
@@ -11,6 +12,12 @@ export class RegisterUsecase implements IRegisterUsecase {
     private _userRepository: IUserRepository
   ) {}
   async execute(data: Partial<IUserEntity>): Promise<void> {
+
+    // const noOfuserstoday=await this._userRepository.noofuser()
+    // if(noOfuserstoday>2){
+    // throw new CustomError(400,"user can't register morethan 2 times ")
+    // }
+
     if (!data.email || !data.phone) {
       throw new Error("email or phone required");
     }

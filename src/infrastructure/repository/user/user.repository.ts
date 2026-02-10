@@ -103,15 +103,4 @@ export class UserRepository
     );
   }
 
-  // async countNumberOfCom() : Promise<number>{
-  //    const date = new Date();
-  //    const data = await userDB.find({createdAt : date,role : "agency_owner " }).countDocuments();
-  //    return data;
-  // }
-
-  //   async findByRole(
-  //     role: IUserEntity["role"],
-  //     pageNumber: number,
-  //     pageSize: number
-  //   ): Promise<{ users: IUserEntity[]; total: number }> {}
 }

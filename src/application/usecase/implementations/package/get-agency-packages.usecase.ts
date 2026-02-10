@@ -26,6 +26,19 @@ export class GetAgencyPackagesUsecase implements IGetAgencyPackagesUsecase {
       agencyId,
       status
     );
+    
+    
+
+    // const date = new Date("11-02-2026")
+    // const packagesGreaterThan = packages.filter(pkg => pkg.startDate > date);
+
+    // const asynTask = [];
+
+    // for(let pkg of packagesGreaterThan){
+    //    asynTask.push(await this._packageRepository.updateStatus(pkg._id,"cancelled"));
+    // }
+
+    // await Promise.all(asynTask);
 
     // Fetch itineraries and activities for packages that have them
     const packagesWithItineraries = await Promise.all(

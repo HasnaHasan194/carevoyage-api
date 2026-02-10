@@ -11,6 +11,7 @@ export class GetAllUsersUsecase implements IGetAllUsersUsecase {
     @inject("IUserRepository")
     private _userRepository: IUserRepository
   ) {}
+  
 
   async execute(
     page: number = 1,
@@ -20,6 +21,7 @@ export class GetAllUsersUsecase implements IGetAllUsersUsecase {
     sort: string = "createdAt",
     order: SortOrder = SortOrder.ASC
   ): Promise<PaginatedUsersResponseDTO> {
+    //  const showingusecase = await this._userRepository.findUserwithA("A")
     const statusFilter: "all" | "blocked" | "unblocked" =
       status === UserStatusFilter.ALL
         ? "all"
@@ -38,6 +40,8 @@ export class GetAllUsersUsecase implements IGetAllUsersUsecase {
       sort,
       sortOrder
     );
+
+    // const userss = await this._userRepository.
 
     const totalPages = Math.ceil(total / limit);
 

@@ -8,6 +8,34 @@ import { HTTP_STATUS } from "../../../shared/constants/constants";
 export class AgencyUploadController {
   constructor(@inject("IS3Service") private _s3Service: IS3Service) {}
 
+  async uploadProfileImage(req: Request, res: Response): Promise<void> {
+    if (!req.file) {
+      ResponseHelper.error(res, "No file uploaded", HTTP_STATUS.BAD_REQUEST);
+      return;
+    }
+
+    try {
+      const s3Key = await this._s3Service.uploadPrivateFile(
+        req.file,
+        "agency-profiles"
+      );
+
+      ResponseHelper.success(
+        res,
+        HTTP_STATUS.OK,
+        "Profile image uploaded successfully",
+        { s3Key }
+      );
+    } catch (error) {
+      console.error("Upload error:", error);
+      ResponseHelper.error(
+        res,
+        "Failed to upload profile image",
+        HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async uploadImage(req: Request, res: Response): Promise<void> {
     if (!req.file) {
       ResponseHelper.error(res, "No file uploaded", HTTP_STATUS.BAD_REQUEST);

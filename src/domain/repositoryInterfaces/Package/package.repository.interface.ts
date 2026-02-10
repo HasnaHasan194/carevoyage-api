@@ -42,5 +42,24 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
     page: number;
     limit: number;
   }): Promise<{ packages: IPackageEntity[]; total: number }>;
+
+  /**
+   * Client-only: returns packages where startDate > today (UTC).
+   * Used for client package listing; does not affect admin/agency APIs.
+   */
+  findUpcomingClientPackages(filters: {
+    search?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    minDuration?: number;
+    maxDuration?: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    page: number;
+    limit: number;
+  }): Promise<{ packages: IPackageEntity[]; total: number }>;
+
+  // findPackagesToday(agencyId : string) : Promise<IPackageEntity[]>
 }
 

@@ -199,7 +199,7 @@ export class AuthController implements IAuthController {
       success: true,
       message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
       user: {
-        id: userData,
+        id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
@@ -234,7 +234,7 @@ export class AuthController implements IAuthController {
       success: true,
       message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
       user: {
-        id: userData,
+        id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
@@ -362,6 +362,7 @@ export class AuthController implements IAuthController {
         "Access token refreshed successfully",
         {
           role: result.role,
+          accessToken: result.accessToken,
         },
       );
     } catch (error) {

@@ -27,7 +27,7 @@ export const normalizePackageCategory = (
 // Statuses that allow package editing 
 export const EDITABLE_PACKAGE_STATUSES: TPackageStatus[] = ["draft", "published"];
 
-// Helper function to check if a package can be edited based on status
+// Helper function to check if a package can be edited based on => status
 export const isPackageEditable = (status: TPackageStatus): boolean => {
   return EDITABLE_PACKAGE_STATUSES.includes(status);
 };

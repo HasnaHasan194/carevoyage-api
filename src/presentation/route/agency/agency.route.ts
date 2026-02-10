@@ -6,6 +6,7 @@ import {
   agencyPackageController,
   agencyActivityController,
   agencyUploadController,
+  agencyProfileController,
   blockedUserMiddleware,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
@@ -16,6 +17,7 @@ import { UpdatePackageBasicDTO } from "../../../application/dto/request/update-p
 import { UpdatePackageImagesDTO } from "../../../application/dto/request/update-package-images.dto";
 import { UpdatePackageItineraryDTO } from "../../../application/dto/request/update-package-itinerary.dto";
 import { CreateActivityRequestDTO } from "../../../application/dto/request/create-activity-request.dto";
+import { UpdateAgencyProfileRequestDTO } from "../../../application/dto/request/update-agency-profile-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { authorizeRole } from "../../middlewares/auth.middleware";
 import multer from "multer";
@@ -28,11 +30,26 @@ export class AgencyRoutes extends BaseRoute {
 
   protected initializeRoutes(): void {
 
-     this.router.use(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware));
+    this.router.use(verifyAuth);
+    this.router.use(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware));
+
+    // Agency Profile Routes
+    this.router.get(
+      "/profile",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyProfileController.getProfile.bind(agencyProfileController))
+    );
+
+    this.router.put(
+      "/profile",
+      authorizeRole(["agency_owner"]),
+      validationMiddleware(UpdateAgencyProfileRequestDTO),
+      asyncHandler(agencyProfileController.updateProfile.bind(agencyProfileController))
+    );
+
     // Caretaker Management Routes
     this.router.post(
       "/caretakers/invite",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       validationMiddleware(InviteCaretakerRequestDTO),
       asyncHandler(agencyController.inviteCaretaker.bind(agencyController))
@@ -41,7 +58,6 @@ export class AgencyRoutes extends BaseRoute {
     // Package Management Routes
     this.router.post(
       "/packages",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       validationMiddleware(CreatePackageRequestDTO),
       asyncHandler(
@@ -51,7 +67,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.get(
       "/packages",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyPackageController.getPackages.bind(agencyPackageController)
@@ -60,7 +75,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.get(
       "/packages/:packageId",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyPackageController.getPackageById.bind(agencyPackageController)
@@ -69,7 +83,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.patch(
       "/packages/:packageId",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       validationMiddleware(UpdatePackageRequestDTO),
       asyncHandler(
@@ -79,7 +92,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.patch(
       "/packages/:packageId/basic",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       validationMiddleware(UpdatePackageBasicDTO),
       asyncHandler(
@@ -89,7 +101,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.patch(
       "/packages/:packageId/images",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       validationMiddleware(UpdatePackageImagesDTO),
       asyncHandler(
@@ -99,7 +110,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.patch(
       "/packages/:packageId/itinerary",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       validationMiddleware(UpdatePackageItineraryDTO),
       asyncHandler(
@@ -111,7 +121,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.patch(
       "/packages/:packageId/publish",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyPackageController.publishPackage.bind(agencyPackageController)
@@ -120,7 +129,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.delete(
       "/packages/:packageId",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyPackageController.deletePackage.bind(agencyPackageController)
@@ -129,7 +137,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.patch(
       "/packages/:packageId/complete",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyPackageController.completePackage.bind(agencyPackageController)
@@ -138,7 +145,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.patch(
       "/packages/:packageId/cancel",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyPackageController.cancelPackage.bind(agencyPackageController)
@@ -148,7 +154,6 @@ export class AgencyRoutes extends BaseRoute {
     // Activity Management Routes
     this.router.post(
       "/activities",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       validationMiddleware(CreateActivityRequestDTO),
       asyncHandler(
@@ -158,7 +163,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.get(
       "/activities",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyActivityController.getAllActivities.bind(agencyActivityController)
@@ -181,8 +185,16 @@ export class AgencyRoutes extends BaseRoute {
     });
 
     this.router.post(
+      "/upload/profile-image",
+      authorizeRole(["agency_owner"]),
+      upload.single("image"),
+      asyncHandler(
+        agencyUploadController.uploadProfileImage.bind(agencyUploadController)
+      )
+    );
+
+    this.router.post(
       "/upload/image",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       upload.single("image"),
       asyncHandler(
@@ -192,7 +204,6 @@ export class AgencyRoutes extends BaseRoute {
 
     this.router.post(
       "/upload/images",
-      asyncHandler(verifyAuth),
       authorizeRole(["agency_owner"]),
       upload.array("images", 10),
       asyncHandler(
