@@ -21,7 +21,7 @@ export class GetAllUsersUsecase implements IGetAllUsersUsecase {
     sort: string = "createdAt",
     order: SortOrder = SortOrder.ASC
   ): Promise<PaginatedUsersResponseDTO> {
-    //  const showingusecase = await this._userRepository.findUserwithA("A")
+   
     const statusFilter: "all" | "blocked" | "unblocked" =
       status === UserStatusFilter.ALL
         ? "all"

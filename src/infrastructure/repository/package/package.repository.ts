@@ -4,6 +4,8 @@ import { IPackageEntity, TPackageStatus } from "../../../domain/entities/package
 import { IPackageModel, packageDB } from "../../database/models/package.model";
 import { IPackageRepository } from "../../../domain/repositoryInterfaces/Package/package.repository.interface";
 import { BaseRepository } from "../baseRepository";
+import { PackageCategory } from "../../../domain/constants/package-categories";
+
 
 export class PackageRepository
   extends BaseRepository<IPackageModel, IPackageEntity>
@@ -396,12 +398,6 @@ export class PackageRepository
 
     return { packages, total };
   }
-
-  // async findPackagesToday(agencyId : string) : Promise<IPackageEntity[]>{
-  //   const today = new Date();
-  //   return await packageDB.find({agencyId,createdAt : today})
-  // }
-
   
 }
 

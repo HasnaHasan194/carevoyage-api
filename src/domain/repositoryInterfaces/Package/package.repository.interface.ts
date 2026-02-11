@@ -1,6 +1,7 @@
 import { ClientSession } from "mongoose";
 import { IPackageEntity, TPackageStatus } from "../../entities/package.entity";
 import { IBaseRepository } from "../baseRepository.interface";
+import { PackageCategory } from "../../constants/package-categories";
 
 export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
   findByAgencyId(
@@ -59,7 +60,7 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
     page: number;
     limit: number;
   }): Promise<{ packages: IPackageEntity[]; total: number }>;
+  
 
-  // findPackagesToday(agencyId : string) : Promise<IPackageEntity[]>
 }
 
