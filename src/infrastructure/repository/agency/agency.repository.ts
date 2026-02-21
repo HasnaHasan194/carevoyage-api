@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { AgencyMapper } from "../../../application/mapper/agency.mapper";
 import { IAgencyEntity } from "../../../domain/entities/Agency.entity";
 import { IAgencyModel, agencyDB } from "../../database/models/agency.model";
@@ -15,20 +16,68 @@ export class AgencyRepository
   }
 
   async findByUserId(userId: string): Promise<IAgencyEntity | null> {
-    const doc = await agencyDB.findOne({ userId }).exec();
-    return doc ? AgencyMapper.toEntity(doc) : null;
+    if (!userId || typeof userId !== "string") return null;
+    try {
+      const objectId = new mongoose.Types.ObjectId(userId);
+      // Try querying with ObjectId first (normal case)
+      let docs = await agencyDB.find({ userId: objectId }).exec();
+      
+      // If not found, try querying with string userId (for old/inconsistent data)
+      if (docs.length === 0) {
+        docs = await agencyDB.find({ userId: userId }).exec();
+      }
+      
+      // Also try finding ALL agencies and filter manually to catch any format mismatches
+      const allAgencies = await agencyDB.find({}).exec();
+      const matchingAgencies = allAgencies.filter(agency => {
+        const agencyUserId = agency.userId?.toString();
+        return agencyUserId === userId || agencyUserId === objectId.toString();
+      });
+      
+      // Use manual filter results if they found more matches
+      if (matchingAgencies.length > docs.length) {
+        docs = matchingAgencies;
+      }
+      
+      if (docs.length === 0) {
+        return null;
+      }
+      
+      // If multiple agencies exist, prefer verified one, then most recent
+      let selectedDoc = docs[0];
+      if (docs.length > 1) {
+        const verified = docs.find(d => d.verificationStatus === "verified");
+        if (verified) {
+          selectedDoc = verified;
+        } else {
+          // Sort by updatedAt descending, get most recent
+          selectedDoc = docs.sort((a, b) => 
+            (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0)
+          )[0];
+        }
+      }
+      
+      return AgencyMapper.toEntity(selectedDoc);
+    } catch {
+      return null;
+    }
   }
 
   async updateVerificationStatus(
     agencyId: string,
-    status: "pending" | "verified" | "rejected"
+    status: "pending" | "verified" | "rejected",
+    rejectionReason?: string
   ): Promise<IAgencyEntity | null> {
+    const update: Record<string, unknown> = {
+      verificationStatus: status,
+    };
+    if (status === "rejected" && rejectionReason !== undefined) {
+      update.rejectionReason = rejectionReason;
+    } else if (status !== "rejected") {
+      update.rejectionReason = null;
+    }
     const doc = await agencyDB
-      .findByIdAndUpdate(
-        agencyId,
-        { $set: { verificationStatus: status } },
-        { new: true }
-      )
+      .findByIdAndUpdate(agencyId, { $set: update }, { new: true })
       .exec();
 
     return doc ? AgencyMapper.toEntity(doc) : null;
@@ -59,6 +108,7 @@ export class AgencyRepository
     limit: number,
     search?: string,
     status: "all" | "blocked" | "unblocked" = "all",
+    verificationStatus: "all" | "pending" | "verified" | "rejected" = "all",
     sort: string = "createdAt",
     order: "asc" | "desc" = "asc"
   ): Promise<{ agencies: IAgencyEntity[]; total: number }> {
@@ -66,11 +116,16 @@ export class AgencyRepository
 
     const matchConditions: Record<string, unknown> = {};
 
-    // Apply status filter
+    // Apply block status filter
     if (status === "blocked") {
       matchConditions.isBlocked = true;
     } else if (status === "unblocked") {
       matchConditions.isBlocked = false;
+    }
+
+    // Apply verification status filter
+    if (verificationStatus !== "all") {
+      matchConditions.verificationStatus = verificationStatus;
     }
 
 

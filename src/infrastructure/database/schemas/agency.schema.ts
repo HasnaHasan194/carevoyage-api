@@ -43,6 +43,11 @@ export const agencySchema = new Schema<IAgencyModel>(
       default: "pending",
     },
 
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+
     description: {
       type: String,
       default: null,

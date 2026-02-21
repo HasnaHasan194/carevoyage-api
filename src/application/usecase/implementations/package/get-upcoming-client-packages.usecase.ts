@@ -5,6 +5,7 @@ import { BrowsePackagesResponseDTO } from "../../../dto/response/browse-packages
 import { IPackageRepository } from "../../../../domain/repositoryInterfaces/Package/package.repository.interface";
 import { IItineraryRepository } from "../../../../domain/repositoryInterfaces/Itinerary/itinerary.repository.interface";
 import { IActivityRepository } from "../../../../domain/repositoryInterfaces/Activity/activity.repository.interface";
+import { ICategoryRepository } from "../../../../domain/repositoryInterfaces/Category/category.repository.interface";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageSortFactory } from "../../../sorting/package/package-sort.factory";
@@ -23,7 +24,9 @@ export class GetUpcomingClientPackagesUsecase implements IGetUpcomingClientPacka
     @inject("IItineraryRepository")
     private _itineraryRepository: IItineraryRepository,
     @inject("IActivityRepository")
-    private _activityRepository: IActivityRepository
+    private _activityRepository: IActivityRepository,
+    @inject("ICategoryRepository")
+    private _categoryRepository: ICategoryRepository
   ) {}
 
   async execute(
@@ -80,6 +83,9 @@ export class GetUpcomingClientPackagesUsecase implements IGetUpcomingClientPacka
       sortOrder: filters.sortOrder,
     });
 
+    // Fetch active category names to filter packages
+    const activeCategoryNames = await this._categoryRepository.findAllActiveCategoryNames();
+
     const repositoryFilters = {
       search: filters.search,
       category: filters.category,
@@ -91,6 +97,7 @@ export class GetUpcomingClientPackagesUsecase implements IGetUpcomingClientPacka
       sortOrder: sortSpec.sortOrder as "asc" | "desc",
       page: filters.page || 1,
       limit: filters.limit || 10,
+      activeCategoryNames,
     };
 
     const { packages, total } = await this._packageRepository.findUpcomingClientPackages(

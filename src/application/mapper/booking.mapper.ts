@@ -1,0 +1,23 @@
+import { IBookingEntity } from "../../domain/entities/booking.entity";
+import type { IBookingModel } from "../../infrastructure/database/models/booking.model";
+
+export class BookingMapper {
+  static toEntity(doc: IBookingModel): IBookingEntity {
+    return {
+      _id: String(doc._id),
+      clientId: String(doc.clientId),
+      packageId: String(doc.packageId),
+      agencyId: String(doc.agencyId),
+      basePrice: doc.basePrice,
+      caretakerFee: doc.caretakerFee,
+      specialNeedsFee: doc.specialNeedsFee,
+      totalAmount: doc.totalAmount,
+      currency: doc.currency,
+      status: doc.status,
+      stripeSessionId: doc.stripeSessionId ?? undefined,
+      paidAt: doc.paidAt ?? undefined,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    };
+  }
+}

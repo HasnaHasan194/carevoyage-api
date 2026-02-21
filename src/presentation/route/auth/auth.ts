@@ -19,6 +19,7 @@ import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caret
 import { ForgotPasswordRequestDTO } from "../../../application/dto/request/forgot-password-request.dto";
 import { ResetPasswordRequestDTO } from "../../../application/dto/request/reset-password-request.dto";
 import { VerifyResetTokenRequestDTO } from "../../../application/dto/request/verify-reset-token-request.dto";
+import { ReverifyAgencyRequestDTO } from "../../../application/dto/request/reverify-agency-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { blockedUserMiddleware } from "../../../infrastructure/dependencyinjection/resolve";
 
@@ -128,6 +129,12 @@ export class AuthRoutes extends BaseRoute {
       "/verify-reset-token",
       validationMiddleware(VerifyResetTokenRequestDTO),
       asyncHandler(authController.verifyResetToken.bind(authController))
+    );
+
+    this.router.post(
+      "/agency/reverify",
+      validationMiddleware(ReverifyAgencyRequestDTO),
+      asyncHandler(authController.reverifyAgency.bind(authController))
     );
 
     this.router.post(

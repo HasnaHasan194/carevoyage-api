@@ -30,6 +30,20 @@ import { CaretakerVerificationController } from "../../presentation/controllers/
 import { CaretakerRoutes } from "../../presentation/route/caretaker/caretaker.route";
 import { PackageController } from "../../presentation/controllers/package/package.controller";
 import { PackageRoutes } from "../../presentation/route/package/package.route";
+import { BookingController } from "../../presentation/controllers/booking/booking.controller";
+import { BookingRoutes } from "../../presentation/route/booking/booking.route";
+import { PaymentController } from "../../presentation/controllers/payment/payment.controller";
+import { AgencyCategoryRoutes } from "../../presentation/route/agency/agency-category.route";
+import { IAgencyCategoryController } from "../../presentation/interfaces/controllers/agency/agency-category.controller.interface";
+import { AgencyCategoryController } from "../../presentation/controllers/agency/agency-category.controller";
+import { IAgencySpecialNeedsMasterController } from "../../presentation/interfaces/controllers/agency/agency-special-needs-master.controller.interface";
+import { AgencySpecialNeedsMasterController } from "../../presentation/controllers/agency/agency-special-needs-master.controller";
+import { AgencySpecialNeedsMasterRoutes } from "../../presentation/route/agency/agency-special-needs-master.route";
+import { IAgencySpecialNeedsController } from "../../presentation/interfaces/controllers/agency/agency-special-needs.controller.interface";
+import { AgencySpecialNeedsController } from "../../presentation/controllers/agency/agency-special-needs.controller";
+import { AgencySpecialNeedsRoutes } from "../../presentation/route/agency/agency-special-needs.route";
+import { IWishlistController } from "../../presentation/interfaces/controllers/user/wishlist.controller.interface";
+import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
 
 DependencyInjection.registerAll();
 
@@ -114,12 +128,79 @@ export const agencyProfileController =
   container.resolve(AgencyProfileController);
 
 /**
+ * Agency Category controller - Resolve directly like other controllers
+ */
+export const agencyCategoryController =
+  container.resolve<IAgencyCategoryController>(AgencyCategoryController);
+
+/**
+ * Agency Category routes - MUST be resolved BEFORE AgencyRoutes because AgencyRoutes imports it
+ */
+let agencyCategoryRoutes: AgencyCategoryRoutes;
+try {
+  agencyCategoryRoutes = container.resolve(AgencyCategoryRoutes);
+} catch (error) {
+  throw error;
+}
+export { agencyCategoryRoutes };
+
+/**
+ * Agency Special Needs Master controller - MUST be resolved BEFORE routes
+ */
+let agencySpecialNeedsMasterController: IAgencySpecialNeedsMasterController;
+try {
+  agencySpecialNeedsMasterController = container.resolve<IAgencySpecialNeedsMasterController>(
+    AgencySpecialNeedsMasterController
+  );
+} catch (error) {
+  throw error;
+}
+export { agencySpecialNeedsMasterController };
+
+/**
+ * Agency Special Needs Master routes - Resolved AFTER controller is fully exported
+ */
+let agencySpecialNeedsMasterRoutes: AgencySpecialNeedsMasterRoutes;
+try {
+  agencySpecialNeedsMasterRoutes = container.resolve(
+    AgencySpecialNeedsMasterRoutes
+  );
+} catch (error) {
+  throw error;
+}
+export { agencySpecialNeedsMasterRoutes };
+
+/**
+ * Agency Special Needs controller
+ */
+export const agencySpecialNeedsController =
+  container.resolve<IAgencySpecialNeedsController>(
+    AgencySpecialNeedsController
+  );
+
+/**
+ * Agency Special Needs routes
+ */
+let agencySpecialNeedsRoutes: AgencySpecialNeedsRoutes;
+try {
+  agencySpecialNeedsRoutes = container.resolve(AgencySpecialNeedsRoutes);
+} catch (error) {
+  throw error;
+}
+export { agencySpecialNeedsRoutes };
+
+/**
  * Agency routes
  */
 export const agencyRoutes = container.resolve(AgencyRoutes);
 
 /**
- * User routes
+ * Wishlist controller - MUST be resolved BEFORE UserRoutes because UserRoutes imports it
+ */
+export const wishlistController = container.resolve<IWishlistController>(WishlistController);
+
+/**
+ * User routes - Resolved AFTER wishlistController to avoid circular dependency
  */
 export const userRoutes = container.resolve(UserRoutes);
 
@@ -147,3 +228,18 @@ export const packageController = container.resolve(PackageController);
  * Package routes
  */
 export const packageRoutes = container.resolve(PackageRoutes);
+
+/**
+ * Booking controller
+ */
+export const bookingController = container.resolve(BookingController);
+
+/**
+ * Booking routes
+ */
+export const bookingRoutes = container.resolve(BookingRoutes);
+
+/**
+ * Payment controller (for Stripe webhook)
+ */
+export const paymentController = container.resolve(PaymentController);

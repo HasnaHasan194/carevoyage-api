@@ -39,6 +39,7 @@ import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caret
 import { IForgotPasswordUsecase } from "../../../application/usecase/interfaces/auth/forgot-password.interface";
 import { IResetPasswordUsecase } from "../../../application/usecase/interfaces/auth/reset-password.interface";
 import { IVerifyResetTokenUsecase } from "../../../application/usecase/interfaces/auth/verify-reset-token.interface";
+import { IReverifyAgencyUsecase } from "../../../application/usecase/interfaces/auth/reverify-agency.interface";
 import { IGoogleAuthUsecase } from "../../../application/usecase/interfaces/auth/google-auth.interface";
 import { IGetCurrentUserUsecase } from "../../../application/usecase/interfaces/auth/get-current-user.interface";
 import { CustomRequest } from "../../middlewares/auth.middleware";
@@ -105,6 +106,9 @@ export class AuthController implements IAuthController {
 
     @inject("IVerifyResetTokenUsecase")
     private _verifyResetTokenUsecase: IVerifyResetTokenUsecase,
+
+    @inject("IReverifyAgencyUsecase")
+    private _reverifyAgencyUsecase: IReverifyAgencyUsecase,
 
     @inject("IGoogleAuthUsecase")
     private _googleAuthUsecase: IGoogleAuthUsecase,
@@ -515,6 +519,18 @@ export class AuthController implements IAuthController {
     const result = await this._verifyResetTokenUsecase.execute(token);
 
     ResponseHelper.success(res, HTTP_STATUS.OK, "Reset token is valid", result);
+  }
+
+  async reverifyAgency(req: Request, res: Response): Promise<void> {
+    const { token } = req.body as { token: string };
+
+    await this._reverifyAgencyUsecase.execute(token);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.AGENCY.REVERIFY_SUBMITTED
+    );
   }
 
   async googleAuth(req: Request, res: Response): Promise<void> {

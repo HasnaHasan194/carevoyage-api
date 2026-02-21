@@ -210,6 +210,41 @@ export class AgencyRoutes extends BaseRoute {
         agencyUploadController.uploadMultipleImages.bind(agencyUploadController)
       )
     );
+
+    // Category Management Routes, Special Needs Master Routes, and Special Needs Routes
+    // Load these routes lazily to avoid circular dependency during module loading
+    let resolveModule: any;
+    try {
+      resolveModule = require("../../../infrastructure/dependencyinjection/resolve");
+    } catch (error) {
+      console.error("[ERROR] Failed to load resolve module:", error);
+      throw new Error(
+        `Failed to load resolve module: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    // Category Management Routes
+    const agencyCategoryRoutes = resolveModule.agencyCategoryRoutes;
+    if (!agencyCategoryRoutes) {
+      throw new Error("agencyCategoryRoutes is undefined");
+    }
+    this.router.use("/", agencyCategoryRoutes.router);
+
+    // Special Needs Master Routes
+    const agencySpecialNeedsMasterRoutes = resolveModule.agencySpecialNeedsMasterRoutes;
+    if (!agencySpecialNeedsMasterRoutes) {
+      throw new Error("agencySpecialNeedsMasterRoutes is undefined");
+    }
+    this.router.use("/", agencySpecialNeedsMasterRoutes.router);
+
+    // Special Needs Management Routes
+    const agencySpecialNeedsRoutes = resolveModule.agencySpecialNeedsRoutes;
+    if (!agencySpecialNeedsRoutes) {
+      throw new Error("agencySpecialNeedsRoutes is undefined");
+    }
+    this.router.use("/", agencySpecialNeedsRoutes.router);
   }
 }
 

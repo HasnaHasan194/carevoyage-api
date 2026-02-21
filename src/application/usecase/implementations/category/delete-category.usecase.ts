@@ -1,0 +1,34 @@
+import { inject, injectable } from "tsyringe";
+import { IDeleteCategoryUsecase } from "../../interfaces/category/delete-category.interface";
+import { ICategoryRepository } from "../../../../domain/repositoryInterfaces/Category/category.repository.interface";
+import { NotFoundError } from "../../../../domain/errors/notFoundError";
+
+@injectable()
+export class DeleteCategoryUsecase implements IDeleteCategoryUsecase {
+  constructor(
+    @inject("ICategoryRepository")
+    private _categoryRepository: ICategoryRepository
+  ) {}
+
+  async execute(categoryId: string, agencyId: string): Promise<void> {
+    // Check if category exists and belongs to agency
+    const category = await this._categoryRepository.findByIdAndAgencyId(
+      categoryId,
+      agencyId
+    );
+
+    if (!category) {
+      throw new NotFoundError("Category not found");
+    }
+
+    // Soft delete category
+    const deletedCategory = await this._categoryRepository.softDelete(
+      categoryId,
+      agencyId
+    );
+
+    if (!deletedCategory) {
+      throw new NotFoundError("Category not found");
+    }
+  }
+}

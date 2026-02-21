@@ -5,6 +5,7 @@ import { PaginatedAgenciesResponseDTO } from "../../../dto/response/agency-respo
 import { AgencyMapper } from "../../../mapper/agency.mapper";
 import {
   AgencyStatusFilter,
+  AgencyVerificationStatusFilter,
   SortOrder,
 } from "../../../dto/request/get-agencies-request.dto";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
@@ -23,6 +24,7 @@ export class GetAllAgenciesUsecase implements IGetAllAgenciesUsecase {
     limit: number = 10,
     search?: string,
     status: AgencyStatusFilter = AgencyStatusFilter.ALL,
+    verificationStatus: AgencyVerificationStatusFilter = AgencyVerificationStatusFilter.ALL,
     sort: string = "createdAt",
     order: SortOrder = SortOrder.ASC
   ): Promise<PaginatedAgenciesResponseDTO> {
@@ -33,6 +35,15 @@ export class GetAllAgenciesUsecase implements IGetAllAgenciesUsecase {
         ? "blocked"
         : "unblocked";
 
+    const verificationStatusFilter: "all" | "pending" | "verified" | "rejected" =
+      verificationStatus === AgencyVerificationStatusFilter.ALL
+        ? "all"
+        : verificationStatus === AgencyVerificationStatusFilter.PENDING
+        ? "pending"
+        : verificationStatus === AgencyVerificationStatusFilter.VERIFIED
+        ? "verified"
+        : "rejected";
+
     const sortOrder: "asc" | "desc" =
       order === SortOrder.ASC ? "asc" : "desc";
 
@@ -41,6 +52,7 @@ export class GetAllAgenciesUsecase implements IGetAllAgenciesUsecase {
       limit,
       search,
       statusFilter,
+      verificationStatusFilter,
       sort,
       sortOrder
     );
@@ -52,7 +64,9 @@ export class GetAllAgenciesUsecase implements IGetAllAgenciesUsecase {
         return AgencyMapper.toAgencyResponseDto(
           agency,
           owner?.email,
-          owner ? `${owner.firstName} ${owner.lastName}` : undefined
+          owner ? `${owner.firstName} ${owner.lastName}` : undefined,
+          owner?.phone,
+          owner?.profileImage
         );
       })
     );

@@ -8,12 +8,15 @@ export interface AgencyResponseDTO {
   registrationNumber: string;
   kycDocs: string[];
   verificationStatus: TVerificationStatus;
+  rejectionReason?: string;
   description?: string;
   isBlocked: boolean;
   createdAt: Date;
   updatedAt: Date;
   ownerEmail?: string;
   ownerName?: string;
+  ownerPhone?: string;
+  ownerProfileImage?: string;
 }
 
 export interface PaginatedAgenciesResponseDTO {

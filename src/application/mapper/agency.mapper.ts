@@ -15,6 +15,7 @@ export class AgencyMapper {
       registrationNumber: doc.registrationNumber,
       kycDocs: doc.kycDocs,
       verificationStatus: doc.verificationStatus,
+      rejectionReason: doc.rejectionReason ?? undefined,
       description: doc.description ?? undefined,
       isBlocked: doc.isBlocked,
       createdAt: doc.createdAt,
@@ -38,7 +39,9 @@ export class AgencyMapper {
   static toAgencyResponseDto(
     agency: IAgencyEntity,
     ownerEmail?: string,
-    ownerName?: string
+    ownerName?: string,
+    ownerPhone?: string,
+    ownerProfileImage?: string
   ): AgencyResponseDTO {
     return {
       id: agency._id,
@@ -48,12 +51,15 @@ export class AgencyMapper {
       registrationNumber: agency.registrationNumber,
       kycDocs: agency.kycDocs,
       verificationStatus: agency.verificationStatus,
+      rejectionReason: agency.rejectionReason,
       description: agency.description,
       isBlocked: agency.isBlocked,
       createdAt: agency.createdAt,
       updatedAt: agency.updatedAt,
       ownerEmail,
       ownerName,
+      ownerPhone,
+      ownerProfileImage,
     };
   }
 }

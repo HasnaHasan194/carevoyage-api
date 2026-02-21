@@ -27,10 +27,6 @@ export class AgencyLoginUsecase implements ILoginUsecase {
 
     const user = await this._userRepository.findByEmail(agencyLoginData.email);
 
-    console.log(user,"-->user")
-
-
-
     if (!user) {
       throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_NOT_FOUND);
     }
@@ -51,19 +47,38 @@ export class AgencyLoginUsecase implements ILoginUsecase {
       );
     }
 
-    const agency = await this._agencyRepository.findByUserId(user._id);
-
-    console.log(agency)
+    let agency = await this._agencyRepository.findByUserId(user._id);
 
     if (!agency) {
-      throw new NotFoundError(ERROR_MESSAGE.AGENCY.PROFILE_NOT_FOUND);
+      // Double-check: try finding by registration number to avoid duplicates
+      const existingByReg = await this._agencyRepository.findByRegistrationNumber(`PENDING-${user._id}`);
+      if (!existingByReg) {
+        agency = await this._agencyRepository.save({
+          userId: user._id,
+          agencyName: "Complete your profile",
+          address: "To be updated",
+          registrationNumber: `PENDING-${user._id}`,
+          description: undefined,
+          verificationStatus: "pending",
+          isBlocked: false,
+        });
+      } else {
+        agency = existingByReg;
+      }
     }
 
     if (agency.isBlocked) {
       throw new ValidationError(ERROR_MESSAGE.AGENCY.ACCOUNT_BLOCKED);
     }
 
-  
+    if (agency.verificationStatus === "rejected") {
+      throw new ValidationError(ERROR_MESSAGE.AGENCY.REGISTRATION_REJECTED);
+    }
+
+    if (agency.verificationStatus !== "verified" && agency.verificationStatus !== "pending") {
+      throw new ValidationError(ERROR_MESSAGE.AGENCY.REGISTRATION_PENDING);
+    }
+
     return AgencyMapper.mapToLoginResponseDto(user);//=>controller
   }
 }

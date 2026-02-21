@@ -41,6 +41,67 @@ export class PackageRepository
     return packages.map((pkg) => PackageMapper.toEntity(pkg));
   }
 
+  async findByAgencyIdPaginated(
+    agencyId: string,
+    page: number,
+    limit: number,
+    status: TPackageStatus | "all" = "all",
+    includeDeleted: boolean = false,
+    search?: string,
+    category?: string,
+    sortBy?: string,
+    sortOrder?: "asc" | "desc"
+  ): Promise<{ packages: IPackageEntity[]; total: number }> {
+    const query: Record<string, unknown> = { agencyId };
+
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    if (!includeDeleted) {
+      query.isDeleted = false;
+    }
+
+    // Category filter
+    if (category && category.trim()) {
+      query.category = new RegExp(category.trim(), "i");
+    }
+
+    // Search filter (PackageName, category, meetingPoint)
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      query.$or = [
+        { PackageName: searchRegex },
+        { category: searchRegex },
+        { meetingPoint: searchRegex },
+      ];
+    }
+
+    const pageNum = Math.max(1, Math.floor(page) || 1);
+    const limitNum = Math.max(1, Math.floor(limit) || 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Determine sort field and order
+    const sortField = sortBy === "price" ? "basePrice" : sortBy || "createdAt";
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
+
+    // Get total count
+    const total = await packageDB.countDocuments(query);
+
+    // Get paginated packages
+    const packages = await packageDB
+      .find(query)
+      .sort({ [sortField]: sortDirection })
+      .skip(skip)
+      .limit(limitNum)
+      .exec();
+
+    return {
+      packages: packages.map((pkg) => PackageMapper.toEntity(pkg)),
+      total,
+    };
+  }
+
   async findByIdAndAgencyId(
     packageId: string,
     agencyId: string,
@@ -113,6 +174,7 @@ export class PackageRepository
     sortOrder?: "asc" | "desc";
     page: number;
     limit: number;
+    activeCategoryNames?: string[];
   }): Promise<{ packages: IPackageEntity[]; total: number }> {
     const {
       search,
@@ -125,6 +187,7 @@ export class PackageRepository
       maxDuration,
       sortBy = "basePrice",
       sortOrder = "asc",
+      activeCategoryNames,
     } = filters;
 
  
@@ -144,8 +207,28 @@ export class PackageRepository
       status: "published",
     };
 
-    // Category filter
-    if (category) {
+    // Filter by active categories - packages must belong to active categories only
+    if (activeCategoryNames !== undefined) {
+      if (activeCategoryNames.length === 0) {
+        // If no active categories exist, return empty result
+        return { packages: [], total: 0 };
+      }
+      // Filter by active category names
+      if (category) {
+        // If user provided category filter, filter active categories first, then apply regex
+        const categoryRegex = new RegExp(category.trim(), "i");
+        const filteredActiveCategories = activeCategoryNames.filter((cat) =>
+          categoryRegex.test(cat)
+        );
+        if (filteredActiveCategories.length === 0) {
+          return { packages: [], total: 0 };
+        }
+        matchConditions.category = { $in: filteredActiveCategories };
+      } else {
+        matchConditions.category = { $in: activeCategoryNames };
+      }
+    } else if (category) {
+      // If activeCategoryNames not provided but category filter exists, use regex
       matchConditions.category = new RegExp(category.trim(), "i");
     }
 
@@ -284,6 +367,7 @@ export class PackageRepository
     sortOrder?: "asc" | "desc";
     page: number;
     limit: number;
+    activeCategoryNames?: string[];
   }): Promise<{ packages: IPackageEntity[]; total: number }> {
     const {
       search,
@@ -294,10 +378,11 @@ export class PackageRepository
       maxDuration,
       sortBy = "basePrice",
       sortOrder = "asc",
+      activeCategoryNames,
     } = filters;
 
     const page = Math.max(1, Math.floor(filters.page) || 1);
-    const limit = Math.max(1, Math.floor(filters.limit) || 10);
+    const limit = Math.max(1, Math.floor(filters.limit) || 10 );
     const skip = (page - 1) * limit;
 
   //  packages must  startDate > today
@@ -311,7 +396,28 @@ export class PackageRepository
       endDate: { $gte: todayStartUTC },
     };
 
-    if (category) {
+    // Filter by active categories - packages must belong to active categories only
+    if (activeCategoryNames !== undefined) {
+      if (activeCategoryNames.length === 0) {
+        // If no active categories exist, return empty result
+        return { packages: [], total: 0 };
+      }
+      // Filter by active category names
+      if (category) {
+        // If user provided category filter, filter active categories first, then apply regex
+        const categoryRegex = new RegExp(category.trim(), "i");
+        const filteredActiveCategories = activeCategoryNames.filter((cat) =>
+          categoryRegex.test(cat)
+        );
+        if (filteredActiveCategories.length === 0) {
+          return { packages: [], total: 0 };
+        }
+        matchConditions.category = { $in: filteredActiveCategories };
+      } else {
+        matchConditions.category = { $in: activeCategoryNames };
+      }
+    } else if (category) {
+      // If activeCategoryNames not provided but category filter exists, use regex
       matchConditions.category = new RegExp(category.trim(), "i");
     }
 

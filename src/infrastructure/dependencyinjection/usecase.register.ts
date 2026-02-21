@@ -37,6 +37,8 @@ import { IResetPasswordUsecase } from "../../application/usecase/interfaces/auth
 import { ResetPasswordUsecase } from "../../application/usecase/implementations/auth/reset-password.usecase";
 import { IVerifyResetTokenUsecase } from "../../application/usecase/interfaces/auth/verify-reset-token.interface";
 import { VerifyResetTokenUsecase } from "../../application/usecase/implementations/auth/verify-reset-token.usecase";
+import { IReverifyAgencyUsecase } from "../../application/usecase/interfaces/auth/reverify-agency.interface";
+import { ReverifyAgencyUsecase } from "../../application/usecase/implementations/auth/reverify-agency.usecase";
 import { IGoogleAuthUsecase } from "../../application/usecase/interfaces/auth/google-auth.interface";
 import { GoogleAuthUsecase } from "../../application/usecase/implementations/auth/google-auth.usecase";
 import { IGetCurrentUserUsecase } from "../../application/usecase/interfaces/auth/get-current-user.interface";
@@ -53,6 +55,10 @@ import { IGetAgencyDetailsUsecase } from "../../application/usecase/interfaces/a
 import { GetAgencyDetailsUsecase } from "../../application/usecase/implementations/admin/get-agency-details.usecase";
 import { IBlockUnblockAgencyUsecase } from "../../application/usecase/interfaces/admin/blockUnblockAgency.interface";
 import { BlockUnblockAgencyUsecase } from "../../application/usecase/implementations/admin/block-unblock-agency.usecase";
+import { IVerifyAgencyUsecase } from "../../application/usecase/interfaces/admin/verify-agency.interface";
+import { VerifyAgencyUsecase } from "../../application/usecase/implementations/admin/verify-agency.usecase";
+import { IRejectAgencyUsecase } from "../../application/usecase/interfaces/admin/reject-agency.interface";
+import { RejectAgencyUsecase } from "../../application/usecase/implementations/admin/reject-agency.usecase";
 import { ICreatePackageUsecase } from "../../application/usecase/interfaces/package/create-package.interface";
 import { CreatePackageUsecase } from "../../application/usecase/implementations/package/create-package.usecase";
 import { IUpdatePackageUsecase } from "../../application/usecase/interfaces/package/update-package.interface";
@@ -91,6 +97,50 @@ import { IGetAgencyProfileUsecase } from "../../application/usecase/interfaces/a
 import { GetAgencyProfileUsecase } from "../../application/usecase/implementations/agency/get-agency-profile.usecase";
 import { IUpdateAgencyProfileUsecase } from "../../application/usecase/interfaces/agency/update-agency-profile.interface";
 import { UpdateAgencyProfileUsecase } from "../../application/usecase/implementations/agency/update-agency-profile.usecase";
+import { AgencyCategoryController } from "../../presentation/controllers/agency/agency-category.controller";
+import { IAgencyCategoryController } from "../../presentation/interfaces/controllers/agency/agency-category.controller.interface";
+import { ICreateCategoryUsecase } from "../../application/usecase/interfaces/category/create-category.interface";
+import { CreateCategoryUsecase } from "../../application/usecase/implementations/category/create-category.usecase";
+import { IUpdateCategoryUsecase } from "../../application/usecase/interfaces/category/update-category.interface";
+import { UpdateCategoryUsecase } from "../../application/usecase/implementations/category/update-category.usecase";
+import { IDeleteCategoryUsecase } from "../../application/usecase/interfaces/category/delete-category.interface";
+import { DeleteCategoryUsecase } from "../../application/usecase/implementations/category/delete-category.usecase";
+import { IListCategoriesUsecase } from "../../application/usecase/interfaces/category/list-categories.interface";
+import { ListCategoriesUsecase } from "../../application/usecase/implementations/category/list-categories.usecase";
+import { IListActiveCategoriesUsecase } from "../../application/usecase/interfaces/category/list-active-categories.interface";
+import { ListActiveCategoriesUsecase } from "../../application/usecase/implementations/category/list-active-categories.usecase";
+import { IAddToWishlistUsecase } from "../../application/usecase/interfaces/wishlist/add-to-wishlist.interface";
+import { AddToWishlistUsecase } from "../../application/usecase/implementations/wishlist/add-to-wishlist.usecase";
+import { IRemoveFromWishlistUsecase } from "../../application/usecase/interfaces/wishlist/remove-from-wishlist.interface";
+import { RemoveFromWishlistUsecase } from "../../application/usecase/implementations/wishlist/remove-from-wishlist.usecase";
+import { IGetWishlistUsecase } from "../../application/usecase/interfaces/wishlist/get-wishlist.interface";
+import { GetWishlistUsecase } from "../../application/usecase/implementations/wishlist/get-wishlist.usecase";
+import { ICheckWishlistStatusUsecase } from "../../application/usecase/interfaces/wishlist/check-wishlist-status.interface";
+import { CheckWishlistStatusUsecase } from "../../application/usecase/implementations/wishlist/check-wishlist-status.usecase";
+import { IListActiveSpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/special-needs-master/list-active-special-needs-master.interface";
+import { ListActiveSpecialNeedsMasterUsecase } from "../../application/usecase/implementations/special-needs-master/list-active-special-needs-master.usecase";
+import { IEnableSpecialNeedUsecase } from "../../application/usecase/interfaces/agency-special-needs/enable-special-need.interface";
+import { EnableSpecialNeedUsecase } from "../../application/usecase/implementations/agency-special-needs/enable-special-need.usecase";
+import { IUpdateSpecialNeedUsecase } from "../../application/usecase/interfaces/agency-special-needs/update-special-need.interface";
+import { UpdateSpecialNeedUsecase } from "../../application/usecase/implementations/agency-special-needs/update-special-need.usecase";
+import { IToggleActiveStatusUsecase } from "../../application/usecase/interfaces/agency-special-needs/toggle-active-status.interface";
+import { ToggleActiveStatusUsecase } from "../../application/usecase/implementations/agency-special-needs/toggle-active-status.usecase";
+import { ISoftDeleteSpecialNeedUsecase } from "../../application/usecase/interfaces/agency-special-needs/soft-delete-special-need.interface";
+import { SoftDeleteSpecialNeedUsecase } from "../../application/usecase/implementations/agency-special-needs/soft-delete-special-need.usecase";
+import { IListAgencySpecialNeedsUsecase } from "../../application/usecase/interfaces/agency-special-needs/list-agency-special-needs.interface";
+import { ListAgencySpecialNeedsUsecase } from "../../application/usecase/implementations/agency-special-needs/list-agency-special-needs.usecase";
+import { ICreateAgencySpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/agency-special-needs-master/create-agency-special-needs-master.interface";
+import { CreateAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/create-agency-special-needs-master.usecase";
+import { IUpdateAgencySpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/agency-special-needs-master/update-agency-special-needs-master.interface";
+import { UpdateAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/update-agency-special-needs-master.usecase";
+import { IDeleteAgencySpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/agency-special-needs-master/delete-agency-special-needs-master.interface";
+import { DeleteAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/delete-agency-special-needs-master.usecase";
+import { IListAgencySpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/agency-special-needs-master/list-agency-special-needs-master.interface";
+import { ListAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/list-agency-special-needs-master.usecase";
+import { ICreateBookingCheckoutUseCase } from "../../application/usecase/interfaces/booking/create-booking-checkout.interface";
+import { CreateBookingCheckoutUseCase } from "../../application/usecase/implementations/booking/create-booking-checkout.usecase";
+import { IHandleStripeWebhookUsecase } from "../../application/usecase/interfaces/payment/handle-stripe-webhook-usecase.interface";
+import { HandleStripeWebhookUsecase } from "../../application/usecase/implementations/payment/handle-stripe-webhook.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -203,6 +253,9 @@ export class UsecaseRegistory {
     container.register<IVerifyResetTokenUsecase>("IVerifyResetTokenUsecase", {
       useClass: VerifyResetTokenUsecase,
     });
+    container.register<IReverifyAgencyUsecase>("IReverifyAgencyUsecase", {
+      useClass: ReverifyAgencyUsecase,
+    });
 
     // Google Authentication use case
     container.register<IGoogleAuthUsecase>("IGoogleAuthUsecase", {
@@ -239,6 +292,12 @@ export class UsecaseRegistory {
 
     container.register<IBlockUnblockAgencyUsecase>("IBlockUnblockAgencyUsecase", {
       useClass: BlockUnblockAgencyUsecase,
+    });
+    container.register<IVerifyAgencyUsecase>("IVerifyAgencyUsecase", {
+      useClass: VerifyAgencyUsecase,
+    });
+    container.register<IRejectAgencyUsecase>("IRejectAgencyUsecase", {
+      useClass: RejectAgencyUsecase,
     });
 
     // Agency Profile use cases
@@ -319,5 +378,94 @@ export class UsecaseRegistory {
     container.register("IBlockedUserMiddleware",{
       useClass:BlockedUserMiddleware,
     })
+
+    // Category use cases
+    container.register("ICreateCategoryUsecase", {
+      useClass: CreateCategoryUsecase,
+    });
+
+    container.register("IUpdateCategoryUsecase", {
+      useClass: UpdateCategoryUsecase,
+    });
+
+    container.register("IDeleteCategoryUsecase", {
+      useClass: DeleteCategoryUsecase,
+    });
+
+    container.register("IListCategoriesUsecase", {
+      useClass: ListCategoriesUsecase,
+    });
+
+    container.register("IListActiveCategoriesUsecase", {
+      useClass: ListActiveCategoriesUsecase,
+    });
+
+    // Wishlist use cases
+    container.register<IAddToWishlistUsecase>("IAddToWishlistUsecase", {
+      useClass: AddToWishlistUsecase,
+    });
+
+    container.register<IRemoveFromWishlistUsecase>("IRemoveFromWishlistUsecase", {
+      useClass: RemoveFromWishlistUsecase,
+    });
+
+    container.register<IGetWishlistUsecase>("IGetWishlistUsecase", {
+      useClass: GetWishlistUsecase,
+    });
+
+    container.register<ICheckWishlistStatusUsecase>("ICheckWishlistStatusUsecase", {
+      useClass: CheckWishlistStatusUsecase,
+    });
+
+    // Special Needs Master use cases
+    container.register<IListActiveSpecialNeedsMasterUsecase>("IListActiveSpecialNeedsMasterUsecase", {
+      useClass: ListActiveSpecialNeedsMasterUsecase,
+    });
+
+    // Agency Special Needs use cases
+    container.register<IEnableSpecialNeedUsecase>("IEnableSpecialNeedUsecase", {
+      useClass: EnableSpecialNeedUsecase,
+    });
+
+    container.register<IUpdateSpecialNeedUsecase>("IUpdateSpecialNeedUsecase", {
+      useClass: UpdateSpecialNeedUsecase,
+    });
+
+    container.register<IToggleActiveStatusUsecase>("IToggleActiveStatusUsecase", {
+      useClass: ToggleActiveStatusUsecase,
+    });
+
+    container.register<ISoftDeleteSpecialNeedUsecase>("ISoftDeleteSpecialNeedUsecase", {
+      useClass: SoftDeleteSpecialNeedUsecase,
+    });
+
+    container.register<IListAgencySpecialNeedsUsecase>("IListAgencySpecialNeedsUsecase", {
+      useClass: ListAgencySpecialNeedsUsecase,
+    });
+
+    // Agency Special Needs Master use cases
+    container.register<ICreateAgencySpecialNeedsMasterUsecase>("ICreateAgencySpecialNeedsMasterUsecase", {
+      useClass: CreateAgencySpecialNeedsMasterUsecase,
+    });
+
+    container.register<IUpdateAgencySpecialNeedsMasterUsecase>("IUpdateAgencySpecialNeedsMasterUsecase", {
+      useClass: UpdateAgencySpecialNeedsMasterUsecase,
+    });
+
+    container.register<IDeleteAgencySpecialNeedsMasterUsecase>("IDeleteAgencySpecialNeedsMasterUsecase", {
+      useClass: DeleteAgencySpecialNeedsMasterUsecase,
+    });
+
+    container.register<IListAgencySpecialNeedsMasterUsecase>("IListAgencySpecialNeedsMasterUsecase", {
+      useClass: ListAgencySpecialNeedsMasterUsecase,
+    });
+
+    container.register<ICreateBookingCheckoutUseCase>("ICreateBookingCheckoutUseCase", {
+      useClass: CreateBookingCheckoutUseCase,
+    });
+
+    container.register<IHandleStripeWebhookUsecase>("IHandleStripeWebhookUsecase", {
+      useClass: HandleStripeWebhookUsecase,
+    });
   }
 }

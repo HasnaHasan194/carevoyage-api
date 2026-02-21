@@ -6,9 +6,11 @@ import {
   blockedUserMiddleware,
   userController,
   profileUploadController,
+  wishlistController,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { UpdateUserProfileRequestDTO } from "../../../application/dto/request/update-user-profile-request.dto";
+import { AddToWishlistRequestDTO } from "../../../application/dto/request/add-to-wishlist-request.dto";
 import multer from "multer";
 
 @injectable()
@@ -81,6 +83,32 @@ export class UserRoutes extends BaseRoute {
       "/signed-urls",
       asyncHandler(
         profileUploadController.getSignedUrls.bind(profileUploadController)
+      )
+    );
+
+    // Wishlist/Bucket List Routes
+    this.router.post(
+      "/wishlist",
+      validationMiddleware(AddToWishlistRequestDTO),
+      asyncHandler(wishlistController.addToWishlist.bind(wishlistController))
+    );
+
+    this.router.delete(
+      "/wishlist/:packageId",
+      asyncHandler(
+        wishlistController.removeFromWishlist.bind(wishlistController)
+      )
+    );
+
+    this.router.get(
+      "/wishlist",
+      asyncHandler(wishlistController.getWishlist.bind(wishlistController))
+    );
+
+    this.router.get(
+      "/wishlist/:packageId/status",
+      asyncHandler(
+        wishlistController.checkWishlistStatus.bind(wishlistController)
       )
     );
   }

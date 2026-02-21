@@ -13,7 +13,8 @@ export class UserRepository
     super(userDB, UserMapper.toEntity);
   }
   async findByEmail(email: string): Promise<IUserEntity | null> {
-    return await userDB.findOne({ email });
+    const doc = await userDB.findOne({ email }).exec();
+    return doc ? UserMapper.toEntity(doc) : null;
   }
 
   async findByPhone(phone: string): Promise<IUserEntity | null> {

@@ -7,6 +7,13 @@ export enum AgencyStatusFilter {
   UNBLOCKED = "unblocked",
 }
 
+export enum AgencyVerificationStatusFilter {
+  ALL = "all",
+  PENDING = "pending",
+  VERIFIED = "verified",
+  REJECTED = "rejected",
+}
+
 export enum SortOrder {
   ASC = "asc",
   DESC = "desc",
@@ -34,6 +41,12 @@ export class GetAgenciesRequestDTO {
     message: "Status must be one of: all, blocked, unblocked",
   })
   status?: AgencyStatusFilter = AgencyStatusFilter.ALL;
+
+  @IsOptional()
+  @IsEnum(AgencyVerificationStatusFilter, {
+    message: "Verification status must be one of: all, pending, verified, rejected",
+  })
+  verificationStatus?: AgencyVerificationStatusFilter = AgencyVerificationStatusFilter.ALL;
 
   @IsOptional()
   @IsString()

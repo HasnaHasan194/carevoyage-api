@@ -8,6 +8,7 @@ import {
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { GetUsersRequestDTO } from "../../../application/dto/request/get-users-request.dto";
 import { GetAgenciesRequestDTO } from "../../../application/dto/request/get-agencies-request.dto";
+import { RejectAgencyRequestDTO } from "../../../application/dto/request/reject-agency-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { adminAuth } from "../../middlewares/adminAuth-middleware";
 
@@ -79,6 +80,25 @@ export class AdminRoutes extends BaseRoute {
       adminAuth,
       asyncHandler(
         adminAgencyController.unblockAgency.bind(adminAgencyController)
+      )
+    );
+
+    this.router.patch(
+      "/agencies/:agencyId/verify",
+      asyncHandler(verifyAuth),
+      adminAuth,
+      asyncHandler(
+        adminAgencyController.verifyAgency.bind(adminAgencyController)
+      )
+    );
+
+    this.router.patch(
+      "/agencies/:agencyId/reject",
+      asyncHandler(verifyAuth),
+      adminAuth,
+      validationMiddleware(RejectAgencyRequestDTO),
+      asyncHandler(
+        adminAgencyController.rejectAgency.bind(adminAgencyController)
       )
     );
   }

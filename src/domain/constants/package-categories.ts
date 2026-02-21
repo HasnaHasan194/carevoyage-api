@@ -10,6 +10,7 @@ export const PACKAGE_CATEGORIES = [
   "Honeymoon",
   "Nature",
   "Heritage",
+  "belief"
 ] as const;
 
 export type PackageCategory = (typeof PACKAGE_CATEGORIES)[number];

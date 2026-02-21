@@ -46,7 +46,8 @@ class ActivityDTO {
   @Transform(({ value }) => value?.trim() || "")
   description?: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: "Duration must be a number" })
+  @Type(() => Number)
   @Min(1, { message: "Duration must be at least 1 minute" })
   duration!: number;
 
@@ -62,7 +63,8 @@ class ActivityDTO {
 }
 
 class ItineraryDayDTO {
-  @IsNumber()
+  @IsNumber({}, { message: "Day number must be a number" })
+  @Type(() => Number)
   @Min(1, { message: "Day number must be at least 1" })
   dayNumber!: number;
 
@@ -86,6 +88,9 @@ class ItineraryDayDTO {
 
   @IsString()
   @IsOptional()
+  @Matches(/^[A-Za-z\s]*$/, {
+    message: "Accommodation can only contain letters and spaces",
+  })
   @Transform(({ value }) => value?.trim() || "")
   accommodation?: string;
 
@@ -144,11 +149,13 @@ export class CreatePackageRequestDTO {
   @IsString({ each: true })
   images!: string[];
 
-  @IsNumber()
+  @IsNumber({}, { message: "Max group size must be a number" })
+  @Type(() => Number)
   @Min(1, { message: "Max group size must be at least 1" })
   maxGroupSize!: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: "Base price must be a number" })
+  @Type(() => Number)
   @Min(0.01, { message: "Base price must be greater than 0" })
   basePrice!: number;
 

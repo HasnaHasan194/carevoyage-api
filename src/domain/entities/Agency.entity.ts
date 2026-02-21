@@ -10,6 +10,7 @@ export interface IAgencyEntity {
   registrationNumber: string;
   kycDocs: string[];
   verificationStatus: TVerificationStatus;
+  rejectionReason?: string;
   description?: string;
   isBlocked: boolean;
   createdAt: Date;

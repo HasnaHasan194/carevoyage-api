@@ -11,6 +11,18 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
     session?: ClientSession
   ): Promise<IPackageEntity[]>;
 
+  findByAgencyIdPaginated(
+    agencyId: string,
+    page: number,
+    limit: number,
+    status?: TPackageStatus | "all",
+    includeDeleted?: boolean,
+    search?: string,
+    category?: string,
+    sortBy?: string,
+    sortOrder?: "asc" | "desc"
+  ): Promise<{ packages: IPackageEntity[]; total: number }>;
+
   findByIdAndAgencyId(
     packageId: string,
     agencyId: string,
@@ -59,6 +71,7 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
     sortOrder?: "asc" | "desc";
     page: number;
     limit: number;
+    activeCategoryNames?: string[];
   }): Promise<{ packages: IPackageEntity[]; total: number }>;
   
 

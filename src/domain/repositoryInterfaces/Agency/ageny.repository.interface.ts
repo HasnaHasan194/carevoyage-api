@@ -5,7 +5,8 @@ export interface IAgencyRepository extends IBaseRepository<IAgencyEntity> {
   findByUserId(userId: string): Promise<IAgencyEntity | null>;
   updateVerificationStatus(
     agencyId: string,
-    status: "pending" | "verified" | "rejected"
+    status: "pending" | "verified" | "rejected",
+    rejectionReason?: string
   ): Promise<IAgencyEntity | null>;
 
   updateBlockStatus(agencyId: string, isBlocked: boolean): Promise<boolean>;
@@ -19,6 +20,7 @@ export interface IAgencyRepository extends IBaseRepository<IAgencyEntity> {
     limit: number,
     search?: string,
     status?: "all" | "blocked" | "unblocked",
+    verificationStatus?: "all" | "pending" | "verified" | "rejected",
     sort?: string,
     order?: "asc" | "desc"
   ): Promise<{ agencies: IAgencyEntity[]; total: number }>;
