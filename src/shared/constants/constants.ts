@@ -115,7 +115,11 @@ export const ERROR_MESSAGE = {
     NOT_FOUND_FOR_USER: "Agency not found for this user",
     PROFILE_NOT_FOUND: "Agency profile not found",
     ACCOUNT_BLOCKED: "Agency account is blocked",
+    REGISTRATION_REJECTED: "Your agency registration was not approved. Please contact support.",
+    REGISTRATION_PENDING: "Your agency registration is pending approval. Please wait for admin verification.",
+    REVERIFY_LINK_INVALID_OR_EXPIRED: "Invalid or expired reverification link. Please request a new one from the rejection email.",
     REGISTRATION_NUMBER_EXISTS: "Registration number already exists",
+    NOT_PENDING: "Agency is not pending approval. Only agencies with pending status can be approved or rejected.",
   },
 
   // Package Errors
@@ -167,6 +171,15 @@ export const ERROR_MESSAGE = {
     INVALID_S3_URL_FORMAT: "Invalid S3 URL format",
   },
 
+  // Wishlist Errors
+  WISHLIST: {
+    ALREADY_IN_WISHLIST: "Package is already in your bucket list",
+    NOT_IN_WISHLIST: "Package is not in your bucket list",
+    PACKAGE_NOT_PUBLISHED: "Only published packages can be added to bucket list",
+    PACKAGE_CANCELLED: "Cancelled packages cannot be added to bucket list",
+    PACKAGE_NOT_FOUND: "Package not found",
+  },
+
   // Booking Errors
   BOOKING: {
     NOT_FOUND: "Booking not found",
@@ -187,6 +200,12 @@ export const ERROR_MESSAGE = {
     NOT_FOUND: "Review not found",
     ALREADY_EXISTS: "You have already reviewed this package",
     CANNOT_REVIEW_OWN: "Cannot review your own package",
+  },
+
+  // Stripe / Payment Errors
+  STRIPE: {
+    PAYMENT_ERROR: "Payment session could not be created",
+    WEBHOOK_SIGNATURE_INVALID: "Invalid webhook signature",
   },
 };
 
@@ -223,6 +242,9 @@ export const SUCCESS_MESSAGE = {
     STATUS_UPDATED: "Agency status updated",
     BLOCKED: "Agency blocked successfully",
     UNBLOCKED: "Agency unblocked successfully",
+    VERIFIED: "Agency approved successfully",
+    REJECTED: "Agency rejected successfully",
+    REVERIFY_SUBMITTED: "Reverification request submitted. Your agency will be reviewed again by our team.",
   },
 
   // Package Success
@@ -262,6 +284,13 @@ export const SUCCESS_MESSAGE = {
     CANCELLED: "Booking cancelled successfully",
     FETCHED: "Booking fetched successfully",
     BOOKINGS_FETCHED: "Bookings fetched successfully",
+  },
+
+  // Wishlist Success
+  WISHLIST: {
+    ADDED: "Package added to bucket list successfully",
+    REMOVED: "Package removed from bucket list successfully",
+    FETCHED: "Bucket list fetched successfully",
   },
 
   // Review Success

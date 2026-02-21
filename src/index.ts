@@ -11,8 +11,7 @@ dotenv.config();
 async function startServer() {
   try {
     ServiceRegistery.registerService();
-    
-    
+
     try {
       await connectRedis();
       console.log("Redis connected");
@@ -34,6 +33,11 @@ async function startServer() {
     );
   } catch (error) {
     console.error("Server startup failed:", error);
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     process.exit(1);
   }
 }

@@ -13,7 +13,7 @@ import {
   Validate,
   IsIn,
 } from "class-validator";
-import { Transform } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { PACKAGE_CATEGORIES } from "../../../domain/constants/package-categories";
 import {
   IsNotPastDateConstraint,
@@ -63,12 +63,14 @@ export class UpdatePackageBasicDTO {
   @Transform(({ value }) => value?.trim())
   meetingPoint?: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: "Max group size must be a number" })
+  @Type(() => Number)
   @Min(1, { message: "Max group size must be at least 1" })
   @ValidateIf((o) => o.maxGroupSize !== undefined && o.maxGroupSize !== null)
   maxGroupSize?: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: "Base price must be a number" })
+  @Type(() => Number)
   @Min(0.01, { message: "Base price must be greater than 0" })
   @ValidateIf((o) => o.basePrice !== undefined && o.basePrice !== null)
   basePrice?: number;

@@ -58,6 +58,9 @@ export interface IAuthController {
   //Verify Reset Token
   verifyResetToken(req: Request, res: Response): Promise<void>;
 
+  //Reverify Agency (rejected agency requests review again via email link)
+  reverifyAgency(req: Request, res: Response): Promise<void>;
+
   //Google Authentication
   googleAuth(req: Request, res: Response): Promise<void>;
 

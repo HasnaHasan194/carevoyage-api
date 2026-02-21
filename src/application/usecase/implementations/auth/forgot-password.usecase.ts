@@ -7,7 +7,7 @@ import { IEmailService } from "../../../../domain/service-interfaces/email-servi
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
-import { redisClient } from "../../../../infrastructure/config/redis.config";
+import { redisClient, connectRedis } from "../../../../infrastructure/config/redis.config";
 import { config } from "../../../../shared/config";
 
 @injectable()
@@ -73,20 +73,52 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
       role: user.role,
     });
 
-    // Store token in Redis with 10 minutes expiry 
+    // Ensure client URI is configured for reset link
+    if (!config.client?.URI || config.client.URI.trim() === "") {
+      console.error("Forgot password: CLIENT_URI is not configured");
+      throw new ValidationError(
+        "Password reset is not configured. Please contact support."
+      );
+    }
+
+    // Ensure Redis is connected before storing token
+    if (!redisClient.isOpen) {
+      await connectRedis();
+    }
+    if (!redisClient.isOpen) {
+      console.warn("Forgot password: Redis is not available");
+      throw new ValidationError(
+        "Password reset is temporarily unavailable. Please try again later."
+      );
+    }
+
     const tokenKey = `reset_token:${resetToken}`;
-    await redisClient.set(tokenKey, user.id, { EX: 600 }); 
+    try {
+      await redisClient.set(tokenKey, user.id, { EX: 600 });
+    } catch (redisErr) {
+      console.error("Forgot password: Redis set failed", redisErr);
+      throw new ValidationError(
+        "Unable to process password reset. Please try again later."
+      );
+    }
 
     // Generate reset link
     const resetLink = `${config.client.URI}/reset-password?token=${resetToken}`;
 
     // Send email with reset link
     const emailHtml = this.getResetPasswordEmailHtml(resetLink);
-    await this._emailService.sendMail(
-      user.email,
-      "Reset Your Password - CareVoyage",
-      emailHtml
-    );
+    try {
+      await this._emailService.sendMail(
+        user.email,
+        "Reset Your Password - CareVoyage",
+        emailHtml
+      );
+    } catch (emailErr) {
+      console.error("Forgot password: Send email failed", emailErr);
+      throw new ValidationError(
+        "Unable to send reset email. Please try again later or contact support."
+      );
+    }
   }
 
   private getResetPasswordEmailHtml(resetLink: string): string {

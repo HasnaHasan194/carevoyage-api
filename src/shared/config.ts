@@ -35,4 +35,9 @@ export const config = {
     CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",
     CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || "",
   },
+
+  stripe: {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  },
 };

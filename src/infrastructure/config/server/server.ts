@@ -2,16 +2,28 @@ import express, { Application } from "express";
 import cors from "cors";
 import { config } from "../../../shared/config";
 import cookieParser from "cookie-parser";
-import { authRoutes, adminRoutes, agencyRoutes, errorMiddleware, userRoutes, caretakerRoutes, packageRoutes } from "../../dependencyinjection/resolve";
+import {
+  authRoutes,
+  adminRoutes,
+  agencyRoutes,
+  errorMiddleware,
+  userRoutes,
+  caretakerRoutes,
+  packageRoutes,
+  bookingRoutes,
+  paymentController,
+} from "../../dependencyinjection/resolve";
 import { loggerMiddleware } from "../../dependencyinjection/resolve";
-
 
 export class App {
   private _app: Application;
   constructor() {
     this._app = express();
+
     this.configureMiddleware();
+
     this.configureRoutes();
+
     this.configureErrorMiddleware();
   }
 
@@ -20,12 +32,20 @@ export class App {
       cors({
         origin: config.client.URI,
         credentials: true,
-      })
+      }),
+    );
+    // Stripe webhook must receive raw body – mount before express.json()
+    this._app.use(
+      "/api/v1/payments/webhook",
+      express.raw({ type: "application/json" }),
+      (req, res, next) => {
+        paymentController.stripeWebhook(req, res).catch(next);
+      }
     );
     this._app.use(express.json());
     this._app.use(express.urlencoded({ extended: true }));
     this._app.use(cookieParser());
-    this._app.use(loggerMiddleware.handle.bind(loggerMiddleware))
+    this._app.use(loggerMiddleware.handle.bind(loggerMiddleware));
     this._app.use((req, res, next) => {
       console.log(req.url);
       next();
@@ -34,16 +54,19 @@ export class App {
 
   private configureRoutes() {
     this._app.use("/api/v1/auth", authRoutes.router);
+
     this._app.use("/api/v1/admin", adminRoutes.router);
+
     this._app.use("/api/v1/agency", agencyRoutes.router);
+
     this._app.use("/api/v1/user", userRoutes.router);
     this._app.use("/api/v1/caretaker", caretakerRoutes.router);
     this._app.use("/api/v1/packages", packageRoutes.router);
+    this._app.use("/api/v1/booking", bookingRoutes.router);
   }
 
   private configureErrorMiddleware() {
     this._app.use(errorMiddleware.handleError.bind(errorMiddleware));
-
   }
 
   public getApp(): Application {

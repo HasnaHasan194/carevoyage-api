@@ -125,16 +125,32 @@ export class AgencyPackageController implements IAgencyPackageController {
       | "cancelled"
       | "all") || "all";
 
-    const packages = await this._getAgencyPackagesUsecase.execute(
+    // Extract pagination parameters (optional for backward compatibility)
+    const page = req.query.page ? parseInt(req.query.page as string) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+
+    // Extract filtering parameters
+    const search = req.query.search as string | undefined;
+    const category = req.query.category as string | undefined;
+    const sortBy = req.query.sortBy as string | undefined;
+    const sortOrder = req.query.sortOrder as "asc" | "desc" | undefined;
+
+    const result = await this._getAgencyPackagesUsecase.execute(
       agencyId,
-      status
+      status,
+      page,
+      limit,
+      search,
+      category,
+      sortBy,
+      sortOrder
     );
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
       "Packages retrieved successfully",
-      packages
+      result
     );
   }
 

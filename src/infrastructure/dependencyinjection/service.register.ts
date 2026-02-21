@@ -9,9 +9,17 @@ import { IGoogleAuthService } from "../../domain/service-interfaces/google-auth-
 import { GoogleAuthService } from "../service/google-auth.service";
 import { ILogger } from "../../domain/service-interfaces/logger.interface";
 import { WinstonLoggerAdapter } from "../service/winston-logger.adapter";
+import { IPaymentService } from "../../domain/service-interfaces/payment-service.interface";
+import { StripePaymentService } from "../service/payment.service";
+import { stripe } from "../config/stripe/stripe.config";
 
 export class ServiceRegistery {
   static registerService(): void {
+    container.register("Stripe", { useValue: stripe });
+    container.register<IPaymentService>("IPaymentService", {
+      useClass: StripePaymentService,
+    });
+
     container.register<IEmailService>("IEmailService", {
       useClass: EmailService,
     });

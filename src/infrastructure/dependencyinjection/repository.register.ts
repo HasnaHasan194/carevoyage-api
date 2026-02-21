@@ -17,12 +17,22 @@ import { IItineraryRepository } from "../../domain/repositoryInterfaces/Itinerar
 import { ItineraryRepository } from "../repository/itinerary/itinerary.repository";
 import { IActivityRepository } from "../../domain/repositoryInterfaces/Activity/activity.repository.interface";
 import { ActivityRepository } from "../repository/activity/activity.repository";
+import { ICategoryRepository } from "../../domain/repositoryInterfaces/Category/category.repository.interface";
+import { CategoryRepository } from "../repository/category/category.repository";
 import { IS3Service } from "../../domain/service-interfaces/s3-service.interface";
 import { S3Service } from "../service/s3.service";
 import { IDBSession } from "../../infrastructure/interface/session.interface";
 import { MongooseDBSession } from "../../infrastructure/database/mongooseDBSession/mongooseDBSession";
-
-
+import { IWishlistRepository } from "../../domain/repositoryInterfaces/Wishlist/wishlist.repository.interface";
+import { WishlistRepository } from "../repository/wishlist/wishlist.repository";
+import { ISpecialNeedsMasterRepository } from "../../domain/repositoryInterfaces/SpecialNeedsMaster/special-needs-master.repository.interface";
+import { SpecialNeedsMasterRepository } from "../repository/special-needs-master/special-needs-master.repository";
+import { IAgencySpecialNeedsRepository } from "../../domain/repositoryInterfaces/AgencySpecialNeeds/agency-special-needs.repository.interface";
+import { AgencySpecialNeedsRepository } from "../repository/agency-special-needs/agency-special-needs.repository";
+import { IAgencySpecialNeedsMasterRepository } from "../../domain/repositoryInterfaces/AgencySpecialNeedsMaster/agency-special-needs-master.repository.interface";
+import { AgencySpecialNeedsMasterRepository } from "../repository/agency-special-needs-master/agency-special-needs-master.repository";
+import { IBookingRepository } from "../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import { BookingRepository } from "../repository/booking/booking.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -71,6 +81,11 @@ export class RepositoryRegister {
       { useClass: ActivityRepository } as ClassProvider<IActivityRepository>
     );
 
+    container.register<ICategoryRepository>(
+      "ICategoryRepository",
+      { useClass: CategoryRepository } as ClassProvider<ICategoryRepository>
+    );
+
     container.register<IS3Service>(
       "IS3Service",
       { useClass: S3Service } as ClassProvider<IS3Service>
@@ -79,6 +94,31 @@ export class RepositoryRegister {
     container.register<IDBSession>(
       "IDBSession",
       { useClass: MongooseDBSession } as ClassProvider<IDBSession>
+    );
+
+    container.register<IWishlistRepository>(
+      "IWishlistRepository",
+      { useClass: WishlistRepository } as ClassProvider<IWishlistRepository>
+    );
+
+    container.register<ISpecialNeedsMasterRepository>(
+      "ISpecialNeedsMasterRepository",
+      { useClass: SpecialNeedsMasterRepository } as ClassProvider<ISpecialNeedsMasterRepository>
+    );
+
+    container.register<IAgencySpecialNeedsRepository>(
+      "IAgencySpecialNeedsRepository",
+      { useClass: AgencySpecialNeedsRepository } as ClassProvider<IAgencySpecialNeedsRepository>
+    );
+
+    container.register<IAgencySpecialNeedsMasterRepository>(
+      "IAgencySpecialNeedsMasterRepository",
+      { useClass: AgencySpecialNeedsMasterRepository } as ClassProvider<IAgencySpecialNeedsMasterRepository>
+    );
+
+    container.register<IBookingRepository>(
+      "IBookingRepository",
+      { useClass: BookingRepository } as ClassProvider<IBookingRepository>
     );
   }
 }

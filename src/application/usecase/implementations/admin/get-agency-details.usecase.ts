@@ -28,7 +28,9 @@ export class GetAgencyDetailsUsecase implements IGetAgencyDetailsUsecase {
     return AgencyMapper.toAgencyResponseDto(
       agency,
       owner?.email,
-      owner ? `${owner.firstName} ${owner.lastName}` : undefined
+      owner ? `${owner.firstName} ${owner.lastName}` : undefined,
+      owner?.phone,
+      owner?.profileImage
     );
   }
 }
