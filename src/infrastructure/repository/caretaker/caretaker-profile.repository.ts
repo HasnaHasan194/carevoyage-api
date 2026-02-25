@@ -54,6 +54,33 @@ export class CaretakerProfileRepository
     return doc ? CaretakerProfileMapper.toEntity(doc) : null;
   }
 
+  async updateAvailabilityStatus(
+    profileId: string,
+    availabilityStatus: "AVAILABLE" | "BUSY" | "INACTIVE"
+  ): Promise<ICaretakerProfileEntity | null> {
+    const doc = await caretakerProfileDB
+      .findByIdAndUpdate(
+        profileId,
+        { $set: { availabilityStatus } },
+        { new: true }
+      )
+      .exec();
+
+    return doc ? CaretakerProfileMapper.toEntity(doc) : null;
+  }
+
+  async softDelete(profileId: string): Promise<ICaretakerProfileEntity | null> {
+    const doc = await caretakerProfileDB
+      .findByIdAndUpdate(
+        profileId,
+        { $set: { isDeleted: true, availabilityStatus: "INACTIVE" } },
+        { new: true }
+      )
+      .exec();
+
+    return doc ? CaretakerProfileMapper.toEntity(doc) : null;
+  }
+
   async activateProfile(
     profileId: string,
     userId: string
@@ -81,6 +108,21 @@ export class CaretakerProfileRepository
   ): Promise<"pending" | "verified" | "rejected" | null> {
     const profile = await this.findByUserId(userId);
     return profile?.verificationStatus || null;
+  }
+
+  async updatePricePerDay(
+    profileId: string,
+    pricePerDay: number
+  ): Promise<ICaretakerProfileEntity | null> {
+    const doc = await caretakerProfileDB
+      .findByIdAndUpdate(
+        profileId,
+        { $set: { pricePerDay } },
+        { new: true }
+      )
+      .exec();
+
+    return doc ? CaretakerProfileMapper.toEntity(doc) : null;
   }
 }
 

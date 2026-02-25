@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { inject, injectable } from "tsyringe";
 import { IPaymentService } from "../../../../domain/service-interfaces/payment-service.interface";
 import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IHandleStripeWebhookUsecase } from "../../interfaces/payment/handle-stripe-webhook-usecase.interface";
 
 @injectable()
@@ -10,7 +11,9 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
     @inject("IPaymentService")
     private _paymentService: IPaymentService,
     @inject("IBookingRepository")
-    private _bookingRepository: IBookingRepository
+    private _bookingRepository: IBookingRepository,
+    @inject("ICaretakerProfileRepository")
+    private _caretakerProfileRepository: ICaretakerProfileRepository
   ) {}
 
   async execute(
@@ -40,5 +43,13 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
       status: "paid",
       paidAt: new Date(),
     });
+
+    // If a caretaker is attached to this booking, mark them as BUSY
+    if (booking.caretakerId) {
+      await this._caretakerProfileRepository.updateAvailabilityStatus(
+        booking.caretakerId,
+        "BUSY"
+      );
+    }
   }
 }

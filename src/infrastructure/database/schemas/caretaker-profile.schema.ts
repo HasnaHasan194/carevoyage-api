@@ -71,7 +71,7 @@ export const caretakerProfileSchema = new Schema<ICaretakerProfileModel>(
       type: String,
       enum: ["invited", "active", "blocked"],
       required: true,
-      default: "invited", // Set to "invited" during invite, "active" during signup
+      default: "invited", // Onboarding / account status (not availability)
     },
     verificationStatus: {
       type: String,
@@ -92,6 +92,24 @@ export const caretakerProfileSchema = new Schema<ICaretakerProfileModel>(
     reviewCount: {
       type: Number,
       default: 0,
+    },
+    availabilityStatus: {
+      type: String,
+      enum: ["AVAILABLE", "BUSY", "INACTIVE"],
+      required: true,
+      default: "INACTIVE",
+      index: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      required: true,
+      default: false,
+      index: true,
+    },
+    pricePerDay: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
     joinedAt: {
       type: Date,

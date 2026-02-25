@@ -10,13 +10,13 @@ export class MongoConnect {
       await mongoose.connect(this._dburl);
       console.log("db connected successsfully");
       mongoose.connection.on("error", (error) => {
-        console.log("mongoDb connection error", error);
+        console.error("mongoDb connection error", error);
       });
       mongoose.connection.on("disconnected", () => {
-        console.log("mongoDb disconnected");
+        console.warn("mongoDb disconnected");
       });
     } catch (error) {
-      console.log("failed to connect mongoDB", error);
+      console.error("failed to connect mongoDB", error);
     }
   }
 }

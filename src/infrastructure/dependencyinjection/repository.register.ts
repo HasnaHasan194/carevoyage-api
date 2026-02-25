@@ -33,6 +33,8 @@ import { IAgencySpecialNeedsMasterRepository } from "../../domain/repositoryInte
 import { AgencySpecialNeedsMasterRepository } from "../repository/agency-special-needs-master/agency-special-needs-master.repository";
 import { IBookingRepository } from "../../domain/repositoryInterfaces/Booking/booking.repository.interface";
 import { BookingRepository } from "../repository/booking/booking.repository";
+import { ICaretakerRequestRepository } from "../../domain/repositoryInterfaces/CaretakerRequest/caretaker-request.repository.interface";
+import { CaretakerRequestRepository } from "../repository/caretaker-request/caretaker-request.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -119,6 +121,11 @@ export class RepositoryRegister {
     container.register<IBookingRepository>(
       "IBookingRepository",
       { useClass: BookingRepository } as ClassProvider<IBookingRepository>
+    );
+
+    container.register<ICaretakerRequestRepository>(
+      "ICaretakerRequestRepository",
+      { useClass: CaretakerRequestRepository } as ClassProvider<ICaretakerRequestRepository>
     );
   }
 }

@@ -13,6 +13,15 @@ export interface ICaretakerProfileRepository
     profileId: string,
     status: "invited" | "active" | "blocked"
   ): Promise<ICaretakerProfileEntity | null>;
+  updateAvailabilityStatus(
+    profileId: string,
+    availabilityStatus: "AVAILABLE" | "BUSY" | "INACTIVE"
+  ): Promise<ICaretakerProfileEntity | null>;
+  updatePricePerDay(
+    profileId: string,
+    pricePerDay: number
+  ): Promise<ICaretakerProfileEntity | null>;
+  softDelete(profileId: string): Promise<ICaretakerProfileEntity | null>;
   activateProfile(
     profileId: string,
     userId: string

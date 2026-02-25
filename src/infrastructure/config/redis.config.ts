@@ -8,9 +8,7 @@ export const redisClient = createClient({
   }
 });
 
-redisClient.on("connect", () => {
-  console.log(" Redis connected");
-});
+redisClient.on("connect", () => {});
 
 redisClient.on("error", (err) => {
 
@@ -20,13 +18,9 @@ redisClient.on("error", (err) => {
 export const connectRedis = async () => {
   if (!redisClient.isOpen) {
     try {
-      console.log("Attempting Redis connection...");
       await redisClient.connect();
-      console.log("Redis connected successfully");
     } catch (error) {
       console.warn("Redis connection failed:", (error as Error).message);
-      console.log("Server will continue without Redis caching...");
-    
     }
   }
 };

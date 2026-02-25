@@ -38,6 +38,14 @@ export class AddToWishlistUsecase implements IAddToWishlistUsecase {
       throw new ValidationError(ERROR_MESSAGE.WISHLIST.PACKAGE_NOT_PUBLISHED);
     }
 
+    // Only upcoming packages (startDate in future) can be added to bucket list
+    const todayStartUTC = new Date();
+    todayStartUTC.setUTCHours(0, 0, 0, 0);
+    const packageStart = new Date(packageEntity.startDate);
+    if (packageStart.getTime() <= todayStartUTC.getTime()) {
+      throw new ValidationError(ERROR_MESSAGE.WISHLIST.PACKAGE_START_DATE_NOT_UPCOMING);
+    }
+
     // Check if already in wishlist
     const existingWishlistItem = await this._wishlistRepository.findByUserIdAndPackageId(
       userId,

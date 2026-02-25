@@ -16,7 +16,10 @@ async function startServer() {
       await connectRedis();
       console.log("Redis connected");
     } catch (redisError) {
-      console.warn("Redis connection failed, continuing without Redis:", (redisError as Error).message);
+      console.warn(
+        "[startup] Redis connection failed, continuing without Redis:",
+        (redisError as Error).message,
+      );
     }
 
     const mongo = new MongoConnect();
@@ -27,21 +30,19 @@ async function startServer() {
     const expressServer = app.getApp();
 
     const PORT = Number(config.server.PORT) || 3000;
-
-    expressServer.listen(PORT, () =>
-      console.log(`Server running at port ${PORT}`)
-    );
+    expressServer.listen(PORT, () => {
+      console.log(`Server running at port ${PORT}`);
+    });
+    expressServer.listen(PORT, () => {});
   } catch (error) {
-    console.error("Server startup failed:", error);
+    console.error(" Server startup failed:", error);
     if (error instanceof Error) {
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
+      console.error(" Error name:", error.name);
+      console.error(" Error message:", error.message);
+      console.error(" Error stack:", error.stack);
     }
     process.exit(1);
   }
 }
 
-
 startServer();
-

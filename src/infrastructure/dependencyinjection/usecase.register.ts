@@ -141,6 +141,20 @@ import { ICreateBookingCheckoutUseCase } from "../../application/usecase/interfa
 import { CreateBookingCheckoutUseCase } from "../../application/usecase/implementations/booking/create-booking-checkout.usecase";
 import { IHandleStripeWebhookUsecase } from "../../application/usecase/interfaces/payment/handle-stripe-webhook-usecase.interface";
 import { HandleStripeWebhookUsecase } from "../../application/usecase/implementations/payment/handle-stripe-webhook.usecase";
+import { IGetPackageSpecialNeedsForBookingUseCase } from "../../application/usecase/interfaces/booking/get-package-special-needs-for-booking.interface";
+import { GetPackageSpecialNeedsForBookingUseCase } from "../../application/usecase/implementations/booking/get-package-special-needs-for-booking.usecase";
+import { IPreviewBookingPriceUseCase } from "../../application/usecase/interfaces/booking/preview-booking-price.interface";
+import { PreviewBookingPriceUseCase } from "../../application/usecase/implementations/booking/preview-booking-price.usecase";
+import { IGetAvailableCaretakersForBookingUseCase } from "../../application/usecase/interfaces/booking/get-available-caretakers-for-booking.interface";
+import { GetAvailableCaretakersForBookingUseCase } from "../../application/usecase/implementations/booking/get-available-caretakers-for-booking.usecase";
+import { IConfirmBookingSuccessUseCase } from "../../application/usecase/interfaces/booking/confirm-booking-success.interface";
+import { ConfirmBookingSuccessUseCase } from "../../application/usecase/implementations/booking/confirm-booking-success.usecase";
+import { ICreateCaretakerRequestUseCase } from "../../application/usecase/interfaces/caretaker-request/create-caretaker-request.interface";
+import { CreateCaretakerRequestUseCase } from "../../application/usecase/implementations/caretaker-request/create-caretaker-request.usecase";
+import { IListCaretakerRequestsUseCase } from "../../application/usecase/interfaces/caretaker-request/list-caretaker-requests.interface";
+import { ListCaretakerRequestsUseCase } from "../../application/usecase/implementations/caretaker-request/list-caretaker-requests.usecase";
+import { IFulfillCaretakerRequestUseCase } from "../../application/usecase/interfaces/caretaker-request/fulfill-caretaker-request.interface";
+import { FulfillCaretakerRequestUseCase } from "../../application/usecase/implementations/caretaker-request/fulfill-caretaker-request.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -466,6 +480,28 @@ export class UsecaseRegistory {
 
     container.register<IHandleStripeWebhookUsecase>("IHandleStripeWebhookUsecase", {
       useClass: HandleStripeWebhookUsecase,
+    });
+
+    container.register<IGetPackageSpecialNeedsForBookingUseCase>("IGetPackageSpecialNeedsForBookingUseCase", {
+      useClass: GetPackageSpecialNeedsForBookingUseCase,
+    });
+    container.register<IPreviewBookingPriceUseCase>("IPreviewBookingPriceUseCase", {
+      useClass: PreviewBookingPriceUseCase,
+    });
+    container.register<IGetAvailableCaretakersForBookingUseCase>("IGetAvailableCaretakersForBookingUseCase", {
+      useClass: GetAvailableCaretakersForBookingUseCase,
+    });
+    container.register<IConfirmBookingSuccessUseCase>("IConfirmBookingSuccessUseCase", {
+      useClass: ConfirmBookingSuccessUseCase,
+    });
+    container.register<ICreateCaretakerRequestUseCase>("ICreateCaretakerRequestUseCase", {
+      useClass: CreateCaretakerRequestUseCase,
+    });
+    container.register<IListCaretakerRequestsUseCase>("IListCaretakerRequestsUseCase", {
+      useClass: ListCaretakerRequestsUseCase,
+    });
+    container.register<IFulfillCaretakerRequestUseCase>("IFulfillCaretakerRequestUseCase", {
+      useClass: FulfillCaretakerRequestUseCase,
     });
   }
 }

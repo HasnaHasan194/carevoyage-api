@@ -20,4 +20,9 @@ export class BookingRepository
     if (!doc) return null;
     return BookingMapper.toEntity(doc);
   }
+
+  async findByPackageId(packageId: string): Promise<IBookingEntity[]> {
+    const docs = await bookingDB.find({ packageId }).exec();
+    return docs.map((doc) => BookingMapper.toEntity(doc));
+  }
 }

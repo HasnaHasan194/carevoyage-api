@@ -19,7 +19,6 @@ export class App {
   private _app: Application;
   constructor() {
     this._app = express();
-
     this.configureMiddleware();
 
     this.configureRoutes();
@@ -46,10 +45,6 @@ export class App {
     this._app.use(express.urlencoded({ extended: true }));
     this._app.use(cookieParser());
     this._app.use(loggerMiddleware.handle.bind(loggerMiddleware));
-    this._app.use((req, res, next) => {
-      console.log(req.url);
-      next();
-    });
   }
 
   private configureRoutes() {

@@ -11,6 +11,8 @@ import {
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
+import { UpdateCaretakerAvailabilityRequestDTO } from "../../../application/dto/request/update-caretaker-availability-request.dto";
+import { UpdateCaretakerPriceRequestDTO } from "../../../application/dto/request/update-caretaker-price-request.dto";
 import { CreatePackageRequestDTO } from "../../../application/dto/request/create-package-request.dto";
 import { UpdatePackageRequestDTO } from "../../../application/dto/request/update-package-request.dto";
 import { UpdatePackageBasicDTO } from "../../../application/dto/request/update-package-basic.dto";
@@ -18,6 +20,7 @@ import { UpdatePackageImagesDTO } from "../../../application/dto/request/update-
 import { UpdatePackageItineraryDTO } from "../../../application/dto/request/update-package-itinerary.dto";
 import { CreateActivityRequestDTO } from "../../../application/dto/request/create-activity-request.dto";
 import { UpdateAgencyProfileRequestDTO } from "../../../application/dto/request/update-agency-profile-request.dto";
+import { FulfillCaretakerRequestRequestDTO } from "../../../application/dto/request/fulfill-caretaker-request-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { authorizeRole } from "../../middlewares/auth.middleware";
 import multer from "multer";
@@ -53,6 +56,43 @@ export class AgencyRoutes extends BaseRoute {
       authorizeRole(["agency_owner"]),
       validationMiddleware(InviteCaretakerRequestDTO),
       asyncHandler(agencyController.inviteCaretaker.bind(agencyController))
+    );
+    this.router.get(
+      "/caretakers",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyController.listCaretakers.bind(agencyController))
+    );
+    this.router.patch(
+      "/caretakers/:caretakerId/status",
+      authorizeRole(["agency_owner"]),
+      validationMiddleware(UpdateCaretakerAvailabilityRequestDTO),
+      asyncHandler(
+        agencyController.updateCaretakerAvailability.bind(agencyController)
+      )
+    );
+    this.router.patch(
+      "/caretakers/:caretakerId/price",
+      authorizeRole(["agency_owner"]),
+      validationMiddleware(UpdateCaretakerPriceRequestDTO),
+      asyncHandler(
+        agencyController.updateCaretakerPrice.bind(agencyController)
+      )
+    );
+    this.router.delete(
+      "/caretakers/:caretakerId",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyController.softDeleteCaretaker.bind(agencyController))
+    );
+    this.router.get(
+      "/caretaker-requests",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyController.listCaretakerRequests.bind(agencyController))
+    );
+    this.router.patch(
+      "/caretaker-requests/:requestId/fulfill",
+      authorizeRole(["agency_owner"]),
+      validationMiddleware(FulfillCaretakerRequestRequestDTO),
+      asyncHandler(agencyController.fulfillCaretakerRequest.bind(agencyController))
     );
 
     // Package Management Routes

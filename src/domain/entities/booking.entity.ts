@@ -13,6 +13,10 @@ export interface IBookingEntity {
   status: TBookingStatus;
   stripeSessionId?: string;
   paidAt?: Date;
+  /** Selected caretaker profile ID (extended booking flow) */
+  caretakerId?: string;
+  /** Special need IDs selected for this booking */
+  selectedSpecialNeedIds?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
