@@ -20,6 +20,9 @@ export class CaretakerProfileMapper {
       kycDocs: doc.kycDocs,
       rating: doc.rating,
       reviewCount: doc.reviewCount,
+      availabilityStatus: doc.availabilityStatus ?? "INACTIVE",
+      isDeleted: doc.isDeleted ?? false,
+      pricePerDay: doc.pricePerDay ?? undefined,
       joinedAt: doc.joinedAt,
       address: doc.address
         ? {

@@ -2,6 +2,8 @@ import { inject, injectable } from "tsyringe";
 import { ICancelPackageUsecase } from "../../interfaces/package/cancel-package.interface";
 import { PackageResponseDTO } from "../../../dto/response/package-response.dto";
 import { IPackageRepository } from "../../../../domain/repositoryInterfaces/Package/package.repository.interface";
+import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IItineraryRepository } from "../../../../domain/repositoryInterfaces/Itinerary/itinerary.repository.interface";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
@@ -14,7 +16,11 @@ export class CancelPackageUsecase implements ICancelPackageUsecase {
     @inject("IPackageRepository")
     private _packageRepository: IPackageRepository,
     @inject("IItineraryRepository")
-    private _itineraryRepository: IItineraryRepository
+    private _itineraryRepository: IItineraryRepository,
+    @inject("IBookingRepository")
+    private _bookingRepository: IBookingRepository,
+    @inject("ICaretakerProfileRepository")
+    private _caretakerProfileRepository: ICaretakerProfileRepository
   ) {}
 
   async execute(
@@ -45,6 +51,19 @@ export class CancelPackageUsecase implements ICancelPackageUsecase {
 
     if (!cancelledPackage) {
       throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
+    }
+
+    // When a package is cancelled, release any BUSY caretakers attached
+    const bookingsWithCaretakers = await this._bookingRepository.findByPackageId(
+      packageId
+    );
+    for (const booking of bookingsWithCaretakers) {
+      if (booking.caretakerId) {
+        await this._caretakerProfileRepository.updateAvailabilityStatus(
+          booking.caretakerId,
+          "AVAILABLE"
+        );
+      }
     }
 
     // Fetch itinerary

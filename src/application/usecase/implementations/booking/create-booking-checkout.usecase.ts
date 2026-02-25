@@ -4,6 +4,7 @@ import { ValidationError } from "../../../../domain/errors/validationError";
 import { IPackageRepository } from "../../../../domain/repositoryInterfaces/Package/package.repository.interface";
 import { IAgencySpecialNeedsRepository } from "../../../../domain/repositoryInterfaces/AgencySpecialNeeds/agency-special-needs.repository.interface";
 import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IPaymentService } from "../../../../domain/service-interfaces/payment-service.interface";
 import {
   ICreateBookingCheckoutUseCase,
@@ -21,6 +22,8 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
     private _agencySpecialNeedsRepository: IAgencySpecialNeedsRepository,
     @inject("IBookingRepository")
     private _bookingRepository: IBookingRepository,
+    @inject("ICaretakerProfileRepository")
+    private _caretakerProfileRepository: ICaretakerProfileRepository,
     @inject("IPaymentService")
     private _paymentService: IPaymentService
   ) {}
@@ -30,6 +33,7 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
     data: {
       packageId: string;
       caretakerFee?: number;
+      caretakerId?: string;
       specialNeedIds?: string[];
     }
   ): Promise<CreateBookingCheckoutResult> {
@@ -45,11 +49,37 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
 
     const tripDays = this.getTripDays(pkg.startDate, pkg.endDate);
     const basePrice = pkg.basePrice;
-    const caretakerFee = data.caretakerFee ?? 0;
+    let caretakerFee = data.caretakerFee ?? 0;
+    let caretakerId: string | undefined;
+    const selectedSpecialNeedIds = data.specialNeedIds ?? [];
+
+    if (data.caretakerId) {
+      const caretaker = await this._caretakerProfileRepository.findById(
+        data.caretakerId
+      );
+      if (!caretaker) {
+        throw new NotFoundError("Caretaker not found");
+      }
+      if (caretaker.agencyId !== pkg.agencyId) {
+        throw new ValidationError(
+          "Caretaker does not belong to this package's agency"
+        );
+      }
+      if (caretaker.status !== "active") {
+        throw new ValidationError("Caretaker is not active");
+      }
+      if (caretaker.availabilityStatus !== "AVAILABLE" || caretaker.isDeleted) {
+        throw new ValidationError("Caretaker is not available");
+      }
+      const pricePerDay = caretaker.pricePerDay ?? 0;
+      caretakerFee = pricePerDay * tripDays;
+      caretakerId = caretaker._id;
+    }
+
     let specialNeedsFee = 0;
 
-    if (data.specialNeedIds?.length) {
-      for (const specialNeedId of data.specialNeedIds) {
+    if (selectedSpecialNeedIds.length) {
+      for (const specialNeedId of selectedSpecialNeedIds) {
         const agencyNeed =
           await this._agencySpecialNeedsRepository.findByAgencyIdAndSpecialNeedId(
             pkg.agencyId,
@@ -84,6 +114,10 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       totalAmount,
       currency: "inr",
       status: "pending_payment",
+      caretakerId,
+      selectedSpecialNeedIds: selectedSpecialNeedIds.length
+        ? selectedSpecialNeedIds
+        : undefined,
     });
 
     const baseUrl = config.client.URI || "http://localhost:5173";
@@ -95,7 +129,7 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       "inr",
       successUrl,
       cancelUrl,
-      { bookingId: booking._id },
+      { bookingId: String(booking._id) },
       {
         name: pkg.PackageName,
         description: pkg.description,

@@ -4,6 +4,9 @@ import { verifyAuth } from "../../middlewares/auth.middleware";
 import { asyncHandler } from "../../../shared/async-handler";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { CreateBookingCheckoutRequestDTO } from "../../../application/dto/request/create-booking-checkout-request.dto";
+import { PreviewBookingPriceRequestDTO } from "../../../application/dto/request/preview-booking-price-request.dto";
+import { ConfirmBookingSuccessRequestDTO } from "../../../application/dto/request/confirm-booking-success-request.dto";
+import { RequestCaretakerRequestDTO } from "../../../application/dto/request/request-caretaker-request.dto";
 import {
   bookingController,
   blockedUserMiddleware,
@@ -22,6 +25,29 @@ export class BookingRoutes extends BaseRoute {
       "/checkout",
       validationMiddleware(CreateBookingCheckoutRequestDTO),
       asyncHandler(bookingController.createCheckout.bind(bookingController))
+    );
+    this.router.get(
+      "/package/:packageId/special-needs",
+      asyncHandler(bookingController.getPackageSpecialNeeds.bind(bookingController))
+    );
+    this.router.post(
+      "/price-preview",
+      validationMiddleware(PreviewBookingPriceRequestDTO),
+      asyncHandler(bookingController.previewPrice.bind(bookingController))
+    );
+    this.router.get(
+      "/package/:packageId/caretakers",
+      asyncHandler(bookingController.getAvailableCaretakers.bind(bookingController))
+    );
+    this.router.post(
+      "/confirm-success",
+      validationMiddleware(ConfirmBookingSuccessRequestDTO),
+      asyncHandler(bookingController.confirmSuccess.bind(bookingController))
+    );
+    this.router.post(
+      "/caretaker-request",
+      validationMiddleware(RequestCaretakerRequestDTO),
+      asyncHandler(bookingController.requestCaretaker.bind(bookingController))
     );
   }
 }

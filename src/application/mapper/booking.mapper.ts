@@ -16,6 +16,8 @@ export class BookingMapper {
       status: doc.status,
       stripeSessionId: doc.stripeSessionId ?? undefined,
       paidAt: doc.paidAt ?? undefined,
+      caretakerId: doc.caretakerId ? String(doc.caretakerId) : undefined,
+      selectedSpecialNeedIds: doc.selectedSpecialNeedIds?.map((id: unknown) => String(id)) ?? undefined,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     };

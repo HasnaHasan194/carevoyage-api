@@ -42,6 +42,8 @@ export const bookingSchema = new Schema<IBookingModel>(
     },
     stripeSessionId: { type: String, default: null },
     paidAt: { type: Date, default: null },
+    caretakerId: { type: Schema.Types.ObjectId, ref: "caretaker_profile", default: null },
+    selectedSpecialNeedIds: { type: [Schema.Types.ObjectId], default: [] },
   },
   { timestamps: true }
 );

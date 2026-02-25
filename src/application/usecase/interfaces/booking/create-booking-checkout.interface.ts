@@ -10,6 +10,7 @@ export interface ICreateBookingCheckoutUseCase {
     data: {
       packageId: string;
       caretakerFee?: number;
+      caretakerId?: string;
       specialNeedIds?: string[];
     }
   ): Promise<CreateBookingCheckoutResult>;

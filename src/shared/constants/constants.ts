@@ -178,6 +178,8 @@ export const ERROR_MESSAGE = {
     PACKAGE_NOT_PUBLISHED: "Only published packages can be added to bucket list",
     PACKAGE_CANCELLED: "Cancelled packages cannot be added to bucket list",
     PACKAGE_NOT_FOUND: "Package not found",
+    PACKAGE_START_DATE_NOT_UPCOMING:
+      "Only packages with a future start date can be added to bucket list",
   },
 
   // Booking Errors
@@ -186,6 +188,13 @@ export const ERROR_MESSAGE = {
     ALREADY_EXISTS: "Booking already exists",
     INVALID_STATUS: "Invalid booking status",
     CANNOT_CANCEL: "Cannot cancel this booking",
+  },
+
+  // Caretaker Request Errors
+  CARETAKER_REQUEST: {
+    NOT_FOUND: "Caretaker request not found",
+    NOT_PENDING: "Request is no longer pending",
+    NOT_AGENCY_REQUEST: "Request does not belong to this agency",
   },
 
   // Wallet Errors
