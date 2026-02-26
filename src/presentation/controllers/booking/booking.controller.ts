@@ -7,6 +7,9 @@ import { IGetPackageSpecialNeedsForBookingUseCase } from "../../../application/u
 import { IPreviewBookingPriceUseCase } from "../../../application/usecase/interfaces/booking/preview-booking-price.interface";
 import { IGetAvailableCaretakersForBookingUseCase } from "../../../application/usecase/interfaces/booking/get-available-caretakers-for-booking.interface";
 import { IConfirmBookingSuccessUseCase } from "../../../application/usecase/interfaces/booking/confirm-booking-success.interface";
+import { IListClientBookingsUseCase } from "../../../application/usecase/interfaces/booking/list-client-bookings.interface";
+import { IGetClientBookingDetailUseCase } from "../../../application/usecase/interfaces/booking/get-client-booking-detail.interface";
+import { ICancelClientBookingUseCase } from "../../../application/usecase/interfaces/booking/cancel-client-booking.interface";
 import { ICreateCaretakerRequestUseCase } from "../../../application/usecase/interfaces/caretaker-request/create-caretaker-request.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 
@@ -24,7 +27,13 @@ export class BookingController {
     @inject("IGetAvailableCaretakersForBookingUseCase")
     private readonly _getAvailableCaretakersUseCase: IGetAvailableCaretakersForBookingUseCase,
     @inject("IConfirmBookingSuccessUseCase")
-    private readonly _confirmBookingSuccessUseCase: IConfirmBookingSuccessUseCase
+    private readonly _confirmBookingSuccessUseCase: IConfirmBookingSuccessUseCase,
+    @inject("IListClientBookingsUseCase")
+    private readonly _listClientBookingsUseCase: IListClientBookingsUseCase,
+    @inject("IGetClientBookingDetailUseCase")
+    private readonly _getClientBookingDetailUseCase: IGetClientBookingDetailUseCase,
+    @inject("ICancelClientBookingUseCase")
+    private readonly _cancelClientBookingUseCase: ICancelClientBookingUseCase
   ) {}
 
   async createCheckout(req: CustomRequest, res: Response): Promise<void> {
@@ -124,5 +133,66 @@ export class BookingController {
     }
     await this._createCaretakerRequestUseCase.execute(req.user.id, packageId);
     ResponseHelper.success(res, HTTP_STATUS.OK, "Caretaker request sent. The agency will be notified.");
+  }
+
+  async getMyBookings(req: CustomRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      return;
+    }
+
+    const bookings = await this._listClientBookingsUseCase.execute(req.user.id);
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Bookings retrieved",
+      bookings
+    );
+  }
+
+  async getBookingDetail(req: CustomRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      return;
+    }
+
+    const bookingId = (req.params as { bookingId?: string }).bookingId;
+    if (!bookingId) {
+      ResponseHelper.error(res, "Booking ID is required", HTTP_STATUS.BAD_REQUEST);
+      return;
+    }
+
+    const detail = await this._getClientBookingDetailUseCase.execute(
+      req.user.id,
+      bookingId
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Booking detail retrieved",
+      detail
+    );
+  }
+
+  async cancelBooking(req: CustomRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      return;
+    }
+
+    const bookingId = (req.params as { bookingId?: string }).bookingId;
+    if (!bookingId) {
+      ResponseHelper.error(res, "Booking ID is required", HTTP_STATUS.BAD_REQUEST);
+      return;
+    }
+
+    await this._cancelClientBookingUseCase.execute(req.user.id, bookingId);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Booking cancelled"
+    );
   }
 }

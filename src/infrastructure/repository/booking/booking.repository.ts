@@ -25,4 +25,23 @@ export class BookingRepository
     const docs = await bookingDB.find({ packageId }).exec();
     return docs.map((doc) => BookingMapper.toEntity(doc));
   }
+
+  async findByClientId(clientId: string): Promise<IBookingEntity[]> {
+    const docs = await bookingDB
+      .find({ clientId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map((doc) => BookingMapper.toEntity(doc));
+  }
+
+  async findByIdAndClientId(
+    bookingId: string,
+    clientId: string
+  ): Promise<IBookingEntity | null> {
+    const doc = await bookingDB
+      .findOne({ _id: bookingId, clientId })
+      .exec();
+    if (!doc) return null;
+    return BookingMapper.toEntity(doc);
+  }
 }
