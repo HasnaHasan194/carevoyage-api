@@ -1,0 +1,35 @@
+import { inject, injectable } from "tsyringe";
+import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ValidationError } from "../../../../domain/errors/validationError";
+import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import {
+  type ICancelClientBookingUseCase,
+} from "../../interfaces/booking/cancel-client-booking.interface";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+
+@injectable()
+export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
+  constructor(
+    @inject("IBookingRepository")
+    private readonly _bookingRepository: IBookingRepository
+  ) {}
+
+  async execute(clientId: string, bookingId: string): Promise<void> {
+    const booking = await this._bookingRepository.findByIdAndClientId(
+      bookingId,
+      clientId
+    );
+    if (!booking) {
+      throw new NotFoundError(ERROR_MESSAGE.BOOKING.NOT_FOUND);
+    }
+
+    if (booking.status !== "pending_payment") {
+      throw new ValidationError(ERROR_MESSAGE.BOOKING.CANNOT_CANCEL);
+    }
+
+    await this._bookingRepository.updateById(bookingId, {
+      status: "cancelled",
+    });
+  }
+}
+

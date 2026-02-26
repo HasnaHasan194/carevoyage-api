@@ -21,6 +21,8 @@ export class BookingRoutes extends BaseRoute {
   protected initializeRoutes(): void {
     this.router.use(verifyAuth);
     this.router.use(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware));
+
+    // Client booking checkout & pricing
     this.router.post(
       "/checkout",
       validationMiddleware(CreateBookingCheckoutRequestDTO),
@@ -39,15 +41,35 @@ export class BookingRoutes extends BaseRoute {
       "/package/:packageId/caretakers",
       asyncHandler(bookingController.getAvailableCaretakers.bind(bookingController))
     );
+
+    // Stripe confirm success
     this.router.post(
       "/confirm-success",
       validationMiddleware(ConfirmBookingSuccessRequestDTO),
       asyncHandler(bookingController.confirmSuccess.bind(bookingController))
     );
+
+    // Caretaker request from booking flow
     this.router.post(
       "/caretaker-request",
       validationMiddleware(RequestCaretakerRequestDTO),
       asyncHandler(bookingController.requestCaretaker.bind(bookingController))
+    );
+
+    // Client bookings: list, detail, cancel
+    this.router.get(
+      "/my",
+      asyncHandler(bookingController.getMyBookings.bind(bookingController))
+    );
+
+    this.router.get(
+      "/:bookingId",
+      asyncHandler(bookingController.getBookingDetail.bind(bookingController))
+    );
+
+    this.router.post(
+      "/:bookingId/cancel",
+      asyncHandler(bookingController.cancelBooking.bind(bookingController))
     );
   }
 }

@@ -149,6 +149,12 @@ import { IGetAvailableCaretakersForBookingUseCase } from "../../application/usec
 import { GetAvailableCaretakersForBookingUseCase } from "../../application/usecase/implementations/booking/get-available-caretakers-for-booking.usecase";
 import { IConfirmBookingSuccessUseCase } from "../../application/usecase/interfaces/booking/confirm-booking-success.interface";
 import { ConfirmBookingSuccessUseCase } from "../../application/usecase/implementations/booking/confirm-booking-success.usecase";
+import { IListClientBookingsUseCase } from "../../application/usecase/interfaces/booking/list-client-bookings.interface";
+import { ListClientBookingsUseCase } from "../../application/usecase/implementations/booking/list-client-bookings.usecase";
+import { IGetClientBookingDetailUseCase } from "../../application/usecase/interfaces/booking/get-client-booking-detail.interface";
+import { GetClientBookingDetailUseCase } from "../../application/usecase/implementations/booking/get-client-booking-detail.usecase";
+import { ICancelClientBookingUseCase } from "../../application/usecase/interfaces/booking/cancel-client-booking.interface";
+import { CancelClientBookingUseCase } from "../../application/usecase/implementations/booking/cancel-client-booking.usecase";
 import { ICreateCaretakerRequestUseCase } from "../../application/usecase/interfaces/caretaker-request/create-caretaker-request.interface";
 import { CreateCaretakerRequestUseCase } from "../../application/usecase/implementations/caretaker-request/create-caretaker-request.usecase";
 import { IListCaretakerRequestsUseCase } from "../../application/usecase/interfaces/caretaker-request/list-caretaker-requests.interface";
@@ -493,6 +499,15 @@ export class UsecaseRegistory {
     });
     container.register<IConfirmBookingSuccessUseCase>("IConfirmBookingSuccessUseCase", {
       useClass: ConfirmBookingSuccessUseCase,
+    });
+    container.register<IListClientBookingsUseCase>("IListClientBookingsUseCase", {
+      useClass: ListClientBookingsUseCase,
+    });
+    container.register<IGetClientBookingDetailUseCase>("IGetClientBookingDetailUseCase", {
+      useClass: GetClientBookingDetailUseCase,
+    });
+    container.register<ICancelClientBookingUseCase>("ICancelClientBookingUseCase", {
+      useClass: CancelClientBookingUseCase,
     });
     container.register<ICreateCaretakerRequestUseCase>("ICreateCaretakerRequestUseCase", {
       useClass: CreateCaretakerRequestUseCase,
