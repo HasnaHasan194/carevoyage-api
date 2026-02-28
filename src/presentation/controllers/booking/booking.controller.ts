@@ -10,6 +10,7 @@ import { IConfirmBookingSuccessUseCase } from "../../../application/usecase/inte
 import { IListClientBookingsUseCase } from "../../../application/usecase/interfaces/booking/list-client-bookings.interface";
 import { IGetClientBookingDetailUseCase } from "../../../application/usecase/interfaces/booking/get-client-booking-detail.interface";
 import { ICancelClientBookingUseCase } from "../../../application/usecase/interfaces/booking/cancel-client-booking.interface";
+import { IRequestRefundUseCase } from "../../../application/usecase/interfaces/refund/request-refund.interface";
 import { ICreateCaretakerRequestUseCase } from "../../../application/usecase/interfaces/caretaker-request/create-caretaker-request.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 
@@ -33,7 +34,9 @@ export class BookingController {
     @inject("IGetClientBookingDetailUseCase")
     private readonly _getClientBookingDetailUseCase: IGetClientBookingDetailUseCase,
     @inject("ICancelClientBookingUseCase")
-    private readonly _cancelClientBookingUseCase: ICancelClientBookingUseCase
+    private readonly _cancelClientBookingUseCase: ICancelClientBookingUseCase,
+    @inject("IRequestRefundUseCase")
+    private readonly _requestRefundUseCase: IRequestRefundUseCase
   ) {}
 
   async createCheckout(req: CustomRequest, res: Response): Promise<void> {
@@ -141,7 +144,16 @@ export class BookingController {
       return;
     }
 
-    const bookings = await this._listClientBookingsUseCase.execute(req.user.id);
+    const rawPaymentType = req.query.paymentType as string | undefined;
+    const paymentType: "all" | "normal" | "special" =
+      rawPaymentType === "normal" || rawPaymentType === "special"
+        ? rawPaymentType
+        : "all";
+
+    const bookings = await this._listClientBookingsUseCase.execute(
+      req.user.id,
+      paymentType
+    );
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
@@ -162,9 +174,16 @@ export class BookingController {
       return;
     }
 
+    const rawPaymentType = req.query.paymentType as string | undefined;
+    const paymentType: "all" | "normal" | "special" =
+      rawPaymentType === "normal" || rawPaymentType === "special"
+        ? rawPaymentType
+        : "all";
+
     const detail = await this._getClientBookingDetailUseCase.execute(
       req.user.id,
-      bookingId
+      bookingId,
+      paymentType
     );
 
     ResponseHelper.success(
@@ -187,12 +206,43 @@ export class BookingController {
       return;
     }
 
-    await this._cancelClientBookingUseCase.execute(req.user.id, bookingId);
+    const { reason } = req.body as { reason?: string };
+
+    await this._cancelClientBookingUseCase.execute(
+      req.user.id,
+      bookingId,
+      reason
+    );
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
       "Booking cancelled"
+    );
+  }
+
+  async requestRefund(req: CustomRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      return;
+    }
+
+    const bookingId = (req.params as { bookingId?: string }).bookingId;
+    if (!bookingId) {
+      ResponseHelper.error(res, "Booking ID is required", HTTP_STATUS.BAD_REQUEST);
+      return;
+    }
+
+    const refundRequest = await this._requestRefundUseCase.execute(
+      req.user.id,
+      bookingId
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Refund request submitted",
+      refundRequest
     );
   }
 }

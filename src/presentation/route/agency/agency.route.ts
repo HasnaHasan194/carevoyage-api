@@ -95,6 +95,28 @@ export class AgencyRoutes extends BaseRoute {
       asyncHandler(agencyController.fulfillCaretakerRequest.bind(agencyController))
     );
 
+    this.router.get(
+      "/refund-requests",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyController.listRefundRequests.bind(agencyController))
+    );
+    this.router.post(
+      "/refund-requests/:requestId/approve",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyController.approveRefundRequest.bind(agencyController))
+    );
+    this.router.post(
+      "/refund-requests/:requestId/reject",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyController.rejectRefundRequest.bind(agencyController))
+    );
+
+    this.router.get(
+      "/bookings/:bookingId",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(agencyController.getBookingDetail.bind(agencyController))
+    );
+
     // Package Management Routes
     this.router.post(
       "/packages",
@@ -118,6 +140,14 @@ export class AgencyRoutes extends BaseRoute {
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyPackageController.getPackageById.bind(agencyPackageController)
+      )
+    );
+
+    this.router.get(
+      "/packages/:packageId/bookings",
+      authorizeRole(["agency_owner"]),
+      asyncHandler(
+        agencyPackageController.getPackageBookings.bind(agencyPackageController)
       )
     );
 

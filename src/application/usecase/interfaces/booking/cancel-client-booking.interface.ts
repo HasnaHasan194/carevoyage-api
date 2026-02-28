@@ -1,4 +1,8 @@
 export interface ICancelClientBookingUseCase {
-  execute(clientId: string, bookingId: string): Promise<void>;
+  execute(
+    clientId: string,
+    bookingId: string,
+    reason?: string
+  ): Promise<void>;
 }
 

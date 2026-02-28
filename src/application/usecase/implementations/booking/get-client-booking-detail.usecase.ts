@@ -7,17 +7,49 @@ import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/us
 import {
   type IGetClientBookingDetailUseCase,
 } from "../../interfaces/booking/get-client-booking-detail.interface";
-import type { ClientBookingDetailDTO } from "../../../dto/response/client-booking-response.dto";
+import type {
+  ClientBookingDetailDTO,
+  PaymentBreakdownItemDTO,
+  PaymentBreakdownFilter,
+} from "../../../dto/response/client-booking-response.dto";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+
+function buildPaymentBreakdown(
+  basePrice: number,
+  caretakerFee: number,
+  specialNeedsFee: number,
+  paymentType: PaymentBreakdownFilter
+): PaymentBreakdownItemDTO[] {
+  const normalItem: PaymentBreakdownItemDTO = {
+    type: "NORMAL",
+    label: "Normal payment (package & caretaker)",
+    amount: basePrice + caretakerFee,
+    items: [
+      { label: "Base package", amount: basePrice },
+      { label: "Caretaker fee", amount: caretakerFee },
+    ],
+  };
+  const specialItem: PaymentBreakdownItemDTO = {
+    type: "SPECIAL_NEEDS",
+    label: "Special needs payment",
+    amount: specialNeedsFee,
+    items: [{ label: "Special needs", amount: specialNeedsFee }],
+  };
+  if (paymentType === "normal") return [normalItem];
+  if (paymentType === "special") return [specialItem];
+  return [normalItem, specialItem];
+}
 
 function mapStatusToLabel(status: string): string {
   switch (status) {
-    case "paid":
-      return "Paid";
+    case "CONFIRMED":
+      return "Confirmed";
+    case "CANCELLED_BY_USER":
+      return "Cancelled by you";
+    case "REFUNDED":
+      return "Refunded";
     case "pending_payment":
-      return "Unpaid";
-    case "cancelled":
-      return "Cancelled";
+      return "Processing payment";
     default:
       return status;
   }
@@ -40,7 +72,8 @@ export class GetClientBookingDetailUseCase
 
   async execute(
     clientId: string,
-    bookingId: string
+    bookingId: string,
+    paymentType: PaymentBreakdownFilter = "all"
   ): Promise<ClientBookingDetailDTO> {
     const booking = await this._bookingRepository.findByIdAndClientId(
       bookingId,
@@ -74,7 +107,14 @@ export class GetClientBookingDetailUseCase
       }
     }
 
-    const canCancel = booking.status === "pending_payment";
+    const canCancel = booking.status === "CONFIRMED";
+
+    const paymentBreakdown = buildPaymentBreakdown(
+      booking.basePrice,
+      booking.caretakerFee,
+      booking.specialNeedsFee,
+      paymentType
+    );
 
     return {
       id: booking._id,
@@ -98,6 +138,8 @@ export class GetClientBookingDetailUseCase
       packageImages: pkg?.images,
       meetingPoint: pkg?.meetingPoint,
       canCancel,
+      cancellationReason: booking.cancellationReason,
+      paymentBreakdown,
     };
   }
 }

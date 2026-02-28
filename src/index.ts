@@ -33,16 +33,18 @@ async function startServer() {
     expressServer.listen(PORT, () => {
       console.log(`Server running at port ${PORT}`);
     });
-    expressServer.listen(PORT, () => {});
   } catch (error) {
-    console.error(" Server startup failed:", error);
+    console.error("Server startup failed:", error);
     if (error instanceof Error) {
-      console.error(" Error name:", error.name);
-      console.error(" Error message:", error.message);
-      console.error(" Error stack:", error.stack);
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
     }
     process.exit(1);
   }
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error("Startup error:", err);
+  process.exit(1);
+});

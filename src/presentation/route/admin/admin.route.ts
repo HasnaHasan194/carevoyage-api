@@ -4,6 +4,7 @@ import { BaseRoute } from "../base.route";
 import {
   adminUserController,
   adminAgencyController,
+  adminController,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { GetUsersRequestDTO } from "../../../application/dto/request/get-users-request.dto";
@@ -99,6 +100,16 @@ export class AdminRoutes extends BaseRoute {
       validationMiddleware(RejectAgencyRequestDTO),
       asyncHandler(
         adminAgencyController.rejectAgency.bind(adminAgencyController)
+      )
+    );
+
+    // Wallet Transactions - Admin overview
+    this.router.get(
+      "/wallet-transactions",
+      asyncHandler(verifyAuth),
+      adminAuth,
+      asyncHandler(
+        adminController.getWalletTransactions.bind(adminController)
       )
     );
   }

@@ -40,4 +40,11 @@ export const config = {
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   },
+
+  wallet: {
+    /** Owner ID for the platform/admin wallet (e.g. "platform" or an admin user id). Used for booking commission (10%). */
+    ADMIN_WALLET_OWNER_ID: process.env.ADMIN_WALLET_OWNER_ID || "platform",
+    BOOKING_AGENCY_SHARE: 0.9,
+    BOOKING_ADMIN_SHARE: 0.1,
+  },
 };

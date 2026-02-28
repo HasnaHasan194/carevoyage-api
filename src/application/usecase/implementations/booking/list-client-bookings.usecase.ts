@@ -4,16 +4,21 @@ import { IPackageRepository } from "../../../../domain/repositoryInterfaces/Pack
 import {
   type IListClientBookingsUseCase,
 } from "../../interfaces/booking/list-client-bookings.interface";
-import type { ClientBookingSummaryDTO } from "../../../dto/response/client-booking-response.dto";
+import type {
+  ClientBookingSummaryDTO,
+  PaymentBreakdownFilter,
+} from "../../../dto/response/client-booking-response.dto";
 
 function mapStatusToLabel(status: string): string {
   switch (status) {
-    case "paid":
-      return "Paid";
+    case "CONFIRMED":
+      return "Confirmed";
+    case "CANCELLED_BY_USER":
+      return "Cancelled by you";
+    case "REFUNDED":
+      return "Refunded";
     case "pending_payment":
-      return "Unpaid";
-    case "cancelled":
-      return "Cancelled";
+      return "Processing payment";
     default:
       return status;
   }
@@ -28,12 +33,22 @@ export class ListClientBookingsUseCase implements IListClientBookingsUseCase {
     private readonly _packageRepository: IPackageRepository
   ) {}
 
-  async execute(clientId: string): Promise<ClientBookingSummaryDTO[]> {
+  async execute(
+    clientId: string,
+    paymentType: PaymentBreakdownFilter = "all"
+  ): Promise<ClientBookingSummaryDTO[]> {
     const bookings = await this._bookingRepository.findByClientId(clientId);
+
+    const filtered =
+      paymentType === "normal"
+        ? bookings.filter((b) => b.specialNeedsFee === 0)
+        : paymentType === "special"
+          ? bookings.filter((b) => b.specialNeedsFee > 0)
+          : bookings;
 
     const result: ClientBookingSummaryDTO[] = [];
 
-    for (const booking of bookings) {
+    for (const booking of filtered) {
       const pkg = await this._packageRepository.findById(booking.packageId);
 
       result.push({

@@ -7,6 +7,7 @@ import { CreateBookingCheckoutRequestDTO } from "../../../application/dto/reques
 import { PreviewBookingPriceRequestDTO } from "../../../application/dto/request/preview-booking-price-request.dto";
 import { ConfirmBookingSuccessRequestDTO } from "../../../application/dto/request/confirm-booking-success-request.dto";
 import { RequestCaretakerRequestDTO } from "../../../application/dto/request/request-caretaker-request.dto";
+import { CancelBookingRequestDTO } from "../../../application/dto/request/cancel-booking-request.dto";
 import {
   bookingController,
   blockedUserMiddleware,
@@ -69,7 +70,13 @@ export class BookingRoutes extends BaseRoute {
 
     this.router.post(
       "/:bookingId/cancel",
+      validationMiddleware(CancelBookingRequestDTO),
       asyncHandler(bookingController.cancelBooking.bind(bookingController))
+    );
+
+    this.router.post(
+      "/:bookingId/refund-request",
+      asyncHandler(bookingController.requestRefund.bind(bookingController))
     );
   }
 }

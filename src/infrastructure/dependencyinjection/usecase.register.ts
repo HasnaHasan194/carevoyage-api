@@ -153,6 +153,10 @@ import { IListClientBookingsUseCase } from "../../application/usecase/interfaces
 import { ListClientBookingsUseCase } from "../../application/usecase/implementations/booking/list-client-bookings.usecase";
 import { IGetClientBookingDetailUseCase } from "../../application/usecase/interfaces/booking/get-client-booking-detail.interface";
 import { GetClientBookingDetailUseCase } from "../../application/usecase/implementations/booking/get-client-booking-detail.usecase";
+import { IListAgencyPackageBookingsUseCase } from "../../application/usecase/interfaces/booking/list-agency-package-bookings.interface";
+import { ListAgencyPackageBookingsUseCase } from "../../application/usecase/implementations/booking/list-agency-package-bookings.usecase";
+import { IGetAgencyBookingDetailUseCase } from "../../application/usecase/interfaces/booking/get-agency-booking-detail.interface";
+import { GetAgencyBookingDetailUseCase } from "../../application/usecase/implementations/booking/get-agency-booking-detail.usecase";
 import { ICancelClientBookingUseCase } from "../../application/usecase/interfaces/booking/cancel-client-booking.interface";
 import { CancelClientBookingUseCase } from "../../application/usecase/implementations/booking/cancel-client-booking.usecase";
 import { ICreateCaretakerRequestUseCase } from "../../application/usecase/interfaces/caretaker-request/create-caretaker-request.interface";
@@ -161,6 +165,30 @@ import { IListCaretakerRequestsUseCase } from "../../application/usecase/interfa
 import { ListCaretakerRequestsUseCase } from "../../application/usecase/implementations/caretaker-request/list-caretaker-requests.usecase";
 import { IFulfillCaretakerRequestUseCase } from "../../application/usecase/interfaces/caretaker-request/fulfill-caretaker-request.interface";
 import { FulfillCaretakerRequestUseCase } from "../../application/usecase/implementations/caretaker-request/fulfill-caretaker-request.usecase";
+import { IRequestRefundUseCase } from "../../application/usecase/interfaces/refund/request-refund.interface";
+import { RequestRefundUseCase } from "../../application/usecase/implementations/refund/request-refund.usecase";
+import { IListAgencyRefundRequestsUseCase } from "../../application/usecase/interfaces/refund/list-agency-refund-requests.interface";
+import { ListAgencyRefundRequestsUseCase } from "../../application/usecase/implementations/refund/list-agency-refund-requests.usecase";
+import { IApproveRefundUseCase } from "../../application/usecase/interfaces/refund/approve-refund.interface";
+import { ApproveRefundUseCase } from "../../application/usecase/implementations/refund/approve-refund.usecase";
+import { IRejectRefundUseCase } from "../../application/usecase/interfaces/refund/reject-refund.interface";
+import { RejectRefundUseCase } from "../../application/usecase/implementations/refund/reject-refund.usecase";
+import { IGetMyWalletUseCase } from "../../application/usecase/interfaces/wallet/get-my-wallet.interface";
+import { GetMyWalletUseCase } from "../../application/usecase/implementations/wallet/get-my-wallet.usecase";
+import { IGetMyWalletTransactionsUseCase } from "../../application/usecase/interfaces/wallet/get-my-wallet-transactions.interface";
+import { GetMyWalletTransactionsUseCase } from "../../application/usecase/implementations/wallet/get-my-wallet-transactions.usecase";
+import { ICreditWalletUseCase } from "../../application/usecase/interfaces/wallet/credit-wallet.interface";
+import { CreditWalletUseCase } from "../../application/usecase/implementations/wallet/credit-wallet.usecase";
+import { IDebitWalletUseCase } from "../../application/usecase/interfaces/wallet/debit-wallet.interface";
+import { DebitWalletUseCase } from "../../application/usecase/implementations/wallet/debit-wallet.usecase";
+import { ICreditBookingPayoutUseCase } from "../../application/usecase/interfaces/wallet/credit-booking-payout.interface";
+import { CreditBookingPayoutUseCase } from "../../application/usecase/implementations/wallet/credit-booking-payout.usecase";
+import { IWalletOwnerResolver } from "../../application/usecase/interfaces/wallet/wallet-owner-resolver.interface";
+import { WalletOwnerResolver } from "../../application/usecase/implementations/wallet/wallet-owner-resolver";
+import { IListWalletTransactionsUseCase } from "../../application/usecase/interfaces/admin/list-wallet-transactions.interface";
+import { IWalletOwnerDisplayService } from "../../application/usecase/interfaces/admin/wallet-owner-display.interface";
+import { WalletOwnerDisplayService } from "../../application/usecase/implementations/admin/wallet-owner-display.service";
+import { ListWalletTransactionsUseCase } from "../../application/usecase/implementations/list-wallet-transactions.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -506,6 +534,18 @@ export class UsecaseRegistory {
     container.register<IGetClientBookingDetailUseCase>("IGetClientBookingDetailUseCase", {
       useClass: GetClientBookingDetailUseCase,
     });
+    container.register<IListAgencyPackageBookingsUseCase>(
+      "IListAgencyPackageBookingsUseCase",
+      {
+        useClass: ListAgencyPackageBookingsUseCase,
+      }
+    );
+    container.register<IGetAgencyBookingDetailUseCase>(
+      "IGetAgencyBookingDetailUseCase",
+      {
+        useClass: GetAgencyBookingDetailUseCase,
+      }
+    );
     container.register<ICancelClientBookingUseCase>("ICancelClientBookingUseCase", {
       useClass: CancelClientBookingUseCase,
     });
@@ -518,5 +558,51 @@ export class UsecaseRegistory {
     container.register<IFulfillCaretakerRequestUseCase>("IFulfillCaretakerRequestUseCase", {
       useClass: FulfillCaretakerRequestUseCase,
     });
+
+    container.register<IRequestRefundUseCase>("IRequestRefundUseCase", {
+      useClass: RequestRefundUseCase,
+    });
+    container.register<IListAgencyRefundRequestsUseCase>("IListAgencyRefundRequestsUseCase", {
+      useClass: ListAgencyRefundRequestsUseCase,
+    });
+    container.register<IApproveRefundUseCase>("IApproveRefundUseCase", {
+      useClass: ApproveRefundUseCase,
+    });
+    container.register<IRejectRefundUseCase>("IRejectRefundUseCase", {
+      useClass: RejectRefundUseCase,
+    });
+
+    // Wallet use cases
+    container.register<ICreditWalletUseCase>("ICreditWalletUseCase", {
+      useClass: CreditWalletUseCase,
+    });
+    container.register<IDebitWalletUseCase>("IDebitWalletUseCase", {
+      useClass: DebitWalletUseCase,
+    });
+    container.register<ICreditBookingPayoutUseCase>("ICreditBookingPayoutUseCase", {
+      useClass: CreditBookingPayoutUseCase,
+    });
+    container.register<IWalletOwnerResolver>("IWalletOwnerResolver", {
+      useClass: WalletOwnerResolver,
+    });
+    container.register<IGetMyWalletUseCase>("IGetMyWalletUseCase", {
+      useClass: GetMyWalletUseCase,
+    });
+    container.register<IGetMyWalletTransactionsUseCase>(
+      "IGetMyWalletTransactionsUseCase",
+      {
+        useClass: GetMyWalletTransactionsUseCase,
+      }
+    );
+
+    container.register<IWalletOwnerDisplayService>("IWalletOwnerDisplayService", {
+      useClass: WalletOwnerDisplayService,
+    });
+    container.register<IListWalletTransactionsUseCase>(
+      "IListWalletTransactionsUseCase",
+      {
+        useClass: ListWalletTransactionsUseCase,
+      }
+    );
   }
 }

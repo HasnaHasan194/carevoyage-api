@@ -12,6 +12,7 @@ import { IUpdatePackageItineraryUsecase } from "../../../application/usecase/int
 import { IDeletePackageUsecase } from "../../../application/usecase/interfaces/package/delete-package.interface";
 import { ICompletePackageUsecase } from "../../../application/usecase/interfaces/package/complete-package.interface";
 import { ICancelPackageUsecase } from "../../../application/usecase/interfaces/package/cancel-package.interface";
+import { IListAgencyPackageBookingsUseCase } from "../../../application/usecase/interfaces/booking/list-agency-package-bookings.interface";
 import { CreatePackageRequestDTO } from "../../../application/dto/request/create-package-request.dto";
 import { UpdatePackageRequestDTO } from "../../../application/dto/request/update-package-request.dto";
 import { UpdatePackageBasicDTO } from "../../../application/dto/request/update-package-basic.dto";
@@ -48,6 +49,8 @@ export class AgencyPackageController implements IAgencyPackageController {
     private _completePackageUsecase: ICompletePackageUsecase,
     @inject("ICancelPackageUsecase")
     private _cancelPackageUsecase: ICancelPackageUsecase,
+    @inject("IListAgencyPackageBookingsUseCase")
+    private _listAgencyPackageBookingsUseCase: IListAgencyPackageBookingsUseCase,
     @inject("IAgencyRepository")
     private _agencyRepository: IAgencyRepository
   ) {}
@@ -168,6 +171,28 @@ export class AgencyPackageController implements IAgencyPackageController {
       HTTP_STATUS.OK,
       "Package retrieved successfully",
       packageData
+    );
+  }
+
+  async getPackageBookings(req: CustomRequest, res: Response): Promise<void> {
+    const agencyId = await this.getAgencyId(req);
+    const { packageId } = req.params;
+
+    const page = req.query.page ? parseInt(req.query.page as string) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+
+    const bookings = await this._listAgencyPackageBookingsUseCase.execute(
+      agencyId,
+      packageId,
+      page,
+      limit
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Package bookings retrieved successfully",
+      bookings
     );
   }
 

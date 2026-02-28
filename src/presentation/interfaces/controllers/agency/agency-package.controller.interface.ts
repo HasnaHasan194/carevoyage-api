@@ -6,6 +6,7 @@ export interface IAgencyPackageController {
   publishPackage(req: Request, res: Response): Promise<void>;
   getPackages(req: Request, res: Response): Promise<void>;
   getPackageById(req: Request, res: Response): Promise<void>;
+  getPackageBookings(req: Request, res: Response): Promise<void>;
   updatePackageBasic(req: Request, res: Response): Promise<void>;
   updatePackageImages(req: Request, res: Response): Promise<void>;
   updatePackageItinerary(req: Request, res: Response): Promise<void>;
