@@ -10,8 +10,13 @@ import {
   ICreateBookingCheckoutUseCase,
   CreateBookingCheckoutResult,
 } from "../../interfaces/booking/create-booking-checkout.interface";
-import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+import {
+  ERROR_MESSAGE,
+  HTTP_STATUS,
+} from "../../../../shared/constants/constants";
 import { config } from "../../../../shared/config";
+import { IPackageEntity } from "../../../../domain/entities/package.entity";
+import { CustomError } from "../../../../domain/errors/customError";
 
 @injectable()
 export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCase {
@@ -25,7 +30,7 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
     @inject("ICaretakerProfileRepository")
     private _caretakerProfileRepository: ICaretakerProfileRepository,
     @inject("IPaymentService")
-    private _paymentService: IPaymentService
+    private _paymentService: IPaymentService,
   ) {}
 
   async execute(
@@ -35,15 +40,37 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       caretakerFee?: number;
       caretakerId?: string;
       specialNeedIds?: string[];
-    }
+    },
   ): Promise<CreateBookingCheckoutResult> {
     const pkg = await this._packageRepository.findById(data.packageId);
     if (!pkg) {
       throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
     if (pkg.status !== "published") {
-      throw new ValidationError(
-        "Only published packages can be booked"
+      throw new ValidationError("Only published packages can be booked");
+    }
+
+    const bookings = await this._bookingRepository.findByClientId(clientId);
+
+    const activeBookings = bookings.filter(
+      (b) => b.status === "CONFIRMED" || b.status === "pending_payment",
+    );
+
+    const packageIds = activeBookings.map((bkg) => bkg.packageId);
+
+    const conflictingPackages =
+      await this._packageRepository.findConflictingPackages(
+        packageIds,
+        pkg.startDate,
+        pkg.endDate,
+      );
+
+    if (conflictingPackages.length > 0) {
+      throw new CustomError(
+        HTTP_STATUS.CONFLICT,
+        ERROR_MESSAGE.BOOKING.ANOTHER_BOOKING_ON_THIS_DATE(
+          conflictingPackages[0].PackageName,
+        ),
       );
     }
 
@@ -55,14 +82,14 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
 
     if (data.caretakerId) {
       const caretaker = await this._caretakerProfileRepository.findById(
-        data.caretakerId
+        data.caretakerId,
       );
       if (!caretaker) {
         throw new NotFoundError("Caretaker not found");
       }
       if (caretaker.agencyId !== pkg.agencyId) {
         throw new ValidationError(
-          "Caretaker does not belong to this package's agency"
+          "Caretaker does not belong to this package's agency",
         );
       }
       if (caretaker.status !== "active") {
@@ -83,13 +110,9 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
         const agencyNeed =
           await this._agencySpecialNeedsRepository.findByAgencyIdAndSpecialNeedId(
             pkg.agencyId,
-            specialNeedId
+            specialNeedId,
           );
-        if (
-          agencyNeed &&
-          agencyNeed.isActive &&
-          !agencyNeed.isDeleted
-        ) {
+        if (agencyNeed && agencyNeed.isActive && !agencyNeed.isDeleted) {
           if (agencyNeed.unit === "per_day") {
             specialNeedsFee += agencyNeed.price * tripDays;
           } else {
@@ -108,6 +131,7 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       clientId,
       packageId: pkg._id,
       agencyId: pkg.agencyId,
+      startDate: pkg.startDate,
       basePrice,
       caretakerFee,
       specialNeedsFee,
@@ -134,7 +158,7 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
         name: pkg.PackageName,
         description: pkg.description,
         images: pkg.images?.length ? pkg.images : undefined,
-      }
+      },
     );
 
     await this._bookingRepository.updateById(booking._id, {

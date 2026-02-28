@@ -188,6 +188,7 @@ export const ERROR_MESSAGE = {
     ALREADY_EXISTS: "Booking already exists",
     INVALID_STATUS: "Invalid booking status",
     CANNOT_CANCEL: "Cannot cancel this booking",
+    ANOTHER_BOOKING_ON_THIS_DATE  : (packageName : string) => `You have the booking for ${packageName} on this date`
   },
 
   // Caretaker Request Errors

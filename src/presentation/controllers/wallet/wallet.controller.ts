@@ -1,0 +1,68 @@
+import { inject, injectable } from "tsyringe";
+import { Response } from "express";
+import { CustomRequest } from "../../middlewares/auth.middleware";
+import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { IGetMyWalletUseCase } from "../../../application/usecase/interfaces/wallet/get-my-wallet.interface";
+import { IGetMyWalletTransactionsUseCase } from "../../../application/usecase/interfaces/wallet/get-my-wallet-transactions.interface";
+import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
+
+@injectable()
+export class WalletController {
+  constructor(
+    @inject("IGetMyWalletUseCase")
+    private readonly _getMyWalletUseCase: IGetMyWalletUseCase,
+    @inject("IGetMyWalletTransactionsUseCase")
+    private readonly _getMyWalletTransactionsUseCase: IGetMyWalletTransactionsUseCase
+  ) {}
+
+  async getMyWallet(req: CustomRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      return;
+    }
+
+    const wallet = await this._getMyWalletUseCase.execute(
+      req.user.id,
+      req.user.role
+    );
+
+    ResponseHelper.success(res, HTTP_STATUS.OK, "Wallet retrieved", wallet);
+  }
+
+  async getMyTransactions(req: CustomRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      return;
+    }
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
+    const rawType = req.query.type as string | undefined;
+    const rawSort = req.query.sort as string | undefined;
+
+    const type =
+      rawType === "CREDIT" || rawType === "DEBIT" || rawType === "all"
+        ? rawType
+        : "all";
+    const sort =
+      rawSort === "newest" || rawSort === "oldest" ? rawSort : "newest";
+
+    const transactions =
+      await this._getMyWalletTransactionsUseCase.execute({
+        userId: req.user.id,
+        role: req.user.role,
+        page,
+        limit,
+        type,
+        sort,
+      });
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Wallet transactions retrieved",
+      transactions
+    );
+  }
+}
+

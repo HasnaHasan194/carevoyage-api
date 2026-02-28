@@ -7,6 +7,8 @@ import { IAuthController } from "../../presentation/interfaces/controllers/auth/
 import { AuthRoutes } from "../../presentation/route/auth/auth";
 import { AdminUserController } from "../../presentation/controllers/admin/admin-user.controller";
 import { IAdminUserController } from "../../presentation/interfaces/controllers/admin/admin-user.controller.interface";
+import { AdminController } from "../../presentation/controllers/admin/admin.controller";
+import type { IAdminController } from "../../presentation/interfaces/controllers/admin/admin.controller.interface";
 import { AdminAgencyController } from "../../presentation/controllers/admin/admin-agency.controller";
 import { IAdminAgencyController } from "../../presentation/interfaces/controllers/admin/admin-agency.controller.interface";
 import { AdminRoutes } from "../../presentation/route/admin/admin.route";
@@ -33,6 +35,8 @@ import { PackageRoutes } from "../../presentation/route/package/package.route";
 import { BookingController } from "../../presentation/controllers/booking/booking.controller";
 import { BookingRoutes } from "../../presentation/route/booking/booking.route";
 import { PaymentController } from "../../presentation/controllers/payment/payment.controller";
+import { WalletController } from "../../presentation/controllers/wallet/wallet.controller";
+import { WalletRoutes } from "../../presentation/route/wallet/wallet.route";
 import { AgencyCategoryRoutes } from "../../presentation/route/agency/agency-category.route";
 import { IAgencyCategoryController } from "../../presentation/interfaces/controllers/agency/agency-category.controller.interface";
 import { AgencyCategoryController } from "../../presentation/controllers/agency/agency-category.controller";
@@ -85,6 +89,12 @@ export const authRoutes = container.resolve(AuthRoutes);
  */
 export const adminUserController =
   container.resolve<IAdminUserController>(AdminUserController);
+
+/**
+ * Admin controller
+ */
+export const adminController =
+  container.resolve<IAdminController>(AdminController);
 
 /**
  * Admin Agency controller
@@ -238,6 +248,16 @@ export const bookingController = container.resolve(BookingController);
  * Booking routes
  */
 export const bookingRoutes = container.resolve(BookingRoutes);
+
+/**
+ * Wallet controller
+ */
+export const walletController = container.resolve(WalletController);
+
+/**
+ * Wallet routes
+ */
+export const walletRoutes = container.resolve(WalletRoutes);
 
 /**
  * Payment controller (for Stripe webhook)

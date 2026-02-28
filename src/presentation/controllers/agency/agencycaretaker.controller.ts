@@ -5,6 +5,9 @@ import { IInviteCaretakerUseCase } from "../../../application/usecase/interfaces
 import { ICaretakerProfileRepository } from "../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IListCaretakerRequestsUseCase } from "../../../application/usecase/interfaces/caretaker-request/list-caretaker-requests.interface";
 import { IFulfillCaretakerRequestUseCase } from "../../../application/usecase/interfaces/caretaker-request/fulfill-caretaker-request.interface";
+import { IListAgencyRefundRequestsUseCase } from "../../../application/usecase/interfaces/refund/list-agency-refund-requests.interface";
+import { IApproveRefundUseCase } from "../../../application/usecase/interfaces/refund/approve-refund.interface";
+import { IRejectRefundUseCase } from "../../../application/usecase/interfaces/refund/reject-refund.interface";
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 import {
@@ -15,6 +18,7 @@ import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/a
 import { IUserRepository } from "../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { NotFoundError } from "../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../domain/errors/validationError";
+import { IGetAgencyBookingDetailUseCase } from "../../../application/usecase/interfaces/booking/get-agency-booking-detail.interface";
 
 @injectable()
 export class AgencyController implements IAgencyController {
@@ -30,7 +34,15 @@ export class AgencyController implements IAgencyController {
     @inject("IListCaretakerRequestsUseCase")
     private _listCaretakerRequestsUseCase: IListCaretakerRequestsUseCase,
     @inject("IFulfillCaretakerRequestUseCase")
-    private _fulfillCaretakerRequestUseCase: IFulfillCaretakerRequestUseCase
+    private _fulfillCaretakerRequestUseCase: IFulfillCaretakerRequestUseCase,
+    @inject("IListAgencyRefundRequestsUseCase")
+    private _listAgencyRefundRequestsUseCase: IListAgencyRefundRequestsUseCase,
+    @inject("IApproveRefundUseCase")
+    private _approveRefundUseCase: IApproveRefundUseCase,
+    @inject("IRejectRefundUseCase")
+    private _rejectRefundUseCase: IRejectRefundUseCase,
+    @inject("IGetAgencyBookingDetailUseCase")
+    private _getAgencyBookingDetailUseCase: IGetAgencyBookingDetailUseCase
   ) {}
 
   async inviteCaretaker(req: Request, res: Response): Promise<void> {
@@ -243,6 +255,73 @@ export class AgencyController implements IAgencyController {
       caretakerId,
     });
     ResponseHelper.success(res, HTTP_STATUS.OK, "Request fulfilled. Client has been notified.");
+  }
+
+  async listRefundRequests(req: Request, res: Response): Promise<void> {
+    const customReq = req as CustomRequest;
+    if (!customReq.user) {
+      throw new NotFoundError("User not authenticated");
+    }
+    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
+    if (!agency) {
+      throw new NotFoundError("Agency not found for this user");
+    }
+    const list = await this._listAgencyRefundRequestsUseCase.execute(agency._id);
+    ResponseHelper.success(res, HTTP_STATUS.OK, "Refund requests retrieved", list);
+  }
+
+  async approveRefundRequest(req: Request, res: Response): Promise<void> {
+    const customReq = req as CustomRequest;
+    if (!customReq.user) {
+      throw new NotFoundError("User not authenticated");
+    }
+    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
+    if (!agency) {
+      throw new NotFoundError("Agency not found for this user");
+    }
+    const requestId = req.params.requestId;
+    await this._approveRefundUseCase.execute(agency._id, requestId);
+    ResponseHelper.success(res, HTTP_STATUS.OK, "Refund approved");
+  }
+
+  async rejectRefundRequest(req: Request, res: Response): Promise<void> {
+    const customReq = req as CustomRequest;
+    if (!customReq.user) {
+      throw new NotFoundError("User not authenticated");
+    }
+    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
+    if (!agency) {
+      throw new NotFoundError("Agency not found for this user");
+    }
+    const requestId = req.params.requestId;
+    const { reason } = req.body as { reason?: string };
+    await this._rejectRefundUseCase.execute(agency._id, requestId, reason);
+    ResponseHelper.success(res, HTTP_STATUS.OK, "Refund rejected");
+  }
+
+  async getBookingDetail(req: Request, res: Response): Promise<void> {
+    const customReq = req as CustomRequest;
+    if (!customReq.user) {
+      throw new NotFoundError("User not authenticated");
+    }
+    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
+    if (!agency) {
+      throw new NotFoundError("Agency not found for this user");
+    }
+
+    const bookingId = req.params.bookingId;
+
+    const detail = await this._getAgencyBookingDetailUseCase.execute(
+      agency._id,
+      bookingId
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Booking detail retrieved",
+      detail
+    );
   }
 }
 

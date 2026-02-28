@@ -1,6 +1,12 @@
-import type { ClientBookingSummaryDTO } from "../../../dto/response/client-booking-response.dto";
+import type {
+  ClientBookingSummaryDTO,
+  PaymentBreakdownFilter,
+} from "../../../dto/response/client-booking-response.dto";
 
 export interface IListClientBookingsUseCase {
-  execute(clientId: string): Promise<ClientBookingSummaryDTO[]>;
+  execute(
+    clientId: string,
+    paymentType?: PaymentBreakdownFilter
+  ): Promise<ClientBookingSummaryDTO[]>;
 }
 

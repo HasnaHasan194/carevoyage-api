@@ -4,6 +4,7 @@ import { IPaymentService } from "../../../../domain/service-interfaces/payment-s
 import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IHandleStripeWebhookUsecase } from "../../interfaces/payment/handle-stripe-webhook-usecase.interface";
+import type { ICreditBookingPayoutUseCase } from "../../interfaces/wallet/credit-booking-payout.interface";
 
 @injectable()
 export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
@@ -13,7 +14,9 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
     @inject("IBookingRepository")
     private _bookingRepository: IBookingRepository,
     @inject("ICaretakerProfileRepository")
-    private _caretakerProfileRepository: ICaretakerProfileRepository
+    private _caretakerProfileRepository: ICaretakerProfileRepository,
+    @inject("ICreditBookingPayoutUseCase")
+    private _creditBookingPayoutUseCase: ICreditBookingPayoutUseCase
   ) {}
 
   async execute(
@@ -40,16 +43,23 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
     if (!booking || booking.status !== "pending_payment") return;
 
     await this._bookingRepository.updateById(bookingId, {
-      status: "paid",
+      status: "CONFIRMED",
       paidAt: new Date(),
     });
 
-    // If a caretaker is attached to this booking, mark them as BUSY
     if (booking.caretakerId) {
       await this._caretakerProfileRepository.updateAvailabilityStatus(
         booking.caretakerId,
         "BUSY"
       );
     }
+
+    await this._creditBookingPayoutUseCase.execute(
+      {
+        bookingId: booking._id,
+        agencyId: booking.agencyId,
+        totalAmount: booking.totalAmount,
+      }
+    );
   }
 }

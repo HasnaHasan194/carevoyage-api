@@ -11,6 +11,7 @@ import {
   caretakerRoutes,
   packageRoutes,
   bookingRoutes,
+  walletRoutes,
   paymentController,
 } from "../../dependencyinjection/resolve";
 import { loggerMiddleware } from "../../dependencyinjection/resolve";
@@ -58,6 +59,7 @@ export class App {
     this._app.use("/api/v1/caretaker", caretakerRoutes.router);
     this._app.use("/api/v1/packages", packageRoutes.router);
     this._app.use("/api/v1/booking", bookingRoutes.router);
+    this._app.use("/api/v1/wallets", walletRoutes.router);
   }
 
   private configureErrorMiddleware() {

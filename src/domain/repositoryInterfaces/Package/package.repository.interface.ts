@@ -8,7 +8,7 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
     agencyId: string,
     status?: TPackageStatus | "all",
     includeDeleted?: boolean,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity[]>;
 
   findByAgencyIdPaginated(
@@ -20,25 +20,25 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
     search?: string,
     category?: string,
     sortBy?: string,
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
   ): Promise<{ packages: IPackageEntity[]; total: number }>;
 
   findByIdAndAgencyId(
     packageId: string,
     agencyId: string,
     includeDeleted?: boolean,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity | null>;
 
   updateStatus(
     packageId: string,
     status: TPackageStatus,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity | null>;
 
   deletePackage(
     packageId: string,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity | null>;
 
   browsePackages(filters: {
@@ -73,7 +73,10 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
     limit: number;
     activeCategoryNames?: string[];
   }): Promise<{ packages: IPackageEntity[]; total: number }>;
-  
 
+  findConflictingPackages(
+    packageIds: string[],
+    newStartDate: Date,
+    newEndDate: Date,
+  ): Promise<IPackageEntity[]>;
 }
-

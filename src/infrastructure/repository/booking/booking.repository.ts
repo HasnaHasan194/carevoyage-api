@@ -26,6 +26,17 @@ export class BookingRepository
     return docs.map((doc) => BookingMapper.toEntity(doc));
   }
 
+  async findByAgencyIdAndPackageId(
+    agencyId: string,
+    packageId: string
+  ): Promise<IBookingEntity[]> {
+    const docs = await bookingDB
+      .find({ agencyId, packageId })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map((doc) => BookingMapper.toEntity(doc));
+  }
+
   async findByClientId(clientId: string): Promise<IBookingEntity[]> {
     const docs = await bookingDB
       .find({ clientId })
@@ -40,6 +51,17 @@ export class BookingRepository
   ): Promise<IBookingEntity | null> {
     const doc = await bookingDB
       .findOne({ _id: bookingId, clientId })
+      .exec();
+    if (!doc) return null;
+    return BookingMapper.toEntity(doc);
+  }
+
+  async findByIdAndAgencyId(
+    bookingId: string,
+    agencyId: string
+  ): Promise<IBookingEntity | null> {
+    const doc = await bookingDB
+      .findOne({ _id: bookingId, agencyId })
       .exec();
     if (!doc) return null;
     return BookingMapper.toEntity(doc);

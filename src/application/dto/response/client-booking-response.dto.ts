@@ -11,6 +11,21 @@ export interface ClientBookingSummaryDTO {
   createdAt: Date;
 }
 
+/** Payment breakdown filter: all, normal (package + caretaker), or special (special needs only). */
+export type PaymentBreakdownFilter = "all" | "normal" | "special";
+
+export interface PaymentBreakdownLineItemDTO {
+  label: string;
+  amount: number;
+}
+
+export interface PaymentBreakdownItemDTO {
+  type: "NORMAL" | "SPECIAL_NEEDS";
+  label: string;
+  amount: number;
+  items: PaymentBreakdownLineItemDTO[];
+}
+
 export interface ClientBookingDetailDTO extends ClientBookingSummaryDTO {
   basePrice: number;
   caretakerFee: number;
@@ -23,5 +38,8 @@ export interface ClientBookingDetailDTO extends ClientBookingSummaryDTO {
   packageImages?: string[];
   meetingPoint?: string;
   canCancel: boolean;
+  cancellationReason?: string;
+  /** Filtered payment breakdown based on paymentType query param. */
+  paymentBreakdown: PaymentBreakdownItemDTO[];
 }
 

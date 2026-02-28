@@ -35,6 +35,12 @@ import { IBookingRepository } from "../../domain/repositoryInterfaces/Booking/bo
 import { BookingRepository } from "../repository/booking/booking.repository";
 import { ICaretakerRequestRepository } from "../../domain/repositoryInterfaces/CaretakerRequest/caretaker-request.repository.interface";
 import { CaretakerRequestRepository } from "../repository/caretaker-request/caretaker-request.repository";
+import { IWalletRepository } from "../../domain/repositoryInterfaces/Wallet/wallet.repository.interface";
+import { WalletRepository } from "../repository/wallet/wallet.repository";
+import { IWalletTransactionRepository } from "../../domain/repositoryInterfaces/Wallet/wallet-transaction.repository.interface";
+import { WalletTransactionRepository } from "../repository/wallet/wallet-transaction.repository";
+import { IRefundRequestRepository } from "../../domain/repositoryInterfaces/Refund/refund-request.repository.interface";
+import { RefundRequestRepository } from "../repository/refund/refund-request.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -126,6 +132,25 @@ export class RepositoryRegister {
     container.register<ICaretakerRequestRepository>(
       "ICaretakerRequestRepository",
       { useClass: CaretakerRequestRepository } as ClassProvider<ICaretakerRequestRepository>
+    );
+
+    container.register<IWalletRepository>(
+      "IWalletRepository",
+      { useClass: WalletRepository } as ClassProvider<IWalletRepository>
+    );
+
+    container.register<IWalletTransactionRepository>(
+      "IWalletTransactionRepository",
+      {
+        useClass: WalletTransactionRepository,
+      } as ClassProvider<IWalletTransactionRepository>
+    );
+
+    container.register<IRefundRequestRepository>(
+      "IRefundRequestRepository",
+      {
+        useClass: RefundRequestRepository,
+      } as ClassProvider<IRefundRequestRepository>
     );
   }
 }

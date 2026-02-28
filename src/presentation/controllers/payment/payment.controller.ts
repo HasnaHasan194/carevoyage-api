@@ -24,7 +24,20 @@ export class PaymentController {
       return;
     }
 
-    const payload = req.body as Buffer;
+    let payload: Buffer;
+    if (Buffer.isBuffer(req.body)) {
+      payload = req.body;
+    } else if (typeof req.body === "string") {
+      payload = Buffer.from(req.body, "utf8");
+    } else {
+      ResponseHelper.error(
+        res,
+        "Webhook body must be raw (use express.raw() for this route)",
+        HTTP_STATUS.BAD_REQUEST
+      );
+      return;
+    }
+
     const webhookSecret = config.stripe.STRIPE_WEBHOOK_SECRET;
     if (!webhookSecret) {
       ResponseHelper.error(
@@ -41,11 +54,18 @@ export class PaymentController {
         signature,
         webhookSecret
       );
-    } catch {
+    } catch (err) {
+      console.error("[Stripe webhook] error:", err);
+      const isSignatureError =
+        err instanceof Error &&
+        (err.message?.toLowerCase().includes("signature") ||
+          err.message?.toLowerCase().includes("webhook"));
       ResponseHelper.error(
         res,
-        ERROR_MESSAGE.STRIPE.WEBHOOK_SIGNATURE_INVALID,
-        HTTP_STATUS.BAD_REQUEST
+        isSignatureError
+          ? ERROR_MESSAGE.STRIPE.WEBHOOK_SIGNATURE_INVALID
+          : (err instanceof Error ? err.message : "Webhook processing failed"),
+        isSignatureError ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.INTERNAL_SERVER_ERROR
       );
       return;
     }

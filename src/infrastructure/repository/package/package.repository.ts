@@ -504,6 +504,20 @@ export class PackageRepository
 
     return { packages, total };
   }
+
+  async findConflictingPackages(
+  packageIds: string[],
+  newStartDate: Date,
+  newEndDate: Date
+): Promise<IPackageEntity[]> {
+  if (!packageIds.length) return [];
+
+  return packageDB.find({
+    _id: { $in: packageIds },
+    startDate: { $lte: newEndDate },
+    endDate: { $gte: newStartDate },
+  });
+}
   
 }
 
