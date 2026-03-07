@@ -5,6 +5,7 @@ import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { CreateCategoryRequestDTO } from "../../../application/dto/request/create-category-request.dto";
 import { UpdateCategoryRequestDTO } from "../../../application/dto/request/update-category-request.dto";
 import { authorizeRole } from "../../middlewares/auth.middleware";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class AgencyCategoryRoutes extends BaseRoute {
@@ -29,7 +30,7 @@ export class AgencyCategoryRoutes extends BaseRoute {
     
    
     this.router.post(
-      "/categories",
+      ROUTES.AGENCY_CATEGORY.BASE,
       authorizeRole(["agency_owner"]),
       validationMiddleware(CreateCategoryRequestDTO),
       asyncHandler(
@@ -39,7 +40,7 @@ export class AgencyCategoryRoutes extends BaseRoute {
 
     // Update Category
     this.router.put(
-      "/categories/:id",
+      ROUTES.AGENCY_CATEGORY.DETAIL,
       authorizeRole(["agency_owner"]),
       validationMiddleware(UpdateCategoryRequestDTO),
       asyncHandler(
@@ -49,7 +50,7 @@ export class AgencyCategoryRoutes extends BaseRoute {
 
     // Delete Category (Soft Delete)
     this.router.delete(
-      "/categories/:id",
+      ROUTES.AGENCY_CATEGORY.DETAIL,
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyCategoryController.deleteCategory.bind(agencyCategoryController)
@@ -58,7 +59,7 @@ export class AgencyCategoryRoutes extends BaseRoute {
 
     // Get Categories (with optional includeDeleted query param)
     this.router.get(
-      "/categories",
+      ROUTES.AGENCY_CATEGORY.BASE,
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyCategoryController.getCategories.bind(agencyCategoryController)
@@ -67,7 +68,7 @@ export class AgencyCategoryRoutes extends BaseRoute {
 
     // Get Active Categories Only
     this.router.get(
-      "/categories/active",
+      ROUTES.AGENCY_CATEGORY.ACTIVE,
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencyCategoryController.getActiveCategories.bind(

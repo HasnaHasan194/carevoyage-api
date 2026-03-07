@@ -11,10 +11,12 @@ import { IRejectRefundUseCase } from "../../../application/usecase/interfaces/re
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 import {
+  ERROR_MESSAGE,
   HTTP_STATUS,
+  SUCCESS_MESSAGE,
 } from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
-import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IUserRepository } from "../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { NotFoundError } from "../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../domain/errors/validationError";
@@ -45,18 +47,33 @@ export class AgencyController implements IAgencyController {
     private _getAgencyBookingDetailUseCase: IGetAgencyBookingDetailUseCase
   ) {}
 
+  private async getAuthenticatedAgency(customReq: CustomRequest) {
+    if (!customReq.user) {
+      throw new NotFoundError(
+        ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED
+      );
+    }
+    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
+    if (!agency) {
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND_FOR_USER);
+    }
+    return agency;
+  }
+
+  private validateCaretakerOwnership(
+    profileAgencyId: string | undefined,
+    agencyId: string
+  ) {
+    if (!profileAgencyId || profileAgencyId !== agencyId) {
+      throw new NotFoundError(
+        ERROR_MESSAGE.CARETAKER.NOT_FOUND_FOR_AGENCY
+      );
+    }
+  }
+
   async inviteCaretaker(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const userId = customReq.user.id;
-    console.log(userId, "-->userId");
-    // Find agency by userId
-    const agency = await this._agencyRepository.findByUserId(userId);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
 
     const requestData = req.body as InviteCaretakerRequestDTO;
 
@@ -65,25 +82,25 @@ export class AgencyController implements IAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.CREATED,
-      "Caretaker invitation sent successfully"
+      SUCCESS_MESSAGE.CARETAKER.INVITATION_SENT
     );
   }
 
   async listCaretakers(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const userId = customReq.user.id;
+    const agency = await this.getAuthenticatedAgency(customReq);
 
-    const agency = await this._agencyRepository.findByUserId(userId);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
 
-    const profiles = await this._caretakerProfileRepository.findByAgencyId(
-      agency._id
-    );
+    const [profiles, total] = await Promise.all([
+      this._caretakerProfileRepository.findByAgencyIdPaginated(
+        agency._id,
+        page,
+        limit
+      ),
+      this._caretakerProfileRepository.countByAgencyId(agency._id),
+    ]);
 
     const caretakers = await Promise.all(
       profiles
@@ -112,39 +129,51 @@ export class AgencyController implements IAgencyController {
         })
     );
 
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Caretakers fetched", caretakers);
+    const totalPages = Math.ceil(total / limit);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.CARETAKER.LIST_FETCHED,
+      {
+      caretakers,
+      total,
+      page,
+      limit,
+      totalPages,
+      }
+    );
   }
 
   async updateCaretakerAvailability(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const userId = customReq.user.id;
-
-    const agency = await this._agencyRepository.findByUserId(userId);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
 
     const caretakerId = req.params.caretakerId;
     const { status } = req.body as { status: "AVAILABLE" | "INACTIVE" };
 
     const profile = await this._caretakerProfileRepository.findById(caretakerId);
-    if (!profile || profile.agencyId !== agency._id) {
-      throw new NotFoundError("Caretaker not found for this agency");
+    if (!profile) {
+      throw new NotFoundError(
+        ERROR_MESSAGE.CARETAKER.NOT_FOUND_FOR_AGENCY
+      );
     }
+    this.validateCaretakerOwnership(profile.agencyId, agency._id);
 
     if (profile.isDeleted) {
-      throw new ValidationError("Cannot update a deleted caretaker");
+      throw new ValidationError(ERROR_MESSAGE.CARETAKER.CANNOT_UPDATE_DELETED);
     }
 
     if (profile.availabilityStatus === "BUSY") {
-      throw new ValidationError("Cannot change availability of a busy caretaker");
+      throw new ValidationError(
+        ERROR_MESSAGE.CARETAKER.CANNOT_CHANGE_BUSY_AVAILABILITY
+      );
     }
 
     if (status !== "AVAILABLE" && status !== "INACTIVE") {
-      throw new ValidationError("Invalid availability status");
+      throw new ValidationError(
+        ERROR_MESSAGE.CARETAKER.INVALID_AVAILABILITY_STATUS
+      );
     }
 
     const updated = await this._caretakerProfileRepository.updateAvailabilityStatus(
@@ -155,63 +184,55 @@ export class AgencyController implements IAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Caretaker availability updated",
+      SUCCESS_MESSAGE.CARETAKER.AVAILABILITY_UPDATED,
       updated
     );
   }
 
   async softDeleteCaretaker(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const userId = customReq.user.id;
-
-    const agency = await this._agencyRepository.findByUserId(userId);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
 
     const caretakerId = req.params.caretakerId;
 
     const profile = await this._caretakerProfileRepository.findById(caretakerId);
-    if (!profile || profile.agencyId !== agency._id) {
-      throw new NotFoundError("Caretaker not found for this agency");
+    if (!profile) {
+      throw new NotFoundError(
+        ERROR_MESSAGE.CARETAKER.NOT_FOUND_FOR_AGENCY
+      );
     }
+    this.validateCaretakerOwnership(profile.agencyId, agency._id);
 
     const deleted = await this._caretakerProfileRepository.softDelete(caretakerId);
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Caretaker removed",
+      SUCCESS_MESSAGE.CARETAKER.REMOVED,
       deleted
     );
   }
 
   async updateCaretakerPrice(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const userId = customReq.user.id;
-
-    const agency = await this._agencyRepository.findByUserId(userId);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
 
     const caretakerId = req.params.caretakerId;
     const { pricePerDay } = req.body as { pricePerDay: number };
 
     if (pricePerDay < 0) {
-      throw new ValidationError("Price per day must be greater than or equal to 0");
+      throw new ValidationError(
+        ERROR_MESSAGE.CARETAKER.INVALID_PRICE_PER_DAY
+      );
     }
 
     const profile = await this._caretakerProfileRepository.findById(caretakerId);
-    if (!profile || profile.agencyId !== agency._id) {
-      throw new NotFoundError("Caretaker not found for this agency");
+    if (!profile) {
+      throw new NotFoundError(
+        ERROR_MESSAGE.CARETAKER.NOT_FOUND_FOR_AGENCY
+      );
     }
+    this.validateCaretakerOwnership(profile.agencyId, agency._id);
 
     const updated = await this._caretakerProfileRepository.updatePricePerDay(
       caretakerId,
@@ -221,93 +242,102 @@ export class AgencyController implements IAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Caretaker price updated",
+      SUCCESS_MESSAGE.CARETAKER.PRICE_UPDATED,
       updated
     );
   }
 
   async listCaretakerRequests(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
-    const list = await this._listCaretakerRequestsUseCase.execute(agency._id);
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Caretaker requests retrieved", list);
+    const agency = await this.getAuthenticatedAgency(customReq);
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
+    const rawStatus = (req.query.status as string | undefined) ?? undefined;
+
+    const result = await this._listCaretakerRequestsUseCase.execute({
+      agencyId: agency._id,
+      page,
+      limit,
+      status:
+        rawStatus === "PENDING" || rawStatus === "FULFILLED"
+          ? rawStatus
+          : undefined,
+    });
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.CARETAKER_REQUEST.LIST_FETCHED,
+      result
+    );
   }
 
   async fulfillCaretakerRequest(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
     const requestId = req.params.requestId;
     const { noteToClient, caretakerId } = req.body as { noteToClient?: string; caretakerId?: string };
     await this._fulfillCaretakerRequestUseCase.execute(agency._id, requestId, {
       noteToClient,
       caretakerId,
     });
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Request fulfilled. Client has been notified.");
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.CARETAKER_REQUEST.FULFILLED
+    );
   }
 
   async listRefundRequests(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
-    const list = await this._listAgencyRefundRequestsUseCase.execute(agency._id);
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Refund requests retrieved", list);
+    const agency = await this.getAuthenticatedAgency(customReq);
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
+
+    const result = await this._listAgencyRefundRequestsUseCase.execute({
+      agencyId: agency._id,
+      page,
+      limit,
+    });
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.REFUND.LIST_FETCHED,
+      result
+    );
   }
 
   async approveRefundRequest(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
     const requestId = req.params.requestId;
     await this._approveRefundUseCase.execute(agency._id, requestId);
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Refund approved");
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.REFUND.APPROVED
+    );
   }
 
   async rejectRefundRequest(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
     const requestId = req.params.requestId;
     const { reason } = req.body as { reason?: string };
     await this._rejectRefundUseCase.execute(agency._id, requestId, reason);
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Refund rejected");
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.REFUND.REJECTED
+    );
   }
 
   async getBookingDetail(req: Request, res: Response): Promise<void> {
     const customReq = req as CustomRequest;
-    if (!customReq.user) {
-      throw new NotFoundError("User not authenticated");
-    }
-    const agency = await this._agencyRepository.findByUserId(customReq.user.id);
-    if (!agency) {
-      throw new NotFoundError("Agency not found for this user");
-    }
+    const agency = await this.getAuthenticatedAgency(customReq);
 
     const bookingId = req.params.bookingId;
 
@@ -319,7 +349,7 @@ export class AgencyController implements IAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Booking detail retrieved",
+      SUCCESS_MESSAGE.BOOKING.DETAIL_FETCHED,
       detail
     );
   }

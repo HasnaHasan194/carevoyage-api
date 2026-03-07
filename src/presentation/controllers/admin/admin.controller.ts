@@ -3,7 +3,11 @@ import type { Request, Response } from "express";
 import type { IGetAllUsersUsecase } from "../../../application/usecase/interfaces/admin/getallusers.interface";
 import type { IBlockUnblockUserUsecase } from "../../../application/usecase/interfaces/admin/blockUnblock.interface";
 import type { IListWalletTransactionsUseCase } from "../../../application/usecase/interfaces/admin/list-wallet-transactions.interface";
+import type { IGetAdminSalesReportUseCase } from "../../../application/usecase/interfaces/sales-report/get-admin-sales-report.interface";
+import type { IExportSalesReportUseCase } from "../../../application/usecase/interfaces/sales-report/export-sales-report.interface";
 import type { IAdminController } from "../../interfaces/controllers/admin/admin.controller.interface";
+import { HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
+import { toExportPayload } from "../../../application/mapper/sales-report.mapper";
 
 @injectable()
 export class AdminController implements IAdminController {
@@ -15,7 +19,13 @@ export class AdminController implements IAdminController {
     private _blockUnblockUserUsecase: IBlockUnblockUserUsecase,
 
     @inject("IListWalletTransactionsUseCase")
-    private _listWalletTransactionsUseCase: IListWalletTransactionsUseCase
+    private _listWalletTransactionsUseCase: IListWalletTransactionsUseCase,
+
+    @inject("IGetAdminSalesReportUseCase")
+    private _getAdminSalesReportUseCase: IGetAdminSalesReportUseCase,
+
+    @inject("IExportSalesReportUseCase")
+    private _exportSalesReportUseCase: IExportSalesReportUseCase
   ) {}
 
   async getAllUsers(req: Request, res: Response): Promise<void> {
@@ -24,7 +34,7 @@ export class AdminController implements IAdminController {
 
     const data = await this._getAllUsersUsecase.execute(page, limit);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       data,
     });
@@ -36,9 +46,9 @@ export class AdminController implements IAdminController {
 
     await this._blockUnblockUserUsecase.execute(userId, isBlocked);
 
-    res.status(200).json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: "User status updated",
+      message: SUCCESS_MESSAGE.USER.STATUS_UPDATED,
     });
   }
 
@@ -71,5 +81,72 @@ export class AdminController implements IAdminController {
       success: true,
       data,
     });
+  }
+
+  private parseSalesReportQuery(req: Request): {
+    startDate: Date | null;
+    endDate: Date | null;
+  } {
+    const startStr = req.query.startDate as string | undefined;
+    const endStr = req.query.endDate as string | undefined;
+    const startDate =
+      startStr && !Number.isNaN(Date.parse(startStr))
+        ? new Date(startStr)
+        : null;
+    const endDate =
+      endStr && !Number.isNaN(Date.parse(endStr)) ? new Date(endStr) : null;
+    return { startDate, endDate };
+  }
+
+  async getSalesReport(req: Request, res: Response): Promise<void> {
+    const { startDate, endDate } = this.parseSalesReportQuery(req);
+    const data = await this._getAdminSalesReportUseCase.execute({
+      startDate,
+      endDate,
+    });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data,
+    });
+  }
+
+  async getSalesReportPdf(req: Request, res: Response): Promise<void> {
+    const { startDate, endDate } = this.parseSalesReportQuery(req);
+    const data = await this._getAdminSalesReportUseCase.execute({
+      startDate,
+      endDate,
+    });
+    const payload = toExportPayload(data, "Admin Sales Report");
+    const buffer = await this._exportSalesReportUseCase.execute(payload, "pdf");
+    const filename = `admin-sales-report-${payload.startDate ?? "all"}-${payload.endDate ?? "all"}.pdf`;
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename}"`
+    );
+    res.send(buffer);
+  }
+
+  async getSalesReportExcel(req: Request, res: Response): Promise<void> {
+    const { startDate, endDate } = this.parseSalesReportQuery(req);
+    const data = await this._getAdminSalesReportUseCase.execute({
+      startDate,
+      endDate,
+    });
+    const payload = toExportPayload(data, "Admin Sales Report");
+    const buffer = await this._exportSalesReportUseCase.execute(
+      payload,
+      "excel"
+    );
+    const filename = `admin-sales-report-${payload.startDate ?? "all"}-${payload.endDate ?? "all"}.xlsx`;
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${filename}"`
+    );
+    res.send(buffer);
   }
 }

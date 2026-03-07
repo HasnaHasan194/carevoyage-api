@@ -9,9 +9,9 @@ import { IListActiveCategoriesUsecase } from "../../../application/usecase/inter
 import { CreateCategoryRequestDTO } from "../../../application/dto/request/create-category-request.dto";
 import { UpdateCategoryRequestDTO } from "../../../application/dto/request/update-category-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
-import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { NotFoundError } from "../../../domain/errors/notFoundError";
 
 @injectable()
@@ -33,11 +33,11 @@ export class AgencyCategoryController implements IAgencyCategoryController {
 
   private async getAgencyId(req: CustomRequest): Promise<string> {
     if (!req.user) {
-      throw new NotFoundError("User not authenticated");
+      throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED);
     }
     const agency = await this._agencyRepository.findByUserId(req.user.id);
     if (!agency) {
-      throw new NotFoundError("Agency not found");
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
     }
     return agency._id;
   }
@@ -51,7 +51,7 @@ export class AgencyCategoryController implements IAgencyCategoryController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.CREATED,
-      "Category created successfully",
+      SUCCESS_MESSAGE.CATEGORY.CREATED,
       category
     );
   }
@@ -70,7 +70,7 @@ export class AgencyCategoryController implements IAgencyCategoryController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Category updated successfully",
+      SUCCESS_MESSAGE.CATEGORY.UPDATED,
       category
     );
   }
@@ -83,22 +83,27 @@ export class AgencyCategoryController implements IAgencyCategoryController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Category deleted successfully"
+      SUCCESS_MESSAGE.CATEGORY.DELETED
     );
   }
 
   async getCategories(req: CustomRequest, res: Response): Promise<void> {
     const agencyId = await this.getAgencyId(req);
     const includeDeleted = req.query.includeDeleted === "true";
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
+
     const categories = await this._listCategoriesUsecase.execute(
       agencyId,
-      includeDeleted
+      includeDeleted,
+      page,
+      limit
     );
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Categories retrieved successfully",
+      SUCCESS_MESSAGE.CATEGORY.LIST_FETCHED,
       categories
     );
   }
@@ -110,7 +115,7 @@ export class AgencyCategoryController implements IAgencyCategoryController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Active categories retrieved successfully",
+      SUCCESS_MESSAGE.CATEGORY.ACTIVE_LIST_FETCHED,
       categories
     );
   }

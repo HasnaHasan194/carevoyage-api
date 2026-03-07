@@ -41,6 +41,27 @@ export class UpdatePackageBasicUsecase implements IUpdatePackageBasicUsecase {
       );
     }
 
+    // Prevent changing dates for published packages
+    if (existingPackage.status === "published") {
+      const incomingStartDate = data.startDate
+        ? new Date(data.startDate)
+        : undefined;
+      const incomingEndDate = data.endDate ? new Date(data.endDate) : undefined;
+
+      const isChangingStartDate =
+        incomingStartDate !== undefined &&
+        incomingStartDate.getTime() !== existingPackage.startDate.getTime();
+      const isChangingEndDate =
+        incomingEndDate !== undefined &&
+        incomingEndDate.getTime() !== existingPackage.endDate.getTime();
+
+      if (isChangingStartDate || isChangingEndDate) {
+        throw new ValidationError(
+          ERROR_MESSAGE.PACKAGE.CANNOT_EDIT_DATES_WHEN_PUBLISHED
+        );
+      }
+    }
+
     const packageUpdateData: Partial<IPackageEntity> = {};
 
     if (data.PackageName !== undefined)

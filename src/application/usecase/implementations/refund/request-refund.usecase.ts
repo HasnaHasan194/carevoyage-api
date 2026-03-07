@@ -32,7 +32,7 @@ export class RequestRefundUseCase implements IRequestRefundUseCase {
 
     if (booking.status !== "CANCELLED_BY_USER") {
       throw new ValidationError(
-        "Only bookings cancelled by the user can request a refund"
+        ERROR_MESSAGE.BOOKING.CANNOT_CANCEL
       );
     }
 
@@ -40,15 +40,14 @@ export class RequestRefundUseCase implements IRequestRefundUseCase {
       bookingId
     );
     if (existing) {
-      throw new ValidationError("Refund already requested for this booking");
+      throw new ValidationError(ERROR_MESSAGE.REFUND.ALREADY_REQUESTED);
     }
 
     const now = new Date();
     let refundAmount =
       this._refundPolicyService.calculateRefundAmount(booking, now);
 
-    // Backward-compatibility: older bookings created before startDate was added
-    // won't have booking.startDate set. In that case, fall back to package.startDate.
+
     if (!booking.startDate) {
       const pkg = await this._packageRepository.findById(booking.packageId);
       if (!pkg) {
@@ -65,7 +64,7 @@ export class RequestRefundUseCase implements IRequestRefundUseCase {
     }
 
     if (refundAmount <= 0) {
-      throw new ValidationError("No refund eligible for this booking");
+      throw new ValidationError(ERROR_MESSAGE.REFUND.NOT_ELIGIBLE);
     }
 
     return this._refundRequestRepository.save({

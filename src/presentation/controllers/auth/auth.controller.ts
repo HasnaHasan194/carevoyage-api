@@ -117,6 +117,52 @@ export class AuthController implements IAuthController {
     private _getCurrentUserUsecase: IGetCurrentUserUsecase,
   ) {}
 
+  private async generateTokensAndSetCookies(
+    res: Response,
+    userId: string,
+    email: string,
+    role: string,
+  ) {
+    const tokens = await this._generateTokenUseCase.execute(
+      userId,
+      email,
+      role,
+    );
+
+    setAuthCookies(
+      res,
+      tokens.accessToken,
+      tokens.refreshToken,
+      COOKIES_NAMES.ACCESS_TOKEN,
+      COOKIES_NAMES.REFRESH_TOKEN,
+    );
+
+    return tokens;
+  }
+
+  private sendLoginSuccessResponse(
+    res: Response,
+    message: string,
+    user: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      role: string;
+      profileImage?: string | null;
+    },
+    tokens: { accessToken: string; refreshToken: string },
+    status: number = HTTP_STATUS.OK,
+  ): void {
+    res.status(status).json({
+      success: true,
+      message,
+      user,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+
   async register(req: Request, res: Response): Promise<void> {
     const userData = req.body;
 
@@ -136,33 +182,25 @@ export class AuthController implements IAuthController {
 
     const userId = data.id.toString();
 
-    const tokens = await this._generateTokenUseCase.execute(
+    const tokens = await this.generateTokensAndSetCookies(
+      res,
       userId,
       data.email,
       data.role,
     );
 
-    setAuthCookies(
+    this.sendLoginSuccessResponse(
       res,
-      tokens.accessToken,
-      tokens.refreshToken,
-      COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN,
-    );
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
-      user: {
+      SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      {
         id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         role: data.role,
       },
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    });
+      tokens,
+    );
   }
 
   async registerAgency(req: Request, res: Response): Promise<void> {
@@ -185,33 +223,25 @@ export class AuthController implements IAuthController {
 
     const userId = data.id.toString();
 
-    const tokens = await this._generateTokenUseCase.execute(
+    const tokens = await this.generateTokensAndSetCookies(
+      res,
       userId,
       data.email,
       data.role,
     );
 
-    setAuthCookies(
+    this.sendLoginSuccessResponse(
       res,
-      tokens.accessToken,
-      tokens.refreshToken,
-      COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN,
-    );
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
-      user: {
+      SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      {
         id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         role: data.role,
       },
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    });
+      tokens,
+    );
   }
   async AdminLogin(req: Request, res: Response): Promise<void> {
     const userData = req.body;
@@ -220,33 +250,25 @@ export class AuthController implements IAuthController {
     );
     const userId = data.id.toString();
 
-    const tokens = await this._generateTokenUseCase.execute(
+    const tokens = await this.generateTokensAndSetCookies(
+      res,
       userId,
       data.email,
       data.role,
     );
 
-    setAuthCookies(
+    this.sendLoginSuccessResponse(
       res,
-      tokens.accessToken,
-      tokens.refreshToken,
-      COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN,
-    );
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
-      user: {
+      SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      {
         id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         role: data.role,
       },
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    });
+      tokens,
+    );
   }
   async sendOtp(req: Request, res: Response): Promise<void> {
     const { email } = req.body;
@@ -323,7 +345,11 @@ export class AuthController implements IAuthController {
       phone,
     });
 
-    ResponseHelper.success(res, HTTP_STATUS.OK, "OTP sent successfully");
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.AUTHORIZATION.OTP_SEND_SUCCESS,
+    );
   }
 
   async logout(req: Request, res: Response): Promise<void> {
@@ -363,14 +389,14 @@ export class AuthController implements IAuthController {
       ResponseHelper.success(
         res,
         HTTP_STATUS.OK,
-        "Access token refreshed successfully",
+        SUCCESS_MESSAGE.AUTHORIZATION.ACCESS_TOKEN_REFRESHED,
         {
           role: result.role,
           accessToken: result.accessToken,
         },
       );
     } catch (error) {
-      // Clear cookies on refresh failure
+     
       clearCookie(res, COOKIES_NAMES.ACCESS_TOKEN, COOKIES_NAMES.REFRESH_TOKEN);
 
       if (error instanceof Error) {
@@ -389,7 +415,11 @@ export class AuthController implements IAuthController {
     const { token } = req.query;
 
     if (!token || typeof token !== "string") {
-      ResponseHelper.error(res, "Token is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.TOKEN_MISSING,
+        HTTP_STATUS.BAD_REQUEST,
+      );
       return;
     }
 
@@ -398,7 +428,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Invite token verified successfully",
+      SUCCESS_MESSAGE.AUTHORIZATION.INVITE_TOKEN_VERIFIED,
       result,
     );
   }
@@ -408,18 +438,11 @@ export class AuthController implements IAuthController {
 
     const userData = await this._caretakerSignupUseCase.execute(signupData);
 
-    const tokens = await this._generateTokenUseCase.execute(
+    const tokens = await this.generateTokensAndSetCookies(
+      res,
       userData.id,
       userData.email,
       userData.role,
-    );
-
-    setAuthCookies(
-      res,
-      tokens.accessToken,
-      tokens.refreshToken,
-      COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN,
     );
 
     res.status(HTTP_STATUS.CREATED).json({
@@ -446,33 +469,25 @@ export class AuthController implements IAuthController {
 
     const userId = data.id.toString();
 
-    const tokens = await this._generateTokenUseCase.execute(
+    const tokens = await this.generateTokensAndSetCookies(
+      res,
       userId,
       data.email,
       data.role,
     );
 
-    setAuthCookies(
+    this.sendLoginSuccessResponse(
       res,
-      tokens.accessToken,
-      tokens.refreshToken,
-      COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN,
-    );
-
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
-      user: {
+      SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      {
         id: data.id,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         role: data.role,
       },
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    });
+      tokens,
+    );
   }
 
   async forgotPassword(req: Request, res: Response): Promise<void> {
@@ -483,7 +498,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Password reset link has been sent to your email. Please check your inbox.",
+      SUCCESS_MESSAGE.AUTHORIZATION.PASSWORD_RESET_EMAIL_SENT,
     );
   }
 
@@ -493,7 +508,7 @@ export class AuthController implements IAuthController {
     if (password !== confirmPassword) {
       ResponseHelper.error(
         res,
-        "Passwords do not match",
+        ERROR_MESSAGE.AUTHENTICATION.PASSWORD_AND_CONFIRM_PASSWORD_MUST_BE_SAME,
         HTTP_STATUS.BAD_REQUEST,
       );
       return;
@@ -504,7 +519,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Password reset successfully. You can now login with your new password.",
+      SUCCESS_MESSAGE.AUTHORIZATION.PASSWORD_RESET_SUCCESS,
     );
   }
 
@@ -512,13 +527,22 @@ export class AuthController implements IAuthController {
     const { token } = req.query;
 
     if (!token || typeof token !== "string") {
-      ResponseHelper.error(res, "Token is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.TOKEN_MISSING,
+        HTTP_STATUS.BAD_REQUEST,
+      );
       return;
     }
 
     const result = await this._verifyResetTokenUsecase.execute(token);
 
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Reset token is valid", result);
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.AUTHORIZATION.RESET_TOKEN_VALID,
+      result,
+    );
   }
 
   async reverifyAgency(req: Request, res: Response): Promise<void> {
@@ -535,29 +559,21 @@ export class AuthController implements IAuthController {
 
   async googleAuth(req: Request, res: Response): Promise<void> {
     const { accessToken } = req.body;
-    console.log(accessToken, "---->,accesstoken");
+    // console.log(accessToken, "---->,accesstoken");
     const userData = await this._googleAuthUsecase.execute(accessToken);
-    console.log(userData, "----->,userData");
     const userId = userData.id.toString();
-    console.log(userId, "----->,useriddddddddd");
-    const tokens = await this._generateTokenUseCase.execute(
+
+    const tokens = await this.generateTokensAndSetCookies(
+      res,
       userId,
       userData.email,
       userData.role,
     );
-    console.log(tokens, "----->,useriddddddddd");
-    setAuthCookies(
-      res,
-      tokens.accessToken,
-      tokens.refreshToken,
-      COOKIES_NAMES.ACCESS_TOKEN,
-      COOKIES_NAMES.REFRESH_TOKEN,
-    );
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
-      user: {
+    this.sendLoginSuccessResponse(
+      res,
+      SUCCESS_MESSAGE.AUTHORIZATION.LOGIN_SUCCESS,
+      {
         id: userData.id,
         firstName: userData.firstName,
         lastName: userData.lastName,
@@ -565,9 +581,8 @@ export class AuthController implements IAuthController {
         role: userData.role,
         profileImage: userData.profileImage,
       },
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-    });
+      tokens,
+    );
   }
 
   async getMe(req: Request, res: Response): Promise<void> {
@@ -585,7 +600,7 @@ export class AuthController implements IAuthController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Current user retrieved successfully",
+      SUCCESS_MESSAGE.AUTHORIZATION.CURRENT_USER_FETCHED,
       currentUser,
     );
   }

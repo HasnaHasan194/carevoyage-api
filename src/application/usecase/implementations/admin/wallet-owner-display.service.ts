@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import type { TWalletOwnerType } from "../../../../domain/entities/wallet.entity";
 import type { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
-import type { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import type { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import type {
   IWalletOwnerDisplayService,
   WalletOwnerDisplayResult,

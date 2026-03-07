@@ -1,7 +1,7 @@
 import { container, type ClassProvider } from "tsyringe";
 import { IUserRepository } from "../../domain/repositoryInterfaces/User/user.repository.interface";
 import { UserRepository } from "../repository/user/user.repository";
-import { IAgencyRepository } from "../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { AgencyRepository } from "../repository/agency/agency.repository";
 import { IAdminRepository } from "../../domain/repositoryInterfaces/Admin/admin.repository.interface";
 import { AdminRepository } from "../repository/admin/admin.repository";
@@ -41,6 +41,8 @@ import { IWalletTransactionRepository } from "../../domain/repositoryInterfaces/
 import { WalletTransactionRepository } from "../repository/wallet/wallet-transaction.repository";
 import { IRefundRequestRepository } from "../../domain/repositoryInterfaces/Refund/refund-request.repository.interface";
 import { RefundRequestRepository } from "../repository/refund/refund-request.repository";
+import { ISalesReportRepository } from "../../domain/repositoryInterfaces/SalesReport/sales-report.repository.interface";
+import { SalesReportRepository } from "../repository/sales-report/sales-report.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -151,6 +153,13 @@ export class RepositoryRegister {
       {
         useClass: RefundRequestRepository,
       } as ClassProvider<IRefundRequestRepository>
+    );
+
+    container.register<ISalesReportRepository>(
+      "ISalesReportRepository",
+      {
+        useClass: SalesReportRepository,
+      } as ClassProvider<ISalesReportRepository>
     );
   }
 }

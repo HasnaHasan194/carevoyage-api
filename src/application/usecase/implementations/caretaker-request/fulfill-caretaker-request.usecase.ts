@@ -27,16 +27,16 @@ export class FulfillCaretakerRequestUseCase implements IFulfillCaretakerRequestU
     if (!request) {
       throw new NotFoundError(ERROR_MESSAGE.CARETAKER_REQUEST.NOT_FOUND);
     }
-    // Edge case: Request scoped to agency — only owning agency can fulfill.
+    //  case: Request scoped to agency — only owning agency can fulfill.
     if (request.agencyId !== agencyId) {
       throw new ValidationError(ERROR_MESSAGE.CARETAKER_REQUEST.NOT_AGENCY_REQUEST);
     }
-    // Edge case: Already fulfilled (e.g. duplicate click or race) — reject.
+    // case: Already fulfilled (e.g. duplicate click or race) — reject.
     if (request.status !== "pending") {
       throw new ValidationError(ERROR_MESSAGE.CARETAKER_REQUEST.NOT_PENDING);
     }
 
-    // fulfilledByCaretakerId is optional; if agency later deletes that caretaker, request stays fulfilled and client was already notified.
+  
     await this._caretakerRequestRepository.updateById(requestId, {
       status: "fulfilled",
       fulfilledAt: new Date(),

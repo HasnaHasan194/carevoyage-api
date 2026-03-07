@@ -37,7 +37,7 @@ export interface IWalletTransactionRepository
     source?: IWalletTransactionEntity["source"]
   ): Promise<number>;
 
-  /** Returns true if any transaction exists with the given referenceId and source (for idempotency). */
+ 
   existsByReferenceIdAndSource(
     referenceId: string,
     source: IWalletTransactionEntity["source"]

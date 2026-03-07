@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { config } from "../../../../shared/config";
 import type {
   IWalletOwnerResolver,

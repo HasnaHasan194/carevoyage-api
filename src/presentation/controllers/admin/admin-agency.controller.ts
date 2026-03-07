@@ -73,7 +73,7 @@ export class AdminAgencyController implements IAdminAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Agencies retrieved successfully",
+      SUCCESS_MESSAGE.AGENCY.AGENCIES_FETCHED,
       result
     );
   }
@@ -86,7 +86,7 @@ export class AdminAgencyController implements IAdminAgencyController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Agency details retrieved successfully",
+      SUCCESS_MESSAGE.AGENCY.FETCHED,
       agency
     );
   }

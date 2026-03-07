@@ -15,7 +15,9 @@ export class BookingRepository
     super(bookingDB, BookingMapper.toEntity);
   }
 
-  async findByStripeSessionId(sessionId: string): Promise<IBookingEntity | null> {
+  async findByStripeSessionId(
+    sessionId: string,
+  ): Promise<IBookingEntity | null> {
     const doc = await bookingDB.findOne({ stripeSessionId: sessionId }).exec();
     if (!doc) return null;
     return BookingMapper.toEntity(doc);
@@ -28,7 +30,7 @@ export class BookingRepository
 
   async findByAgencyIdAndPackageId(
     agencyId: string,
-    packageId: string
+    packageId: string,
   ): Promise<IBookingEntity[]> {
     const docs = await bookingDB
       .find({ agencyId, packageId })
@@ -47,23 +49,26 @@ export class BookingRepository
 
   async findByIdAndClientId(
     bookingId: string,
-    clientId: string
+    clientId: string,
   ): Promise<IBookingEntity | null> {
-    const doc = await bookingDB
-      .findOne({ _id: bookingId, clientId })
-      .exec();
+    const doc = await bookingDB.findOne({ _id: bookingId, clientId }).exec();
     if (!doc) return null;
     return BookingMapper.toEntity(doc);
   }
 
   async findByIdAndAgencyId(
     bookingId: string,
-    agencyId: string
+    agencyId: string,
   ): Promise<IBookingEntity | null> {
-    const doc = await bookingDB
-      .findOne({ _id: bookingId, agencyId })
-      .exec();
+    const doc = await bookingDB.findOne({ _id: bookingId, agencyId }).exec();
     if (!doc) return null;
     return BookingMapper.toEntity(doc);
   }
+
+  
+ 
+
+ 
+
+  
 }

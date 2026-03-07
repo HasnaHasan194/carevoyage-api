@@ -4,6 +4,7 @@ import { asyncHandler } from "../../../shared/async-handler";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { BrowsePackagesRequestDTO } from "../../../application/dto/request/browse-packages-request.dto";
 import { packageController } from "../../../infrastructure/dependencyinjection/resolve";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class PackageRoutes extends BaseRoute {
@@ -14,13 +15,13 @@ export class PackageRoutes extends BaseRoute {
   protected initializeRoutes(): void {
     //  upcoming packages (startDate > today) 
     this.router.get(
-      "/upcoming",
+      ROUTES.PACKAGE_PUBLIC.UPCOMING,
       validationMiddleware(BrowsePackagesRequestDTO),
       asyncHandler(packageController.getUpcomingPackages.bind(packageController))
     );
 
     this.router.get(
-      "/",
+      ROUTES.PACKAGE_PUBLIC.ROOT,
       validationMiddleware(BrowsePackagesRequestDTO),
       asyncHandler(packageController.browsePackages.bind(packageController))
     );

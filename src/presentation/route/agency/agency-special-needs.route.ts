@@ -6,6 +6,7 @@ import { EnableSpecialNeedRequestDTO } from "../../../application/dto/request/en
 import { UpdateSpecialNeedRequestDTO } from "../../../application/dto/request/update-special-need-request.dto";
 import { ToggleActiveStatusRequestDTO } from "../../../application/dto/request/toggle-active-status-request.dto";
 import { authorizeRole } from "../../middlewares/auth.middleware";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class AgencySpecialNeedsRoutes extends BaseRoute {
@@ -36,7 +37,7 @@ export class AgencySpecialNeedsRoutes extends BaseRoute {
 
     // List Agency Special Needs
     this.router.get(
-      "/special-needs",
+      ROUTES.AGENCY_SPECIAL_NEEDS.BASE,
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencySpecialNeedsController.listAgencySpecialNeeds.bind(
@@ -47,7 +48,7 @@ export class AgencySpecialNeedsRoutes extends BaseRoute {
 
     // Enable Special Need
     this.router.post(
-      "/special-needs",
+      ROUTES.AGENCY_SPECIAL_NEEDS.BASE,
       authorizeRole(["agency_owner"]),
       validationMiddleware(EnableSpecialNeedRequestDTO),
       asyncHandler(
@@ -59,7 +60,7 @@ export class AgencySpecialNeedsRoutes extends BaseRoute {
 
     // Update Special Need
     this.router.put(
-      "/special-needs/:id",
+      ROUTES.AGENCY_SPECIAL_NEEDS.DETAIL,
       authorizeRole(["agency_owner"]),
       validationMiddleware(UpdateSpecialNeedRequestDTO),
       asyncHandler(
@@ -71,7 +72,7 @@ export class AgencySpecialNeedsRoutes extends BaseRoute {
 
     // Toggle Active Status
     this.router.patch(
-      "/special-needs/:id/toggle-active",
+      ROUTES.AGENCY_SPECIAL_NEEDS.TOGGLE_ACTIVE,
       authorizeRole(["agency_owner"]),
       validationMiddleware(ToggleActiveStatusRequestDTO),
       asyncHandler(
@@ -83,7 +84,7 @@ export class AgencySpecialNeedsRoutes extends BaseRoute {
 
     // Soft Delete Special Need
     this.router.delete(
-      "/special-needs/:id",
+      ROUTES.AGENCY_SPECIAL_NEEDS.DETAIL,
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencySpecialNeedsController.softDeleteSpecialNeed.bind(

@@ -5,7 +5,7 @@ import { IGetAgencyProfileUsecase } from "../../../application/usecase/interface
 import { IUpdateAgencyProfileUsecase } from "../../../application/usecase/interfaces/agency/update-agency-profile.interface";
 import { IS3Service } from "../../../domain/service-interfaces/s3-service.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 
 @injectable()
 export class AgencyProfileController {
@@ -18,12 +18,27 @@ export class AgencyProfileController {
     private readonly _s3Service: IS3Service
   ) {}
 
+  private async enrichProfileImageUrl(
+    profileImage: string | null,
+  ): Promise<string | null> {
+    if (!profileImage || profileImage.startsWith("http")) {
+      return profileImage;
+    }
+    try {
+      const signedUrl = await this._s3Service.getSignedUrl(profileImage);
+      return signedUrl;
+    } catch (error) {
+      console.error("Error generating signed URL for agency profile image:", error);
+      return null;
+    }
+  }
+
   async getProfile(req: CustomRequest, res: Response): Promise<void> {
     console.log(req.user,"-->users");
     if (!req.user?.id) {
       ResponseHelper.error(
         res,
-        "Unauthorized",
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
         HTTP_STATUS.UNAUTHORIZED
       );
       return;
@@ -31,20 +46,14 @@ export class AgencyProfileController {
 
     const profile = await this._getAgencyProfileUsecase.execute(req.user.id);
 
-    if (profile.profileImage && !profile.profileImage.startsWith("http")) {
-      try {
-        const signedUrl = await this._s3Service.getSignedUrl(profile.profileImage);
-        profile.profileImage = signedUrl;
-      } catch (error) {
-        console.error("Error generating signed URL for agency profile image:", error);
-        profile.profileImage = null;
-      }
-    }
+    profile.profileImage = await this.enrichProfileImageUrl(
+      profile.profileImage,
+    );
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Agency profile retrieved successfully",
+      SUCCESS_MESSAGE.AGENCY.FETCHED,
       profile
     );
   }
@@ -53,7 +62,7 @@ export class AgencyProfileController {
     if (!req.user?.id) {
       ResponseHelper.error(
         res,
-        "Unauthorized",
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
         HTTP_STATUS.UNAUTHORIZED
       );
       return;
@@ -66,15 +75,9 @@ export class AgencyProfileController {
       updateData
     );
 
-    if (updatedProfile.profileImage && !updatedProfile.profileImage.startsWith("http")) {
-      try {
-        const signedUrl = await this._s3Service.getSignedUrl(updatedProfile.profileImage);
-        updatedProfile.profileImage = signedUrl;
-      } catch (error) {
-        console.error("Error generating signed URL for agency profile image:", error);
-        updatedProfile.profileImage = null;
-      }
-    }
+    updatedProfile.profileImage = await this.enrichProfileImageUrl(
+      updatedProfile.profileImage,
+    );
 
     ResponseHelper.success(
       res,

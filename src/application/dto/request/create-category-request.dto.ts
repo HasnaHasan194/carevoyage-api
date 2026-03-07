@@ -1,9 +1,14 @@
 import { IsString, IsNotEmpty, MinLength, MaxLength } from "class-validator";
+import { VALIDATION_MESSAGE } from "../../../shared/constants/constants";
 
 export class CreateCategoryRequestDTO {
   @IsString()
-  @IsNotEmpty({ message: "Category name is required" })
-  @MinLength(1, { message: "Category name must be at least 1 character" })
-  @MaxLength(50, { message: "Category name must not exceed 50 characters" })
+  @IsNotEmpty({ message: VALIDATION_MESSAGE.CATEGORY.NAME_REQUIRED })
+  @MinLength(1, {
+    message: VALIDATION_MESSAGE.GENERAL.MIN_LENGTH("Category name", 1),
+  })
+  @MaxLength(50, {
+    message: VALIDATION_MESSAGE.GENERAL.MAX_LENGTH("Category name", 50),
+  })
   name!: string;
 }

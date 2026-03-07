@@ -28,6 +28,42 @@ export class CategoryRepository
     return docs.map((doc) => CategoryMapper.toEntity(doc));
   }
 
+  async findByAgencyIdPaginated(
+    agencyId: string,
+    includeDeleted: boolean,
+    page: number,
+    limit: number
+  ): Promise<ICategoryEntity[]> {
+    const query: Record<string, unknown> = { agencyId };
+    if (!includeDeleted) {
+      query.isDeleted = false;
+    }
+
+    const safePage = page > 0 ? page : 1;
+    const safeLimit = limit > 0 ? limit : 10;
+    const skip = (safePage - 1) * safeLimit;
+
+    const docs = await categoryDB
+      .find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+
+    return docs.map((doc) => CategoryMapper.toEntity(doc));
+  }
+
+  async countByAgencyId(
+    agencyId: string,
+    includeDeleted: boolean
+  ): Promise<number> {
+    const query: Record<string, unknown> = { agencyId };
+    if (!includeDeleted) {
+      query.isDeleted = false;
+    }
+    return categoryDB.countDocuments(query).exec();
+  }
+
   async findActiveByAgencyId(agencyId: string): Promise<ICategoryEntity[]> {
     const docs = await categoryDB
       .find({ agencyId, isDeleted: false })

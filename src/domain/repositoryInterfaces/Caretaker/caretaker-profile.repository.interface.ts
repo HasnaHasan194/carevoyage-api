@@ -4,6 +4,12 @@ import { IBaseRepository } from "../baseRepository.interface";
 export interface ICaretakerProfileRepository
   extends IBaseRepository<ICaretakerProfileEntity> {
   findByAgencyId(agencyId: string): Promise<ICaretakerProfileEntity[]>;
+  findByAgencyIdPaginated(
+    agencyId: string,
+    page: number,
+    limit: number
+  ): Promise<ICaretakerProfileEntity[]>;
+  countByAgencyId(agencyId: string): Promise<number>;
   findByUserId(userId: string): Promise<ICaretakerProfileEntity | null>;
   findByEmailAndAgencyId(
     email: string,

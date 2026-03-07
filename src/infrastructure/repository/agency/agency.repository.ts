@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { AgencyMapper } from "../../../application/mapper/agency.mapper";
 import { IAgencyEntity } from "../../../domain/entities/Agency.entity";
 import { IAgencyModel, agencyDB } from "../../database/models/agency.model";
-import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { BaseRepository } from "../baseRepository";
 import { SortOrder } from "mongoose";
 import { userDB } from "../../database/models/client.model";
@@ -19,22 +19,22 @@ export class AgencyRepository
     if (!userId || typeof userId !== "string") return null;
     try {
       const objectId = new mongoose.Types.ObjectId(userId);
-      // Try querying with ObjectId first (normal case)
+     
       let docs = await agencyDB.find({ userId: objectId }).exec();
       
-      // If not found, try querying with string userId (for old/inconsistent data)
+    
       if (docs.length === 0) {
         docs = await agencyDB.find({ userId: userId }).exec();
       }
       
-      // Also try finding ALL agencies and filter manually to catch any format mismatches
+      
       const allAgencies = await agencyDB.find({}).exec();
       const matchingAgencies = allAgencies.filter(agency => {
         const agencyUserId = agency.userId?.toString();
         return agencyUserId === userId || agencyUserId === objectId.toString();
       });
       
-      // Use manual filter results if they found more matches
+      
       if (matchingAgencies.length > docs.length) {
         docs = matchingAgencies;
       }
@@ -43,14 +43,14 @@ export class AgencyRepository
         return null;
       }
       
-      // If multiple agencies exist, prefer verified one, then most recent
+    
       let selectedDoc = docs[0];
       if (docs.length > 1) {
         const verified = docs.find(d => d.verificationStatus === "verified");
         if (verified) {
           selectedDoc = verified;
         } else {
-          // Sort by updatedAt descending, get most recent
+          
           selectedDoc = docs.sort((a, b) => 
             (b.updatedAt?.getTime() || 0) - (a.updatedAt?.getTime() || 0)
           )[0];

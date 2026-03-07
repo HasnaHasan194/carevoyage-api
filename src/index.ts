@@ -32,6 +32,9 @@ async function startServer() {
     const PORT = Number(config.server.PORT) || 3000;
     expressServer.listen(PORT, () => {
       console.log(`Server running at port ${PORT}`);
+      
+      try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'index.ts:startup',message:'SERVER STARTED - canary log',data:{port:PORT,cwd:process.cwd()},timestamp:Date.now(),hypothesisId:'CANARY'})+'\n'); } catch(e){ console.error('CANARY LOG FAILED:', e); }
+     
     });
   } catch (error) {
     console.error("Server startup failed:", error);

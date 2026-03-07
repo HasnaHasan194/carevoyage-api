@@ -39,7 +39,7 @@ export class PreviewBookingPriceUseCase implements IPreviewBookingPriceUseCase {
       throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
     if (pkg.status !== "published") {
-      throw new ValidationError("Only published packages can be booked");
+      throw new ValidationError(ERROR_MESSAGE.BOOKING.ONLY_PUBLISHED_CAN_BE_BOOKED);
     }
 
     const tripDays = this.getTripDays(pkg.startDate, pkg.endDate);
@@ -88,7 +88,7 @@ export class PreviewBookingPriceUseCase implements IPreviewBookingPriceUseCase {
         data.caretakerId
       );
       if (!profile) {
-        throw new NotFoundError("Caretaker not found");
+        throw new NotFoundError(ERROR_MESSAGE.BOOKING.CARETAKER_NOT_FOUND);
       }
       if (profile.agencyId !== pkg.agencyId) {
         throw new ValidationError(
@@ -96,7 +96,7 @@ export class PreviewBookingPriceUseCase implements IPreviewBookingPriceUseCase {
         );
       }
       if (profile.status !== "active") {
-        throw new ValidationError("Caretaker is not available");
+        throw new ValidationError(ERROR_MESSAGE.BOOKING.CARETAKER_NOT_AVAILABLE);
       }
       const pricePerDay = profile.pricePerDay ?? 0;
       caretakerTotal = pricePerDay * tripDays;

@@ -62,10 +62,16 @@ export class ListClientBookingsUseCase implements IListClientBookingsUseCase {
         startDate: pkg?.startDate,
         endDate: pkg?.endDate,
         createdAt: booking.createdAt,
+
       });
     }
 
-    return result;
+    return  result
+    
   }
+
+
+ 
+
 }
 

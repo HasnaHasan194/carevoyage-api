@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { IPackageRepository } from "../../../../domain/repositoryInterfaces/Package/package.repository.interface";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { ICaretakerRequestRepository } from "../../../../domain/repositoryInterfaces/CaretakerRequest/caretaker-request.repository.interface";
 import { IEmailService } from "../../../../domain/service-interfaces/email-service.interface";
@@ -35,13 +35,13 @@ export class CreateCaretakerRequestUseCase implements ICreateCaretakerRequestUse
       throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
     }
 
-    // Edge case: User refreshed page and resubmitted, or double-click — one pending per client+package.
+    // case: User refreshed page and resubmitted, or double-click — one pending per client+package.
     const existing = await this._caretakerRequestRepository.findPendingByClientAndPackage(
       clientId,
       packageId
     );
     if (existing) {
-      return; // Idempotent: do not create duplicate; API still returns success.
+      return; 
     }
 
     await this._caretakerRequestRepository.save({

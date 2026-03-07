@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { Response } from "express";
 import { CustomRequest } from "../../middlewares/auth.middleware";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { IGetMyWalletUseCase } from "../../../application/usecase/interfaces/wallet/get-my-wallet.interface";
 import { IGetMyWalletTransactionsUseCase } from "../../../application/usecase/interfaces/wallet/get-my-wallet-transactions.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
@@ -17,7 +17,11 @@ export class WalletController {
 
   async getMyWallet(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
 
@@ -26,12 +30,21 @@ export class WalletController {
       req.user.role
     );
 
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Wallet retrieved", wallet);
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.WALLET.BALANCE_FETCHED,
+      wallet
+    );
   }
 
   async getMyTransactions(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
 
@@ -60,7 +73,7 @@ export class WalletController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Wallet transactions retrieved",
+      SUCCESS_MESSAGE.WALLET.TRANSACTIONS_FETCHED,
       transactions
     );
   }

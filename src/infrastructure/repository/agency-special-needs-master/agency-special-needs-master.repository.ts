@@ -31,6 +31,42 @@ export class AgencySpecialNeedsMasterRepository
     return docs.map((doc) => AgencySpecialNeedsMasterMapper.toEntity(doc));
   }
 
+  async findByAgencyIdPaginated(
+    agencyId: string,
+    includeDeleted: boolean,
+    page: number,
+    limit: number
+  ): Promise<IAgencySpecialNeedsMasterEntity[]> {
+    const query: Record<string, unknown> = { agencyId };
+    if (!includeDeleted) {
+      query.isDeleted = false;
+    }
+
+    const safePage = page > 0 ? page : 1;
+    const safeLimit = limit > 0 ? limit : 10;
+    const skip = (safePage - 1) * safeLimit;
+
+    const docs = await agencySpecialNeedsMasterDB
+      .find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+
+    return docs.map((doc) => AgencySpecialNeedsMasterMapper.toEntity(doc));
+  }
+
+  async countByAgencyId(
+    agencyId: string,
+    includeDeleted: boolean
+  ): Promise<number> {
+    const query: Record<string, unknown> = { agencyId };
+    if (!includeDeleted) {
+      query.isDeleted = false;
+    }
+    return agencySpecialNeedsMasterDB.countDocuments(query).exec();
+  }
+
   async findActiveByAgencyId(
     agencyId: string
   ): Promise<IAgencySpecialNeedsMasterEntity[]> {

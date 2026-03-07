@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { ISoftDeleteSpecialNeedUsecase } from "../../interfaces/agency-special-needs/soft-delete-special-need.interface";
 import { IAgencySpecialNeedsRepository } from "../../../../domain/repositoryInterfaces/AgencySpecialNeeds/agency-special-needs.repository.interface";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class SoftDeleteSpecialNeedUsecase
@@ -20,11 +21,11 @@ export class SoftDeleteSpecialNeedUsecase
     );
 
     if (!existing) {
-      throw new NotFoundError("Special need configuration not found");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_NOT_FOUND);
     }
 
     if (existing.isDeleted) {
-      throw new NotFoundError("Special need configuration is already deleted");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_ALREADY_DELETED);
     }
 
     // Soft delete

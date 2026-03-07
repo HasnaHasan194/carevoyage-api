@@ -5,6 +5,7 @@ import { IAgencySpecialNeedsRepository } from "../../../../domain/repositoryInte
 import { IAgencySpecialNeedsMasterRepository } from "../../../../domain/repositoryInterfaces/AgencySpecialNeedsMaster/agency-special-needs-master.repository.interface";
 import { AgencySpecialNeedsMapper } from "../../../mapper/agency-special-needs.mapper";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class ToggleActiveStatusUsecase implements IToggleActiveStatusUsecase {
@@ -27,11 +28,13 @@ export class ToggleActiveStatusUsecase implements IToggleActiveStatusUsecase {
     );
 
     if (!existing) {
-      throw new NotFoundError("Special need configuration not found");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_NOT_FOUND);
     }
 
     if (existing.isDeleted) {
-      throw new NotFoundError("Cannot toggle status of a deleted special need configuration");
+      throw new NotFoundError(
+        ERROR_MESSAGE.SPECIAL_NEEDS.CANNOT_TOGGLE_DELETED_CONFIG,
+      );
     }
 
     // Update isActive status - use updateById instead of save to avoid duplicate key error
@@ -43,7 +46,7 @@ export class ToggleActiveStatusUsecase implements IToggleActiveStatusUsecase {
     );
 
     if (!updated) {
-      throw new NotFoundError("Special need configuration not found");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_NOT_FOUND);
     }
 
     // Get master details

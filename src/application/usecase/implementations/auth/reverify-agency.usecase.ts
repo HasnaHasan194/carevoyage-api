@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IReverifyAgencyUsecase } from "../../interfaces/auth/reverify-agency.interface";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
@@ -58,7 +58,7 @@ export class ReverifyAgencyUsecase implements IReverifyAgencyUsecase {
         await redisClient.del(REVERIFY_REDIS_PREFIX + trimmedToken);
       }
     } catch {
-      // Token already consumed; continue
+      // Token already consumed=> continue
     }
   }
 }

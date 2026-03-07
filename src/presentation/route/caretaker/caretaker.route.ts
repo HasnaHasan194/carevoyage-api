@@ -7,6 +7,7 @@ import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { CaretakerVerificationRequestDTO } from "../../../application/dto/request/caretaker-verification-request.dto";
 import { caretakerVerificationController, profileUploadController } from "../../../infrastructure/dependencyinjection/resolve";
 import multer from "multer";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class CaretakerRoutes extends BaseRoute {
@@ -36,7 +37,7 @@ export class CaretakerRoutes extends BaseRoute {
 
     
     this.router.post(
-      "/upload/documents",
+      ROUTES.CARETAKER.UPLOAD_DOCUMENTS,
       asyncHandler(verifyAuth),
       authorizeRole(["caretaker"]),
       documentUpload.array("documents", 10),
@@ -46,7 +47,7 @@ export class CaretakerRoutes extends BaseRoute {
     );
 
     this.router.post(
-      "/verification",
+      ROUTES.CARETAKER.VERIFICATION,
       asyncHandler(verifyAuth),
       authorizeRole(["caretaker"]),
       validationMiddleware(CaretakerVerificationRequestDTO),
@@ -58,7 +59,7 @@ export class CaretakerRoutes extends BaseRoute {
     );
 
     this.router.get(
-      "/verification/status",
+      ROUTES.CARETAKER.VERIFICATION_STATUS,
       asyncHandler(verifyAuth),
       authorizeRole(["caretaker"]),
       asyncHandler(
@@ -69,7 +70,7 @@ export class CaretakerRoutes extends BaseRoute {
     );
 
     this.router.get(
-      "/profile",
+      ROUTES.CARETAKER.PROFILE,
       asyncHandler(verifyAuth),
       authorizeRole(["caretaker"]),
       asyncHandler(

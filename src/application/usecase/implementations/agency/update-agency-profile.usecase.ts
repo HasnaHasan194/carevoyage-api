@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { AgencyProfileResponseDTO } from "../../../dto/response/agency-profile-response.dto";
 import { UpdateAgencyProfileRequestDTO } from "../../../dto/request/update-agency-profile-request.dto";

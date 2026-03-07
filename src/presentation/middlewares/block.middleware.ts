@@ -2,7 +2,7 @@ import { Response, NextFunction } from "express";
 import { inject, injectable } from "tsyringe";
 
 import { IUserRepository } from "../../domain/repositoryInterfaces/User/user.repository.interface";
-import { IAgencyRepository } from "../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IBlockedUserMiddleware } from "../interfaces/controllers/user/blocked-user.middleware.interface";
 
 import {

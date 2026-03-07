@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { InviteCaretakerRequestDTO } from "../../../dto/request/invite-caretaker-request.dto";
 import { IInviteCaretakerUseCase } from "../../interfaces/caretaker/invite-caretaker.interface";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { ITokenService } from "../../../../domain/service-interfaces/token-service-interfaces";

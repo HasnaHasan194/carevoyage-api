@@ -5,12 +5,13 @@ import { ICreateAgencySpecialNeedsMasterUsecase } from "../../../application/use
 import { IUpdateAgencySpecialNeedsMasterUsecase } from "../../../application/usecase/interfaces/agency-special-needs-master/update-agency-special-needs-master.interface";
 import { IDeleteAgencySpecialNeedsMasterUsecase } from "../../../application/usecase/interfaces/agency-special-needs-master/delete-agency-special-needs-master.interface";
 import { IListAgencySpecialNeedsMasterUsecase } from "../../../application/usecase/interfaces/agency-special-needs-master/list-agency-special-needs-master.interface";
+import { IListActiveAgencySpecialNeedsMasterUsecase } from "../../../application/usecase/interfaces/agency-special-needs-master/list-active-agency-special-needs-master.interface";
 import { CreateAgencySpecialNeedsMasterRequestDTO } from "../../../application/dto/request/create-agency-special-needs-master-request.dto";
 import { UpdateAgencySpecialNeedsMasterRequestDTO } from "../../../application/dto/request/update-agency-special-needs-master-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
-import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { NotFoundError } from "../../../domain/errors/notFoundError";
 
 @injectable()
@@ -26,17 +27,19 @@ export class AgencySpecialNeedsMasterController
     private _deleteAgencySpecialNeedsMasterUsecase: IDeleteAgencySpecialNeedsMasterUsecase,
     @inject("IListAgencySpecialNeedsMasterUsecase")
     private _listAgencySpecialNeedsMasterUsecase: IListAgencySpecialNeedsMasterUsecase,
+    @inject("IListActiveAgencySpecialNeedsMasterUsecase")
+    private _listActiveAgencySpecialNeedsMasterUsecase: IListActiveAgencySpecialNeedsMasterUsecase,
     @inject("IAgencyRepository")
     private _agencyRepository: IAgencyRepository
   ) {}
 
   private async getAgencyId(req: CustomRequest): Promise<string> {
     if (!req.user) {
-      throw new NotFoundError("User not authenticated");
+      throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED);
     }
     const agency = await this._agencyRepository.findByUserId(req.user.id);
     if (!agency) {
-      throw new NotFoundError("Agency not found");
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
     }
     return agency._id;
   }
@@ -53,7 +56,7 @@ export class AgencySpecialNeedsMasterController
     ResponseHelper.success(
       res,
       HTTP_STATUS.CREATED,
-      "Special need created successfully",
+      SUCCESS_MESSAGE.SPECIAL_NEEDS.MASTER_CREATED,
       specialNeed
     );
   }
@@ -72,7 +75,7 @@ export class AgencySpecialNeedsMasterController
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Special need updated successfully",
+      SUCCESS_MESSAGE.SPECIAL_NEEDS.MASTER_UPDATED,
       specialNeed
     );
   }
@@ -86,23 +89,27 @@ export class AgencySpecialNeedsMasterController
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Special need deleted successfully"
+      SUCCESS_MESSAGE.SPECIAL_NEEDS.MASTER_DELETED
     );
   }
 
   async getSpecialNeeds(req: CustomRequest, res: Response): Promise<void> {
     const agencyId = await this.getAgencyId(req);
     const includeDeleted = req.query.includeDeleted === "true";
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
 
     const specialNeeds = await this._listAgencySpecialNeedsMasterUsecase.execute(
       agencyId,
-      includeDeleted
+      includeDeleted,
+      page,
+      limit
     );
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Special needs retrieved successfully",
+      SUCCESS_MESSAGE.SPECIAL_NEEDS.MASTER_LIST_FETCHED,
       specialNeeds
     );
   }
@@ -113,15 +120,13 @@ export class AgencySpecialNeedsMasterController
   ): Promise<void> {
     const agencyId = await this.getAgencyId(req);
 
-    const specialNeeds = await this._listAgencySpecialNeedsMasterUsecase.execute(
-      agencyId,
-      false
-    );
+    const specialNeeds =
+      await this._listActiveAgencySpecialNeedsMasterUsecase.execute(agencyId);
 
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Active special needs retrieved successfully",
+      SUCCESS_MESSAGE.SPECIAL_NEEDS.MASTER_ACTIVE_LIST_FETCHED,
       specialNeeds
     );
   }

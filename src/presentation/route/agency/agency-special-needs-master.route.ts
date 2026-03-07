@@ -5,6 +5,7 @@ import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { CreateAgencySpecialNeedsMasterRequestDTO } from "../../../application/dto/request/create-agency-special-needs-master-request.dto";
 import { UpdateAgencySpecialNeedsMasterRequestDTO } from "../../../application/dto/request/update-agency-special-needs-master-request.dto";
 import { authorizeRole } from "../../middlewares/auth.middleware";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class AgencySpecialNeedsMasterRoutes extends BaseRoute {
@@ -35,7 +36,7 @@ export class AgencySpecialNeedsMasterRoutes extends BaseRoute {
     }
     // Create Special Need
     this.router.post(
-      "/special-needs-master",
+      ROUTES.AGENCY_SPECIAL_NEEDS_MASTER.BASE,
       authorizeRole(["agency_owner"]),
       validationMiddleware(CreateAgencySpecialNeedsMasterRequestDTO),
       asyncHandler(
@@ -47,7 +48,7 @@ export class AgencySpecialNeedsMasterRoutes extends BaseRoute {
 
     // Update Special Need
     this.router.put(
-      "/special-needs-master/:id",
+      ROUTES.AGENCY_SPECIAL_NEEDS_MASTER.DETAIL,
       authorizeRole(["agency_owner"]),
       validationMiddleware(UpdateAgencySpecialNeedsMasterRequestDTO),
       asyncHandler(
@@ -59,7 +60,7 @@ export class AgencySpecialNeedsMasterRoutes extends BaseRoute {
 
     // Delete Special Need (Soft Delete)
     this.router.delete(
-      "/special-needs-master/:id",
+      ROUTES.AGENCY_SPECIAL_NEEDS_MASTER.DETAIL,
       authorizeRole(["agency_owner"]),
       asyncHandler(
         agencySpecialNeedsMasterController.deleteSpecialNeed.bind(
@@ -68,23 +69,23 @@ export class AgencySpecialNeedsMasterRoutes extends BaseRoute {
       )
     );
 
-    // Get Special Needs (with optional includeDeleted query param)
+    // Get Active Special Needs Only (must be before base path so /active is not ambiguous)
     this.router.get(
-      "/special-needs-master",
+      ROUTES.AGENCY_SPECIAL_NEEDS_MASTER.ACTIVE,
       authorizeRole(["agency_owner"]),
       asyncHandler(
-        agencySpecialNeedsMasterController.getSpecialNeeds.bind(
+        agencySpecialNeedsMasterController.getActiveSpecialNeeds.bind(
           agencySpecialNeedsMasterController
         )
       )
     );
 
-    // Get Active Special Needs Only
+    // Get Special Needs (with optional includeDeleted query param)
     this.router.get(
-      "/special-needs-master/active",
+      ROUTES.AGENCY_SPECIAL_NEEDS_MASTER.BASE,
       authorizeRole(["agency_owner"]),
       asyncHandler(
-        agencySpecialNeedsMasterController.getActiveSpecialNeeds.bind(
+        agencySpecialNeedsMasterController.getSpecialNeeds.bind(
           agencySpecialNeedsMasterController
         )
       )

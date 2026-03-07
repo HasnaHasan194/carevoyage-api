@@ -41,7 +41,7 @@ export class UserRepository
 
     const matchConditions: Record<string, unknown> = { role: "client" };
 
-    // Apply status filter
+    // status filter
     if (status === "blocked") {
       matchConditions.isBlocked = true;
     } else if (status === "unblocked") {
@@ -49,7 +49,7 @@ export class UserRepository
     }
     // If status is "all", no filter is applied
 
-    // Apply search filter
+    //  search filter
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), "i");
       matchConditions.$or = [
