@@ -6,6 +6,7 @@ import { IAgencySpecialNeedsRepository } from "../../../../domain/repositoryInte
 import { IAgencySpecialNeedsMasterRepository } from "../../../../domain/repositoryInterfaces/AgencySpecialNeedsMaster/agency-special-needs-master.repository.interface";
 import { AgencySpecialNeedsMapper } from "../../../mapper/agency-special-needs.mapper";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class UpdateSpecialNeedUsecase implements IUpdateSpecialNeedUsecase {
@@ -28,11 +29,11 @@ export class UpdateSpecialNeedUsecase implements IUpdateSpecialNeedUsecase {
     );
 
     if (!existing) {
-      throw new NotFoundError("Special need configuration not found");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_NOT_FOUND);
     }
 
     if (existing.isDeleted) {
-      throw new NotFoundError("Cannot update a deleted special need configuration");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CANNOT_UPDATE_DELETED);
     }
 
     // Update fields - use updateById instead of save to avoid duplicate key error
@@ -45,7 +46,7 @@ export class UpdateSpecialNeedUsecase implements IUpdateSpecialNeedUsecase {
     );
 
     if (!updated) {
-      throw new NotFoundError("Special need configuration not found");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_NOT_FOUND);
     }
 
     // Get master details

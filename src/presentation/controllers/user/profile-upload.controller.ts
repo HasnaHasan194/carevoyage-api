@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { IS3Service } from "../../../domain/service-interfaces/s3-service.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
 
 @injectable()
@@ -16,7 +16,7 @@ export class ProfileUploadController {
     if (!req.file) {
       ResponseHelper.error(
         res,
-        "No file uploaded",
+        ERROR_MESSAGE.UPLOAD.NO_FILE_UPLOADED,
         HTTP_STATUS.BAD_REQUEST
         
       );
@@ -30,14 +30,14 @@ export class ProfileUploadController {
       ResponseHelper.success(
         res,
         HTTP_STATUS.OK,
-        "Profile image uploaded successfully",
+        SUCCESS_MESSAGE.UPLOAD.PROFILE_IMAGE_UPLOADED,
         { s3Key } 
       );
     } catch (error) {
       console.error("Upload error:", error);
       ResponseHelper.error(
         res,
-        "Failed to upload profile image",
+          ERROR_MESSAGE.UPLOAD.PROFILE_UPLOAD_FAILED,
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
         
       );
@@ -51,7 +51,7 @@ export class ProfileUploadController {
     if (!req.files || (Array.isArray(req.files) && req.files.length === 0)) {
       ResponseHelper.error(
         res,
-        "No files uploaded",
+        ERROR_MESSAGE.UPLOAD.NO_FILES_UPLOADED,
         HTTP_STATUS.BAD_REQUEST
         
       );
@@ -76,14 +76,14 @@ export class ProfileUploadController {
       ResponseHelper.success(
         res,
         HTTP_STATUS.OK,
-        "Documents uploaded successfully",
+        SUCCESS_MESSAGE.UPLOAD.DOCUMENTS_UPLOADED,
         { s3Keys }
       );
     } catch (error) {
       console.error("Upload error:", error);
       ResponseHelper.error(
         res,
-         "Failed to upload documents",
+           ERROR_MESSAGE.UPLOAD.DOCUMENTS_UPLOAD_FAILED,
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
        
       );
@@ -99,7 +99,7 @@ export class ProfileUploadController {
     if (!s3Key || typeof s3Key !== "string") {
       ResponseHelper.error(
         res,
-          "S3 key is required",
+          ERROR_MESSAGE.UPLOAD.S3_KEY_REQUIRED,
         HTTP_STATUS.BAD_REQUEST,
       
       );
@@ -113,14 +113,14 @@ export class ProfileUploadController {
       ResponseHelper.success(
         res,
         HTTP_STATUS.OK,
-        "Signed URL generated successfully",
+        SUCCESS_MESSAGE.UPLOAD.SIGNED_URL_GENERATED,
         { url: signedUrl, expiresIn }
       );
     } catch (error) {
       console.error("Error generating signed URL:", error);
       ResponseHelper.error(
         res,
-         "Failed to generate signed URL",
+         ERROR_MESSAGE.UPLOAD.SIGNED_URL_FAILED,
         HTTP_STATUS.INTERNAL_SERVER_ERROR
        
       );
@@ -136,7 +136,7 @@ export class ProfileUploadController {
     if (!Array.isArray(s3Keys) || s3Keys.length === 0) {
       ResponseHelper.error(
         res,
-        "Array of S3 keys is required",
+        ERROR_MESSAGE.UPLOAD.S3_KEYS_REQUIRED,
         HTTP_STATUS.BAD_REQUEST
         
       );
@@ -150,14 +150,14 @@ export class ProfileUploadController {
       ResponseHelper.success(
         res,
         HTTP_STATUS.OK,
-        "Signed URLs generated successfully",
+        SUCCESS_MESSAGE.UPLOAD.SIGNED_URLS_GENERATED,
         { urls: signedUrls, expiresIn }
       );
     } catch (error) {
       console.error("Error generating signed URLs:", error);
       ResponseHelper.error(
         res,
-         "Failed to generate signed URLs",
+         ERROR_MESSAGE.UPLOAD.SIGNED_URLS_FAILED,
         HTTP_STATUS.INTERNAL_SERVER_ERROR
        
       );

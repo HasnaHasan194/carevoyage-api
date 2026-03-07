@@ -26,6 +26,19 @@ export interface PaymentBreakdownItemDTO {
   items: PaymentBreakdownLineItemDTO[];
 }
 
+export interface CaretakerSummaryInBookingDTO {
+  id: string;
+  name: string;
+  profileImage?: string;
+  verificationStatus?: "pending" | "verified" | "rejected";
+  languages: string[];
+  experienceYears: number;
+  rating: number;
+  reviewCount: number;
+  pricePerDay?: number;
+  availabilityStatus: "AVAILABLE" | "BUSY" | "INACTIVE";
+}
+
 export interface ClientBookingDetailDTO extends ClientBookingSummaryDTO {
   basePrice: number;
   caretakerFee: number;
@@ -41,5 +54,6 @@ export interface ClientBookingDetailDTO extends ClientBookingSummaryDTO {
   cancellationReason?: string;
   /** Filtered payment breakdown based on paymentType query param. */
   paymentBreakdown: PaymentBreakdownItemDTO[];
+  caretaker?: CaretakerSummaryInBookingDTO;
 }
 

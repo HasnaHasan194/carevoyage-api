@@ -1,13 +1,12 @@
 import { inject, injectable } from "tsyringe";
 import { Response } from "express";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
 import { IAddToWishlistUsecase } from "../../../application/usecase/interfaces/wishlist/add-to-wishlist.interface";
 import { IRemoveFromWishlistUsecase } from "../../../application/usecase/interfaces/wishlist/remove-from-wishlist.interface";
 import { IGetWishlistUsecase } from "../../../application/usecase/interfaces/wishlist/get-wishlist.interface";
 import { ICheckWishlistStatusUsecase } from "../../../application/usecase/interfaces/wishlist/check-wishlist-status.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { IWishlistController } from "../../interfaces/controllers/user/wishlist.controller.interface";
 
 @injectable()
@@ -27,7 +26,7 @@ export class WishlistController implements IWishlistController {
     if (!req.user) {
       ResponseHelper.error(
         res,
-        "Unauthorized",
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
         HTTP_STATUS.UNAUTHORIZED
       );
       return;
@@ -50,7 +49,7 @@ export class WishlistController implements IWishlistController {
     } catch (error: any) {
       ResponseHelper.error(
         res,
-        error.message || "Failed to add package to bucket list",
+        error.message || ERROR_MESSAGE.GENERAL.SERVER_ERROR,
         error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
       );
     }
@@ -60,7 +59,7 @@ export class WishlistController implements IWishlistController {
     if (!req.user) {
       ResponseHelper.error(
         res,
-        "Unauthorized",
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
         HTTP_STATUS.UNAUTHORIZED
       );
       return;
@@ -72,7 +71,7 @@ export class WishlistController implements IWishlistController {
       if (!packageId) {
         ResponseHelper.error(
           res,
-          "Package ID is required",
+          ERROR_MESSAGE.PACKAGE.NOT_FOUND,
           HTTP_STATUS.BAD_REQUEST
         );
         return;
@@ -89,7 +88,7 @@ export class WishlistController implements IWishlistController {
     } catch (error: any) {
       ResponseHelper.error(
         res,
-        error.message || "Failed to remove package from bucket list",
+        error.message || ERROR_MESSAGE.GENERAL.SERVER_ERROR,
         error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
       );
     }
@@ -99,7 +98,7 @@ export class WishlistController implements IWishlistController {
     if (!req.user) {
       ResponseHelper.error(
         res,
-        "Unauthorized",
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
         HTTP_STATUS.UNAUTHORIZED
       );
       return;
@@ -120,7 +119,7 @@ export class WishlistController implements IWishlistController {
     } catch (error: any) {
       ResponseHelper.error(
         res,
-        error.message || "Failed to fetch bucket list",
+        error.message || ERROR_MESSAGE.GENERAL.SERVER_ERROR,
         error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
       );
     }
@@ -130,7 +129,7 @@ export class WishlistController implements IWishlistController {
     if (!req.user) {
       ResponseHelper.error(
         res,
-        "Unauthorized",
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
         HTTP_STATUS.UNAUTHORIZED
       );
       return;
@@ -142,7 +141,7 @@ export class WishlistController implements IWishlistController {
       if (!packageId) {
         ResponseHelper.error(
           res,
-          "Package ID is required",
+          ERROR_MESSAGE.PACKAGE.NOT_FOUND,
           HTTP_STATUS.BAD_REQUEST
         );
         return;
@@ -156,13 +155,13 @@ export class WishlistController implements IWishlistController {
       ResponseHelper.success(
         res,
         HTTP_STATUS.OK,
-        "Wishlist status checked successfully",
+        SUCCESS_MESSAGE.WISHLIST.FETCHED,
         { isInWishlist }
       );
     } catch (error: any) {
       ResponseHelper.error(
         res,
-        error.message || "Failed to check wishlist status",
+        error.message || ERROR_MESSAGE.GENERAL.SERVER_ERROR,
         error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
       );
     }

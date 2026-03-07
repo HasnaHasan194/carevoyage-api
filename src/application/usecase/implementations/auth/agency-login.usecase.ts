@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { ILoginUsecase } from "../../interfaces/auth/loginUsecase.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { AgencyLoginRequestDTO } from "../../../dto/request/agencylogin-request.dto";
 import { BaseLoginRequest } from "../../../dto/request/base-login-request.dto";
 import { LoginResponseDTO } from "../../../dto/response/login-response.dto";

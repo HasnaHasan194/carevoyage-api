@@ -137,6 +137,8 @@ import { IDeleteAgencySpecialNeedsMasterUsecase } from "../../application/usecas
 import { DeleteAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/delete-agency-special-needs-master.usecase";
 import { IListAgencySpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/agency-special-needs-master/list-agency-special-needs-master.interface";
 import { ListAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/list-agency-special-needs-master.usecase";
+import { IListActiveAgencySpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/agency-special-needs-master/list-active-agency-special-needs-master.interface";
+import { ListActiveAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/list-active-agency-special-needs-master.usecase";
 import { ICreateBookingCheckoutUseCase } from "../../application/usecase/interfaces/booking/create-booking-checkout.interface";
 import { CreateBookingCheckoutUseCase } from "../../application/usecase/implementations/booking/create-booking-checkout.usecase";
 import { IHandleStripeWebhookUsecase } from "../../application/usecase/interfaces/payment/handle-stripe-webhook-usecase.interface";
@@ -189,6 +191,12 @@ import { IListWalletTransactionsUseCase } from "../../application/usecase/interf
 import { IWalletOwnerDisplayService } from "../../application/usecase/interfaces/admin/wallet-owner-display.interface";
 import { WalletOwnerDisplayService } from "../../application/usecase/implementations/admin/wallet-owner-display.service";
 import { ListWalletTransactionsUseCase } from "../../application/usecase/implementations/list-wallet-transactions.usecase";
+import { IGetAdminSalesReportUseCase } from "../../application/usecase/interfaces/sales-report/get-admin-sales-report.interface";
+import { GetAdminSalesReportUseCase } from "../../application/usecase/implementations/sales-report/get-admin-sales-report.usecase";
+import { IGetAgencySalesReportUseCase } from "../../application/usecase/interfaces/sales-report/get-agency-sales-report.interface";
+import { GetAgencySalesReportUseCase } from "../../application/usecase/implementations/sales-report/get-agency-sales-report.usecase";
+import { IExportSalesReportUseCase } from "../../application/usecase/interfaces/sales-report/export-sales-report.interface";
+import { ExportSalesReportUseCase } from "../../application/usecase/implementations/sales-report/export-sales-report.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -508,6 +516,10 @@ export class UsecaseRegistory {
       useClass: ListAgencySpecialNeedsMasterUsecase,
     });
 
+    container.register<IListActiveAgencySpecialNeedsMasterUsecase>("IListActiveAgencySpecialNeedsMasterUsecase", {
+      useClass: ListActiveAgencySpecialNeedsMasterUsecase,
+    });
+
     container.register<ICreateBookingCheckoutUseCase>("ICreateBookingCheckoutUseCase", {
       useClass: CreateBookingCheckoutUseCase,
     });
@@ -603,6 +615,19 @@ export class UsecaseRegistory {
       {
         useClass: ListWalletTransactionsUseCase,
       }
+    );
+
+    container.register<IGetAdminSalesReportUseCase>(
+      "IGetAdminSalesReportUseCase",
+      { useClass: GetAdminSalesReportUseCase }
+    );
+    container.register<IGetAgencySalesReportUseCase>(
+      "IGetAgencySalesReportUseCase",
+      { useClass: GetAgencySalesReportUseCase }
+    );
+    container.register<IExportSalesReportUseCase>(
+      "IExportSalesReportUseCase",
+      { useClass: ExportSalesReportUseCase }
     );
   }
 }

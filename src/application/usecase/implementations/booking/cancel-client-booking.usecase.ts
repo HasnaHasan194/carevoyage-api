@@ -3,8 +3,9 @@ import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
 import { type ICancelClientBookingUseCase } from "../../interfaces/booking/cancel-client-booking.interface";
-import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS } from "../../../../shared/constants/constants";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
+import { CustomError } from "../../../../domain/errors/customError";
 
 @injectable()
 export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
@@ -25,6 +26,11 @@ export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
       bookingId,
       clientId,
     );
+
+   
+
+    
+
     if (!booking) {
       throw new NotFoundError(ERROR_MESSAGE.BOOKING.NOT_FOUND);
     }

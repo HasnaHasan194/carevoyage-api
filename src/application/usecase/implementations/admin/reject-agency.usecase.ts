@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { inject, injectable } from "tsyringe";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { IEmailService } from "../../../../domain/service-interfaces/email-service.interface";
 import { IRejectAgencyUsecase } from "../../interfaces/admin/reject-agency.interface";

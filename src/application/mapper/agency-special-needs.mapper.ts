@@ -38,7 +38,7 @@ export class AgencySpecialNeedsMapper {
       updatedAt: entity.updatedAt,
     };
 
-    // If specialNeedMaster is populated, add it to the response
+   
     if (specialNeedMaster) {
       dto.specialNeed = {
         id: specialNeedMaster._id?.toString() || specialNeedMaster.id,

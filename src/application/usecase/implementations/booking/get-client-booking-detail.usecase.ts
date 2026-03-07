@@ -4,11 +4,10 @@ import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Book
 import { IPackageRepository } from "../../../../domain/repositoryInterfaces/Package/package.repository.interface";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
-import {
-  type IGetClientBookingDetailUseCase,
-} from "../../interfaces/booking/get-client-booking-detail.interface";
+import { type IGetClientBookingDetailUseCase } from "../../interfaces/booking/get-client-booking-detail.interface";
 import type {
   ClientBookingDetailDTO,
+  CaretakerSummaryInBookingDTO,
   PaymentBreakdownItemDTO,
   PaymentBreakdownFilter,
 } from "../../../dto/response/client-booking-response.dto";
@@ -88,6 +87,7 @@ export class GetClientBookingDetailUseCase
     let caretakerName: string | undefined;
     let caretakerProfileImage: string | undefined;
     let caretakerVerificationStatus: string | undefined;
+    let caretakerSummary: CaretakerSummaryInBookingDTO | undefined;
 
     if (booking.caretakerId) {
       const profile = await this._caretakerProfileRepository.findById(
@@ -97,13 +97,27 @@ export class GetClientBookingDetailUseCase
         caretakerProfileImage = profile.profileImage;
         caretakerVerificationStatus = profile.verificationStatus;
         caretakerName = profile.email ?? "Caretaker";
+        let fullName = caretakerName;
         if (profile.userId) {
           const user = await this._userRepository.findById(profile.userId);
           if (user) {
-            const fullName = `${user.firstName} ${user.lastName}`.trim();
-            if (fullName) caretakerName = fullName;
+            fullName = `${user.firstName} ${user.lastName}`.trim() || caretakerName;
+            caretakerName = fullName;
           }
         }
+
+        caretakerSummary = {
+          id: profile._id,
+          name: fullName ?? caretakerName ?? "Caretaker",
+          profileImage: profile.profileImage,
+          verificationStatus: profile.verificationStatus,
+          languages: profile.languages,
+          experienceYears: profile.experienceYears,
+          rating: profile.rating,
+          reviewCount: profile.reviewCount,
+          pricePerDay: profile.pricePerDay,
+          availabilityStatus: profile.availabilityStatus,
+        };
       }
     }
 
@@ -140,6 +154,7 @@ export class GetClientBookingDetailUseCase
       canCancel,
       cancellationReason: booking.cancellationReason,
       paymentBreakdown,
+      caretaker: caretakerSummary,
     };
   }
 }

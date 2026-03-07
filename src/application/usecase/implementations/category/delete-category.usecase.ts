@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IDeleteCategoryUsecase } from "../../interfaces/category/delete-category.interface";
 import { ICategoryRepository } from "../../../../domain/repositoryInterfaces/Category/category.repository.interface";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class DeleteCategoryUsecase implements IDeleteCategoryUsecase {
@@ -18,7 +19,7 @@ export class DeleteCategoryUsecase implements IDeleteCategoryUsecase {
     );
 
     if (!category) {
-      throw new NotFoundError("Category not found");
+      throw new NotFoundError(ERROR_MESSAGE.CATEGORY.NOT_FOUND);
     }
 
     // Soft delete category
@@ -28,7 +29,7 @@ export class DeleteCategoryUsecase implements IDeleteCategoryUsecase {
     );
 
     if (!deletedCategory) {
-      throw new NotFoundError("Category not found");
+      throw new NotFoundError(ERROR_MESSAGE.CATEGORY.NOT_FOUND);
     }
   }
 }

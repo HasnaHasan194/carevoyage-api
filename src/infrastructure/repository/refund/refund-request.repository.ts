@@ -57,5 +57,38 @@ export class RefundRequestRepository
       updatedAt: doc.updatedAt,
     }));
   }
+
+  async findByAgencyIdPaginated(
+    agencyId: string,
+    page: number,
+    limit: number
+  ): Promise<IRefundRequestEntity[]> {
+    const safePage = page > 0 ? page : 1;
+    const safeLimit = limit > 0 ? limit : 10;
+    const skip = (safePage - 1) * safeLimit;
+
+    const docs = await refundRequestDB
+      .find({ agencyId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+
+    return docs.map((doc) => ({
+      _id: String(doc._id),
+      bookingId: String(doc.bookingId),
+      userId: String(doc.userId),
+      agencyId: String(doc.agencyId),
+      refundAmount: doc.refundAmount,
+      status: doc.status,
+      reason: doc.reason ?? undefined,
+      createdAt: doc.createdAt,
+      updatedAt: doc.updatedAt,
+    }));
+  }
+
+  async countByAgencyId(agencyId: string): Promise<number> {
+    return refundRequestDB.countDocuments({ agencyId }).exec();
+  }
 }
 

@@ -7,6 +7,7 @@ import { IAgencySpecialNeedsMasterRepository } from "../../../../domain/reposito
 import { AgencySpecialNeedsMapper } from "../../../mapper/agency-special-needs.mapper";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
@@ -28,11 +29,11 @@ export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
         agencyId
       );
     if (!specialNeedMaster) {
-      throw new NotFoundError("Special need not found");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.NOT_FOUND);
     }
 
     if (specialNeedMaster.isDeleted) {
-      throw new ValidationError("This special need is not available");
+      throw new ValidationError(ERROR_MESSAGE.SPECIAL_NEEDS.NOT_AVAILABLE);
     }
 
     // Check if already exists (including soft-deleted)
@@ -56,7 +57,7 @@ export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
         );
 
         if (!restored) {
-          throw new NotFoundError("Special need configuration not found");
+          throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_NOT_FOUND);
         }
         const master = await this._agencySpecialNeedsMasterRepository.findByIdAndAgencyId(
           restored.specialNeedId,

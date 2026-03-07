@@ -3,6 +3,7 @@ import { BaseRoute } from "../base.route";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { asyncHandler } from "../../../shared/async-handler";
 import { blockedUserMiddleware, walletController } from "../../../infrastructure/dependencyinjection/resolve";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class WalletRoutes extends BaseRoute {
@@ -17,12 +18,12 @@ export class WalletRoutes extends BaseRoute {
     );
 
     this.router.get(
-      "/me",
+      ROUTES.WALLET.ME,
       asyncHandler(walletController.getMyWallet.bind(walletController))
     );
 
     this.router.get(
-      "/me/transactions",
+      ROUTES.WALLET.ME_TRANSACTIONS,
       asyncHandler(walletController.getMyTransactions.bind(walletController))
     );
   }

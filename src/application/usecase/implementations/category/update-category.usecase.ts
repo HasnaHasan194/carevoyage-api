@@ -6,6 +6,7 @@ import { ICategoryRepository } from "../../../../domain/repositoryInterfaces/Cat
 import { CategoryMapper } from "../../../mapper/category.mapper";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class UpdateCategoryUsecase implements IUpdateCategoryUsecase {
@@ -26,7 +27,7 @@ export class UpdateCategoryUsecase implements IUpdateCategoryUsecase {
     );
 
     if (!existingCategory) {
-      throw new NotFoundError("Category not found");
+      throw new NotFoundError(ERROR_MESSAGE.CATEGORY.NOT_FOUND);
     }
 
     // Check if another category with same name exists (excluding current category)
@@ -47,7 +48,7 @@ export class UpdateCategoryUsecase implements IUpdateCategoryUsecase {
     });
 
     if (!updatedCategory) {
-      throw new NotFoundError("Category not found");
+      throw new NotFoundError(ERROR_MESSAGE.CATEGORY.NOT_FOUND);
     }
 
     return CategoryMapper.toResponseDto(updatedCategory);

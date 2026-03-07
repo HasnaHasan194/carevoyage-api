@@ -44,9 +44,17 @@ export class GetWishlistUsecase implements IGetWishlistUsecase {
       const wishlistWithPackages = await Promise.all(
         wishlistItems.map(async (item) => {
           const packageEntity = await this._packageRepository.findById(item.packageId);
-          
+
           // If package was deleted or doesn't exist, skip it
           if (!packageEntity || packageEntity.isDeleted) {
+            return null;
+          }
+
+          // If package start date is in the past or today, hide it from wishlist
+          const todayStartUTC = new Date();
+          todayStartUTC.setUTCHours(0, 0, 0, 0);
+          const packageStart = new Date(packageEntity.startDate);
+          if (packageStart.getTime() <= todayStartUTC.getTime()) {
             return null;
           }
 
@@ -102,9 +110,17 @@ export class GetWishlistUsecase implements IGetWishlistUsecase {
     const wishlistWithPackages = await Promise.all(
       wishlistItems.map(async (item) => {
         const packageEntity = await this._packageRepository.findById(item.packageId);
-        
+
         // If package was deleted or doesn't exist, skip it
         if (!packageEntity || packageEntity.isDeleted) {
+          return null;
+        }
+
+        // If package start date is in the past or today, hide it from wishlist
+        const todayStartUTC = new Date();
+        todayStartUTC.setUTCHours(0, 0, 0, 0);
+        const packageStart = new Date(packageEntity.startDate);
+        if (packageStart.getTime() <= todayStartUTC.getTime()) {
           return null;
         }
 

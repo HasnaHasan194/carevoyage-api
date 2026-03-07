@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { IRefundRequestRepository } from "../../../../domain/repositoryInterfaces/Refund/refund-request.repository.interface";
 import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IDBSession } from "../../../../infrastructure/interface/session.interface";
 import { IApproveRefundUseCase } from "../../interfaces/refund/approve-refund.interface";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
@@ -37,15 +37,15 @@ export class ApproveRefundUseCase implements IApproveRefundUseCase {
       refundRequestId
     );
     if (!refundRequest) {
-      throw new NotFoundError("Refund request not found");
+      throw new NotFoundError(ERROR_MESSAGE.REFUND.NOT_FOUND);
     }
 
     if (refundRequest.agencyId !== agencyId) {
-      throw new ValidationError("Refund request does not belong to this agency");
+      throw new ValidationError(ERROR_MESSAGE.REFUND.NOT_AGENCY_REQUEST);
     }
 
     if (refundRequest.status !== "PENDING") {
-      // idempotent: already handled
+      //  already handled
       return;
     }
 

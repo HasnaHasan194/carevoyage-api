@@ -103,7 +103,7 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
             activity.description !== undefined &&
             activity.description !== null
           ) {
-            // New activity - create it
+          
             newActivities.push({
               name: activity.name,
               description: activity.description || "",
@@ -154,7 +154,7 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
         await Promise.all(updatePromises);
       }
 
-      // Create new activities if any
+      // Create new activities 
       const createdActivities: IActivityEntity[] = [];
       let uniqueNewActivities: Array<{
         name: string;
@@ -202,13 +202,13 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
         }
       });
 
-      // Map activities to IDs in itinerary days
+      
       const itineraryDaysWithIds = data.itineraryDays.map((day) => ({
         dayNumber: day.dayNumber!,
         title: day.title!,
         description: day.description!,
         activities: day.activities!.map((activity) => {
-          // If activity has ID, use it
+          
           if (activity.id) {
             return activity.id;
           }
@@ -224,7 +224,7 @@ export class UpdatePackageItineraryUsecase implements IUpdatePackageItineraryUse
           }
           return activityId;
         }),
-        accommodation: day.accommodation!,
+        accommodation: day.accommodation ?? "",
         meals: {
           breakfast: day.meals?.breakfast ?? false,
           lunch: day.meals?.lunch ?? false,

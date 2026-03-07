@@ -12,6 +12,7 @@ import {
   bookingController,
   blockedUserMiddleware,
 } from "../../../infrastructure/dependencyinjection/resolve";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class BookingRoutes extends BaseRoute {
@@ -25,57 +26,57 @@ export class BookingRoutes extends BaseRoute {
 
     // Client booking checkout & pricing
     this.router.post(
-      "/checkout",
+      ROUTES.BOOKING.CHECKOUT,
       validationMiddleware(CreateBookingCheckoutRequestDTO),
       asyncHandler(bookingController.createCheckout.bind(bookingController))
     );
     this.router.get(
-      "/package/:packageId/special-needs",
+      ROUTES.BOOKING.PACKAGE_SPECIAL_NEEDS,
       asyncHandler(bookingController.getPackageSpecialNeeds.bind(bookingController))
     );
     this.router.post(
-      "/price-preview",
+      ROUTES.BOOKING.PRICE_PREVIEW,
       validationMiddleware(PreviewBookingPriceRequestDTO),
       asyncHandler(bookingController.previewPrice.bind(bookingController))
     );
     this.router.get(
-      "/package/:packageId/caretakers",
+      ROUTES.BOOKING.PACKAGE_CARETAKERS,
       asyncHandler(bookingController.getAvailableCaretakers.bind(bookingController))
     );
 
     // Stripe confirm success
     this.router.post(
-      "/confirm-success",
+      ROUTES.BOOKING.CONFIRM_SUCCESS,
       validationMiddleware(ConfirmBookingSuccessRequestDTO),
       asyncHandler(bookingController.confirmSuccess.bind(bookingController))
     );
 
     // Caretaker request from booking flow
     this.router.post(
-      "/caretaker-request",
+      ROUTES.BOOKING.CARETAKER_REQUEST,
       validationMiddleware(RequestCaretakerRequestDTO),
       asyncHandler(bookingController.requestCaretaker.bind(bookingController))
     );
 
     // Client bookings: list, detail, cancel
     this.router.get(
-      "/my",
+      ROUTES.BOOKING.MY_BOOKINGS,
       asyncHandler(bookingController.getMyBookings.bind(bookingController))
     );
 
     this.router.get(
-      "/:bookingId",
+      ROUTES.BOOKING.DETAIL,
       asyncHandler(bookingController.getBookingDetail.bind(bookingController))
     );
 
     this.router.post(
-      "/:bookingId/cancel",
+      ROUTES.BOOKING.CANCEL,
       validationMiddleware(CancelBookingRequestDTO),
       asyncHandler(bookingController.cancelBooking.bind(bookingController))
     );
 
     this.router.post(
-      "/:bookingId/refund-request",
+      ROUTES.BOOKING.REFUND_REQUEST,
       asyncHandler(bookingController.requestRefund.bind(bookingController))
     );
   }

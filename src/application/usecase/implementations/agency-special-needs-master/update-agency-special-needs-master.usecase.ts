@@ -6,6 +6,7 @@ import { IAgencySpecialNeedsMasterRepository } from "../../../../domain/reposito
 import { AgencySpecialNeedsMasterMapper } from "../../../mapper/agency-special-needs-master.mapper";
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class UpdateAgencySpecialNeedsMasterUsecase
@@ -28,11 +29,11 @@ export class UpdateAgencySpecialNeedsMasterUsecase
     );
 
     if (!existing) {
-      throw new NotFoundError("Special need not found");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.NOT_FOUND);
     }
 
     if (existing.isDeleted) {
-      throw new NotFoundError("Cannot update a deleted special need");
+      throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CANNOT_UPDATE_DELETED);
     }
 
     // If name is being updated, check for duplicates

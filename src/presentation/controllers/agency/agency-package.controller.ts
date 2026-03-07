@@ -19,9 +19,9 @@ import { UpdatePackageBasicDTO } from "../../../application/dto/request/update-p
 import { UpdatePackageImagesDTO } from "../../../application/dto/request/update-package-images.dto";
 import { UpdatePackageItineraryDTO } from "../../../application/dto/request/update-package-itinerary.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
-import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { NotFoundError } from "../../../domain/errors/notFoundError";
 
 @injectable()
@@ -57,11 +57,11 @@ export class AgencyPackageController implements IAgencyPackageController {
 
   private async getAgencyId(req: CustomRequest): Promise<string> {
     if (!req.user) {
-      throw new NotFoundError("User not authenticated");
+      throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED);
     }
     const agency = await this._agencyRepository.findByUserId(req.user.id);
     if (!agency) {
-      throw new NotFoundError("Agency not found");
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
     }
     return agency._id;
   }
@@ -77,8 +77,8 @@ export class AgencyPackageController implements IAgencyPackageController {
 
     ResponseHelper.success(
       res,
-      HTTP_STATUS.CREATED, 
-      "Package created successfully",
+      HTTP_STATUS.CREATED,
+      SUCCESS_MESSAGE.PACKAGE.CREATED,
       createdPackage
     );
   }
@@ -97,7 +97,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package updated successfully",
+      SUCCESS_MESSAGE.PACKAGE.UPDATED,
       updatedPackage
     );
   }
@@ -114,7 +114,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package published successfully",
+      SUCCESS_MESSAGE.PACKAGE.PUBLISHED,
       publishedPackage
     );
   }
@@ -128,7 +128,6 @@ export class AgencyPackageController implements IAgencyPackageController {
       | "cancelled"
       | "all") || "all";
 
-    // Extract pagination parameters (optional for backward compatibility)
     const page = req.query.page ? parseInt(req.query.page as string) : undefined;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
 
@@ -152,7 +151,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Packages retrieved successfully",
+      SUCCESS_MESSAGE.PACKAGE.PACKAGES_RETRIEVED,
       result
     );
   }
@@ -169,7 +168,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package retrieved successfully",
+      SUCCESS_MESSAGE.PACKAGE.RETRIEVED,
       packageData
     );
   }
@@ -191,7 +190,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package bookings retrieved successfully",
+      SUCCESS_MESSAGE.BOOKING.BOOKINGS_FETCHED,
       bookings
     );
   }
@@ -210,7 +209,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package basic details updated successfully",
+      SUCCESS_MESSAGE.PACKAGE.BASIC_DETAILS_UPDATED,
       updatedPackage
     );
   }
@@ -229,7 +228,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package images updated successfully",
+      SUCCESS_MESSAGE.PACKAGE.IMAGES_UPDATED,
       updatedPackage
     );
   }
@@ -251,7 +250,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package itinerary updated successfully",
+      SUCCESS_MESSAGE.PACKAGE.ITINERARY_UPDATED,
       updatedPackage
     );
   }
@@ -265,7 +264,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package deleted successfully"
+      SUCCESS_MESSAGE.PACKAGE.DELETED
     );
   }
 
@@ -281,7 +280,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package marked as completed",
+      SUCCESS_MESSAGE.PACKAGE.COMPLETED,
       completedPackage
     );
   }
@@ -298,7 +297,7 @@ export class AgencyPackageController implements IAgencyPackageController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Package cancelled successfully",
+      SUCCESS_MESSAGE.PACKAGE.CANCELLED,
       cancelledPackage
     );
   }

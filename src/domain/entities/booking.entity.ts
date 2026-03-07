@@ -9,7 +9,6 @@ export interface IBookingEntity {
   clientId: string;
   packageId: string;
   agencyId: string;
-  /** Trip start date copied from package at time of booking */
   startDate: Date;
   basePrice: number;
   caretakerFee: number;
@@ -19,11 +18,8 @@ export interface IBookingEntity {
   status: TBookingStatus;
   stripeSessionId?: string;
   paidAt?: Date;
-  /** Optional client-provided reason when the booking was cancelled */
   cancellationReason?: string;
-  /** Selected caretaker profile ID (extended booking flow) */
   caretakerId?: string;
-  /** Special need IDs selected for this booking */
   selectedSpecialNeedIds?: string[];
   createdAt: Date;
   updatedAt: Date;

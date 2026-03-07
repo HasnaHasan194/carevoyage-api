@@ -57,8 +57,8 @@ export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
   }): Promise<{ packages: IPackageEntity[]; total: number }>;
 
   /**
-   * Client-only: returns packages where startDate > today (UTC).
-   * Used for client package listing; does not affect admin/agency APIs.
+   * Client-only: returns packages where startDate > today .
+   * Used for client package listing.
    */
   findUpcomingClientPackages(filters: {
     search?: string;

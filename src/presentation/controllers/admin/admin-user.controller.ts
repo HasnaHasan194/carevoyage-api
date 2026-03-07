@@ -49,7 +49,7 @@ export class AdminUserController implements IAdminUserController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Users retrieved successfully",
+      SUCCESS_MESSAGE.USER.USERS_FETCHED,
       result
     );
   }
@@ -62,7 +62,7 @@ export class AdminUserController implements IAdminUserController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "User details retrieved successfully",
+      SUCCESS_MESSAGE.USER.FETCHED,
       user
     );
   }

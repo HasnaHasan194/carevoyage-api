@@ -19,7 +19,7 @@ export class GetMyWalletUseCase implements IGetMyWalletUseCase {
   async execute(userId: string, role: string): Promise<IWalletEntity> {
     const owner = await this._walletOwnerResolver.resolve(userId, role);
     if (!owner) {
-      throw new ValidationError("Wallet is not available for this role");
+      throw new ValidationError(ERROR_MESSAGE.WALLET.UNSUPPORTED_ROLE);
     }
 
     const existing =

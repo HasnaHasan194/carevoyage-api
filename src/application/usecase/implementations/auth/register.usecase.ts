@@ -3,7 +3,7 @@ import { IUserEntity } from "../../../../domain/entities/user.entity";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
 import { hashPassword } from "../../../../shared/utils/bcryptHelper";
 import { IRegisterUsecase } from "../../interfaces/auth/register-usecase.interface";
-import { CustomError } from "../../../../domain/errors/customError";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 
 @injectable()
 export class RegisterUsecase implements IRegisterUsecase {
@@ -19,19 +19,19 @@ export class RegisterUsecase implements IRegisterUsecase {
     // }
 
     if (!data.email || !data.phone) {
-      throw new Error("email or phone required");
+      throw new Error(ERROR_MESSAGE.AUTHENTICATION.EMAIL_AND_PHONE_REQUIRED);
     }
 
     const isEmailExists = await this._userRepository.findByEmail(data.email);
 
     if (isEmailExists) {
-      throw new Error("email already exists");
+      throw new Error(ERROR_MESSAGE.AUTHENTICATION.EMAIL_EXISTS);
     }
 
     const isPhoneExists = await this._userRepository.findByPhone(data.phone);
 
     if (isPhoneExists) {
-      throw new Error("phone already exists");
+      throw new Error(ERROR_MESSAGE.AUTHENTICATION.PHONE_NUMBER_EXISTS);
     }
 
     const hashedPassword = await hashPassword(data.password!);

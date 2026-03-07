@@ -17,7 +17,10 @@ import {
   Validate,
 } from "class-validator";
 import { Type, Transform } from "class-transformer";
-import { PACKAGE_CATEGORIES } from "../../../domain/constants/package-categories";
+import {
+  PACKAGE_CATEGORIES,
+  normalizePackageCategory,
+} from "../../../domain/constants/package-categories";
 import {
   IsNotPastDateConstraint,
   IsEndDateAfterStartDateConstraint,
@@ -104,9 +107,14 @@ export class UpdatePackageRequestDTO {
 
   @IsString()
   @IsNotEmpty({ message: "Category is required" })
+  @Transform(({ value }) => {
+    const raw = String(value ?? "").trim();
+    const normalized = normalizePackageCategory(raw);
+    return normalized ?? raw;
+  })
   @IsIn(PACKAGE_CATEGORIES, {
     message:
-      "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage",
+      "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage, belief",
   })
   @ValidateIf((o) => o.category !== undefined && o.category !== null)
   @Transform(({ value }) => value?.trim())

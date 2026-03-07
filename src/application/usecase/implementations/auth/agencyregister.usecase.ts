@@ -1,7 +1,8 @@
 import { inject, injectable } from "tsyringe";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IRegisterAgencyUsecase } from "../../interfaces/auth/register-agency.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
+import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 @injectable()
 export class RegisterAgencyUsecase implements IRegisterAgencyUsecase {
   constructor(
@@ -28,7 +29,7 @@ export class RegisterAgencyUsecase implements IRegisterAgencyUsecase {
 
     const existingUser = await this._userRepository.findByEmail(data.email);
     if (existingUser) {
-      throw new Error("User already exists");
+      throw new Error(ERROR_MESSAGE.USER.ALREADY_EXISTS);
     }
 
    
@@ -49,7 +50,7 @@ export class RegisterAgencyUsecase implements IRegisterAgencyUsecase {
       );
 
     if (existingAgency) {
-      throw new Error("Registration number already exists");
+      throw new Error(ERROR_MESSAGE.AGENCY.REGISTRATION_NUMBER_EXISTS);
     }
 
 

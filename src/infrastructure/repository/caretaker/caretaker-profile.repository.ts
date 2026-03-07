@@ -22,6 +22,29 @@ export class CaretakerProfileRepository
     return docs.map((doc) => CaretakerProfileMapper.toEntity(doc));
   }
 
+  async findByAgencyIdPaginated(
+    agencyId: string,
+    page: number,
+    limit: number
+  ): Promise<ICaretakerProfileEntity[]> {
+    const safePage = page > 0 ? page : 1;
+    const safeLimit = limit > 0 ? limit : 10;
+    const skip = (safePage - 1) * safeLimit;
+
+    const docs = await caretakerProfileDB
+      .find({ agencyId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+
+    return docs.map((doc) => CaretakerProfileMapper.toEntity(doc));
+  }
+
+  async countByAgencyId(agencyId: string): Promise<number> {
+    return caretakerProfileDB.countDocuments({ agencyId }).exec();
+  }
+
   async findByUserId(
     userId: string
   ): Promise<ICaretakerProfileEntity | null> {

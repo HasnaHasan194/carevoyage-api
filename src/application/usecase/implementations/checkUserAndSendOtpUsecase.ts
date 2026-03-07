@@ -38,7 +38,13 @@ export class CheckUserAndSendOtpUsecase implements ICheckUserAndSendOtpUsecase {
     }
 
     const otp = this._otpService.generateOtp();
+    // #region agent log
+    try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'checkUserAndSendOtpUsecase.ts:beforeStoreOtp',message:'About to store OTP in Redis',data:{email,otp},timestamp:Date.now(),hypothesisId:'H3'})+'\n'); } catch(e){}
+    // #endregion
     await this._otpService.storeOtp(email, otp);
+    // #region agent log
+    try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'checkUserAndSendOtpUsecase.ts:afterStoreOtp',message:'OTP stored successfully',data:{email,otp},timestamp:Date.now(),hypothesisId:'H3'})+'\n'); } catch(e){}
+    // #endregion
     console.log(otp,"-->otp")
     eventBus.emit(
       "SENDMAIL",

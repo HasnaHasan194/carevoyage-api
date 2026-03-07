@@ -1,6 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import { Response } from "express";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import {
+  ERROR_MESSAGE,
+  HTTP_STATUS,
+  SUCCESS_MESSAGE,
+} from "../../../shared/constants/constants";
 import { CustomRequest } from "../../middlewares/auth.middleware";
 import { ICreateBookingCheckoutUseCase } from "../../../application/usecase/interfaces/booking/create-booking-checkout.interface";
 import { IGetPackageSpecialNeedsForBookingUseCase } from "../../../application/usecase/interfaces/booking/get-package-special-needs-for-booking.interface";
@@ -41,7 +45,11 @@ export class BookingController {
 
   async createCheckout(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
 
@@ -60,7 +68,7 @@ export class BookingController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Checkout session created",
+      SUCCESS_MESSAGE.BOOKING.CHECKOUT_CREATED,
       result
     );
   }
@@ -68,14 +76,18 @@ export class BookingController {
   async getPackageSpecialNeeds(req: CustomRequest, res: Response): Promise<void> {
     const packageId = req.params.packageId;
     if (!packageId) {
-      ResponseHelper.error(res, "Package ID is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.PACKAGE.NOT_FOUND,
+        HTTP_STATUS.BAD_REQUEST
+      );
       return;
     }
     const list = await this._getPackageSpecialNeedsUseCase.execute(packageId);
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Special needs retrieved",
+      SUCCESS_MESSAGE.SPECIAL_NEEDS.FETCHED_FOR_BOOKING,
       list
     );
   }
@@ -94,7 +106,7 @@ export class BookingController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Price preview",
+      SUCCESS_MESSAGE.BOOKING.PRICE_PREVIEW,
       result
     );
   }
@@ -102,14 +114,18 @@ export class BookingController {
   async getAvailableCaretakers(req: CustomRequest, res: Response): Promise<void> {
     const packageId = req.params.packageId;
     if (!packageId) {
-      ResponseHelper.error(res, "Package ID is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.PACKAGE.NOT_FOUND,
+        HTTP_STATUS.BAD_REQUEST
+      );
       return;
     }
     const list = await this._getAvailableCaretakersUseCase.execute(packageId);
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Available caretakers retrieved",
+      SUCCESS_MESSAGE.CARETAKER.AVAILABLE_LIST_FETCHED,
       list
     );
   }
@@ -117,30 +133,54 @@ export class BookingController {
   async confirmSuccess(req: CustomRequest, res: Response): Promise<void> {
     const sessionId = (req.body as { sessionId?: string }).sessionId ?? (req.query as { session_id?: string }).session_id;
     if (!sessionId || typeof sessionId !== "string") {
-      ResponseHelper.error(res, "Session ID is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.STRIPE.PAYMENT_ERROR,
+        HTTP_STATUS.BAD_REQUEST
+      );
       return;
     }
     await this._confirmBookingSuccessUseCase.execute(sessionId);
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Booking confirmed");
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.BOOKING.CONFIRMED
+    );
   }
 
   async requestCaretaker(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
     const { packageId } = req.body as { packageId: string };
     if (!packageId) {
-      ResponseHelper.error(res, "Package ID is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.PACKAGE.NOT_FOUND,
+        HTTP_STATUS.BAD_REQUEST
+      );
       return;
     }
     await this._createCaretakerRequestUseCase.execute(req.user.id, packageId);
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Caretaker request sent. The agency will be notified.");
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.CARETAKER_REQUEST.CREATED
+    );
   }
 
   async getMyBookings(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
 
@@ -157,20 +197,28 @@ export class BookingController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Bookings retrieved",
+      SUCCESS_MESSAGE.BOOKING.LIST_FETCHED_FOR_CLIENT,
       bookings
     );
   }
 
   async getBookingDetail(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
 
     const bookingId = (req.params as { bookingId?: string }).bookingId;
     if (!bookingId) {
-      ResponseHelper.error(res, "Booking ID is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.BOOKING.NOT_FOUND,
+        HTTP_STATUS.BAD_REQUEST
+      );
       return;
     }
 
@@ -189,20 +237,28 @@ export class BookingController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Booking detail retrieved",
+      SUCCESS_MESSAGE.BOOKING.DETAIL_FETCHED_FOR_CLIENT,
       detail
     );
   }
 
   async cancelBooking(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
 
     const bookingId = (req.params as { bookingId?: string }).bookingId;
     if (!bookingId) {
-      ResponseHelper.error(res, "Booking ID is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.BOOKING.NOT_FOUND,
+        HTTP_STATUS.BAD_REQUEST
+      );
       return;
     }
 
@@ -217,19 +273,27 @@ export class BookingController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Booking cancelled"
+      SUCCESS_MESSAGE.BOOKING.CANCELLED_BY_CLIENT
     );
   }
 
   async requestRefund(req: CustomRequest, res: Response): Promise<void> {
     if (!req.user) {
-      ResponseHelper.error(res, "Unauthorized", HTTP_STATUS.UNAUTHORIZED);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
       return;
     }
 
     const bookingId = (req.params as { bookingId?: string }).bookingId;
     if (!bookingId) {
-      ResponseHelper.error(res, "Booking ID is required", HTTP_STATUS.BAD_REQUEST);
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.BOOKING.NOT_FOUND,
+        HTTP_STATUS.BAD_REQUEST
+      );
       return;
     }
 
@@ -241,7 +305,7 @@ export class BookingController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Refund request submitted",
+      SUCCESS_MESSAGE.REFUND.REQUESTED_BY_CLIENT,
       refundRequest
     );
   }

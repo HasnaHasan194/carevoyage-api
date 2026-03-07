@@ -33,4 +33,40 @@ export class CaretakerRequestRepository
       .exec();
     return docs.map((d) => CaretakerRequestMapper.toEntity(d));
   }
+
+  async findByAgencyIdPaginated(
+    agencyId: string,
+    page: number,
+    limit: number,
+    status?: "pending" | "fulfilled"
+  ): Promise<ICaretakerRequestEntity[]> {
+    const safePage = page > 0 ? page : 1;
+    const safeLimit = limit > 0 ? limit : 10;
+    const skip = (safePage - 1) * safeLimit;
+
+    const query: Record<string, unknown> = { agencyId };
+    if (status) {
+      query.status = status;
+    }
+
+    const docs = await caretakerRequestDB
+      .find(query)
+      .sort({ requestedAt: -1 })
+      .skip(skip)
+      .limit(safeLimit)
+      .exec();
+
+    return docs.map((d) => CaretakerRequestMapper.toEntity(d));
+  }
+
+  async countByAgencyId(
+    agencyId: string,
+    status?: "pending" | "fulfilled"
+  ): Promise<number> {
+    const query: Record<string, unknown> = { agencyId };
+    if (status) {
+      query.status = status;
+    }
+    return caretakerRequestDB.countDocuments(query).exec();
+  }
 }

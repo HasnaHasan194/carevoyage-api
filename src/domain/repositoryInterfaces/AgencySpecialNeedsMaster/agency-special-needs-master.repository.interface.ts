@@ -7,6 +7,16 @@ export interface IAgencySpecialNeedsMasterRepository
     agencyId: string,
     includeDeleted?: boolean
   ): Promise<IAgencySpecialNeedsMasterEntity[]>;
+  findByAgencyIdPaginated(
+    agencyId: string,
+    includeDeleted: boolean,
+    page: number,
+    limit: number
+  ): Promise<IAgencySpecialNeedsMasterEntity[]>;
+  countByAgencyId(
+    agencyId: string,
+    includeDeleted: boolean
+  ): Promise<number>;
   findActiveByAgencyId(agencyId: string): Promise<IAgencySpecialNeedsMasterEntity[]>;
   findByIdAndAgencyId(
     id: string,

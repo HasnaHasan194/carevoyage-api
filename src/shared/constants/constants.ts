@@ -107,6 +107,7 @@ export const ERROR_MESSAGE = {
     PHONE_ALREADY_IN_USE: "Phone number is already in use",
     BLOCKED: "User blocked successfully",
     UNBLOCKED: "User unblocked successfully",
+    RETRIEVED:"Users retrieved successfully"
   },
 
   // Agency Errors
@@ -146,6 +147,8 @@ export const ERROR_MESSAGE = {
     INVALID_SORT_BY: (fields: string) => `sortBy must be one of: ${fields}`,
     ITINERARY_MUST_HAVE_AT_LEAST_ONE_DAY: "Itinerary must have at least one day",
     END_DATE_MUST_BE_AFTER_START: "End date must be after start date",
+    CANNOT_EDIT_DATES_WHEN_PUBLISHED:
+      "You cannot change the start or end date of a published package.",
   },
 
   // Caretaker Errors
@@ -158,6 +161,13 @@ export const ERROR_MESSAGE = {
     ALREADY_REGISTERED: "Caretaker already registered with this email",
     AGE_MUST_BE_18: "Age must be at least 18 years",
     PROFILE_NOT_ACTIVE: "Your caretaker profile is not active. Please contact your agency or support.",
+    NOT_FOUND_FOR_AGENCY: "Caretaker not found for this agency",
+    CANNOT_UPDATE_DELETED: "Cannot update a deleted caretaker",
+    CANNOT_CHANGE_BUSY_AVAILABILITY:
+      "Cannot change availability of a busy caretaker",
+    INVALID_AVAILABILITY_STATUS: "Invalid availability status",
+    INVALID_PRICE_PER_DAY:
+      "Price per day must be greater than or equal to 0",
   },
 
   // Admin Errors
@@ -188,7 +198,14 @@ export const ERROR_MESSAGE = {
     ALREADY_EXISTS: "Booking already exists",
     INVALID_STATUS: "Invalid booking status",
     CANNOT_CANCEL: "Cannot cancel this booking",
-    ANOTHER_BOOKING_ON_THIS_DATE  : (packageName : string) => `You have the booking for ${packageName} on this date`
+    ANOTHER_BOOKING_ON_THIS_DATE: (packageName: string) =>
+      `You have the booking for ${packageName} on this date`,
+    ONLY_PUBLISHED_CAN_BE_BOOKED: "Only published packages can be booked",
+    CARETAKER_NOT_FOUND: "Caretaker not found",
+    CARETAKER_NOT_ACTIVE: "Caretaker is not active",
+    CARETAKER_NOT_AVAILABLE: "Caretaker is not available",
+    TOTAL_AMOUNT_MUST_BE_GREATER_THAN_ZERO:
+      "Total amount must be greater than 0",
   },
 
   // Caretaker Request Errors
@@ -198,11 +215,24 @@ export const ERROR_MESSAGE = {
     NOT_AGENCY_REQUEST: "Request does not belong to this agency",
   },
 
+  // Upload Errors
+  UPLOAD: {
+    NO_FILE_UPLOADED: "No file uploaded",
+    NO_FILES_UPLOADED: "No files uploaded",
+    S3_KEY_REQUIRED: "S3 key is required",
+    S3_KEYS_REQUIRED: "Array of S3 keys is required",
+    PROFILE_UPLOAD_FAILED: "Failed to upload profile image",
+    DOCUMENTS_UPLOAD_FAILED: "Failed to upload documents",
+    SIGNED_URL_FAILED: "Failed to generate signed URL",
+    SIGNED_URLS_FAILED: "Failed to generate signed URLs",
+  },
+
   // Wallet Errors
   WALLET: {
     NOT_FOUND: "Wallet not found",
     INSUFFICIENT_BALANCE: "Insufficient wallet balance",
     INVALID_AMOUNT: "Invalid amount",
+    UNSUPPORTED_ROLE: "Wallet is not available for this role",
   },
 
   // Review Errors
@@ -216,6 +246,27 @@ export const ERROR_MESSAGE = {
   STRIPE: {
     PAYMENT_ERROR: "Payment session could not be created",
     WEBHOOK_SIGNATURE_INVALID: "Invalid webhook signature",
+  },
+  REFUND: {
+    NOT_FOUND: "Refund request not found",
+    NOT_AGENCY_REQUEST: "Refund request does not belong to this agency",
+    ALREADY_REQUESTED: "Refund already requested for this booking",
+    NOT_ELIGIBLE: "No refund eligible for this booking",
+  },
+
+  CATEGORY: {
+    NOT_FOUND: "Category not found",
+  },
+
+  SPECIAL_NEEDS: {
+    CONFIG_NOT_FOUND: "Special need configuration not found",
+    CONFIG_ALREADY_DELETED: "Special need configuration is already deleted",
+    CANNOT_TOGGLE_DELETED_CONFIG:
+      "Cannot toggle status of a deleted special need configuration",
+    NOT_FOUND: "Special need not found",
+    NOT_AVAILABLE: "This special need is not available",
+    CANNOT_UPDATE_DELETED:
+      "Cannot update a deleted special need or configuration",
   },
 };
 
@@ -232,6 +283,10 @@ export const SUCCESS_MESSAGE = {
     PASSWORD_RESET_SUCCESS: "Password reset successfully",
     PASSWORD_RESET_EMAIL_SENT: "Password reset email sent successfully",
     NOT_BLOCKED: "User is not blocked. Middleware passed",
+    ACCESS_TOKEN_REFRESHED: "Access token refreshed successfully",
+    RESET_TOKEN_VALID: "Reset token is valid",
+    INVITE_TOKEN_VERIFIED: "Invite token verified successfully",
+    CURRENT_USER_FETCHED: "Current user retrieved successfully",
   },
 
   // User Success
@@ -270,6 +325,9 @@ export const SUCCESS_MESSAGE = {
     DELETED: "Package deleted successfully",
     COMPLETED: "Package marked as completed",
     CANCELLED: "Package cancelled successfully",
+    UPCOMING_LIST_FETCHED: "Upcoming packages retrieved successfully",
+    ACTIVITY_CREATED:"Activity created successfully",
+    ACTIVITY_RETRIEVED:"Activity retrieved successfully"
   },
 
   // Caretaker Success
@@ -280,6 +338,20 @@ export const SUCCESS_MESSAGE = {
     INVITATION_SENT: "Invitation sent successfully",
     VERIFICATION_SUBMITTED: "Verification submitted successfully",
     VERIFICATION_STATUS_UPDATED: "Verification status updated successfully",
+    VERIFICATION_STATUS_FETCHED: "Verification status retrieved successfully",
+    LIST_FETCHED: "Caretakers fetched",
+    AVAILABLE_LIST_FETCHED: "Available caretakers retrieved",
+    AVAILABILITY_UPDATED: "Caretaker availability updated",
+    REMOVED: "Caretaker removed",
+    PRICE_UPDATED: "Caretaker price updated",
+  },
+
+  // Upload Success
+  UPLOAD: {
+    PROFILE_IMAGE_UPLOADED: "Profile image uploaded successfully",
+    DOCUMENTS_UPLOADED: "Documents uploaded successfully",
+    SIGNED_URL_GENERATED: "Signed URL generated successfully",
+    SIGNED_URLS_GENERATED: "Signed URLs generated successfully",
   },
 
   // Admin Success
@@ -294,6 +366,13 @@ export const SUCCESS_MESSAGE = {
     CANCELLED: "Booking cancelled successfully",
     FETCHED: "Booking fetched successfully",
     BOOKINGS_FETCHED: "Bookings fetched successfully",
+    DETAIL_FETCHED: "Booking detail retrieved",
+    CHECKOUT_CREATED: "Checkout session created",
+    PRICE_PREVIEW: "Price preview",
+    CONFIRMED: "Booking confirmed",
+    LIST_FETCHED_FOR_CLIENT: "Bookings retrieved",
+    DETAIL_FETCHED_FOR_CLIENT: "Booking detail retrieved",
+    CANCELLED_BY_CLIENT: "Booking cancelled",
   },
 
   // Wishlist Success
@@ -317,7 +396,92 @@ export const SUCCESS_MESSAGE = {
     TRANSACTION_SUCCESS: "Transaction completed successfully",
     TRANSACTIONS_FETCHED: "Transactions fetched successfully",
   },
+  // Caretaker Request Success
+  CARETAKER_REQUEST: {
+    LIST_FETCHED: "Caretaker requests retrieved",
+    FULFILLED: "Request fulfilled. Client has been notified.",
+    CREATED: "Caretaker request sent. The agency will be notified.",
+  },
+  // Refund Success
+  REFUND: {
+    LIST_FETCHED: "Refund requests retrieved",
+    APPROVED: "Refund approved",
+    REJECTED: "Refund rejected",
+    REQUESTED_BY_CLIENT: "Refund request submitted",
+  },
+
+  SPECIAL_NEEDS: {
+    MASTER_CREATED: "Special need created successfully",
+    MASTER_UPDATED: "Special need updated successfully",
+    MASTER_DELETED: "Special need deleted successfully",
+    MASTER_LIST_FETCHED: "Special needs retrieved successfully",
+    MASTER_ACTIVE_LIST_FETCHED: "Active special needs retrieved successfully",
+    FETCHED_FOR_BOOKING: "Special needs retrieved",
+  },
+
+  AGENCY_SPECIAL_NEEDS: {
+    ENABLED: "Special need enabled successfully",
+    UPDATED: "Special need updated successfully",
+    STATUS_UPDATED: "Special need status updated successfully",
+    DELETED: "Special need deleted successfully",
+    LIST_FETCHED: "Special needs retrieved successfully",
+  },
+
+  CATEGORY: {
+    CREATED: "Category created successfully",
+    UPDATED: "Category updated successfully",
+    DELETED: "Category deleted successfully",
+    LIST_FETCHED: "Categories retrieved successfully",
+    ACTIVE_LIST_FETCHED: "Active categories retrieved successfully",
+  },
 };
+
+// VALIDATION MESSAGE CONSTANTS (for class-validator decorators)
+export const VALIDATION_MESSAGE = {
+  GENERAL: {
+    REQUIRED: (field: string) => `${field} is required`,
+    MUST_BE_STRING: (field: string) => `${field} must be a string`,
+    MUST_BE_NUMBER: (field: string) => `${field} must be a number`,
+    MUST_BE_BOOLEAN: (field: string) => `${field} must be a boolean value`,
+    MIN_LENGTH: (field: string, min: number) =>
+      `${field} must be at least ${min} characters`,
+    MAX_LENGTH: (field: string, max: number) =>
+      `${field} must not exceed ${max} characters`,
+    MUST_BE_IN_LIST: (field: string, values: string) =>
+      `${field} must be one of: ${values}`,
+    ARRAY_MIN_SIZE: (field: string, min: number) =>
+      `${field} must contain at least ${min} item${min > 1 ? "s" : ""}`,
+  },
+
+  ID: {
+    MUST_BE_MONGODB_ID: (field: string) =>
+      `${field} must be a valid MongoDB ObjectId`,
+  },
+
+  PACKAGE: {
+    ID_REQUIRED: "Package ID is required",
+    ID_MUST_BE_OBJECT_ID: "Package ID must be a valid MongoDB ObjectId",
+    NAME_REQUIRED: "Package name is required",
+    DESCRIPTION_REQUIRED: "Description is required",
+    CATEGORY_REQUIRED: "Category is required",
+    MEETING_POINT_REQUIRED: "Meeting point is required",
+    AT_LEAST_ONE_IMAGE: "At least one image is required",
+    AT_LEAST_ONE_ITINERARY_DAY: "At least one itinerary day is required",
+  },
+
+  BOOKING: {
+    PACKAGE_ID_REQUIRED: "Package ID is required",
+  },
+
+  CATEGORY: {
+    NAME_REQUIRED: "Category name is required",
+  },
+
+  SPECIAL_NEEDS: {
+    NAME_REQUIRED: "Special need name is required",
+    ID_REQUIRED: "Special need ID is required",
+  },
+} as const;
 
 export const ROLES = {
   ADMIN: "admin",

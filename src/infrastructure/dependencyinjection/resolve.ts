@@ -46,6 +46,8 @@ import { AgencySpecialNeedsMasterRoutes } from "../../presentation/route/agency/
 import { IAgencySpecialNeedsController } from "../../presentation/interfaces/controllers/agency/agency-special-needs.controller.interface";
 import { AgencySpecialNeedsController } from "../../presentation/controllers/agency/agency-special-needs.controller";
 import { AgencySpecialNeedsRoutes } from "../../presentation/route/agency/agency-special-needs.route";
+import { IAgencySalesReportController } from "../../presentation/interfaces/controllers/agency/agency-sales-report.controller.interface";
+import { AgencySalesReportController } from "../../presentation/controllers/agency/agency-sales-report.controller";
 import { IWishlistController } from "../../presentation/interfaces/controllers/user/wishlist.controller.interface";
 import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
 
@@ -198,6 +200,12 @@ try {
   throw error;
 }
 export { agencySpecialNeedsRoutes };
+
+/**
+ * Agency Sales Report controller
+ */
+export const agencySalesReportController =
+  container.resolve<IAgencySalesReportController>(AgencySalesReportController);
 
 /**
  * Agency routes

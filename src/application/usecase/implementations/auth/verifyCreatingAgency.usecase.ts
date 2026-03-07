@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { IOtpService } from "../../../../domain/service-interfaces/otp-service.interface";
 import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
-import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/ageny.repository.interface";
+import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { hashPassword } from "../../../../shared/utils/bcryptHelper";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";

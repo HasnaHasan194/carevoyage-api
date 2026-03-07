@@ -5,7 +5,7 @@ import { ICreateActivityUsecase } from "../../../application/usecase/interfaces/
 import { IGetAllActivitiesUsecase } from "../../../application/usecase/interfaces/activity/get-all-activities.interface";
 import { CreateActivityRequestDTO } from "../../../application/dto/request/create-activity-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
-import { HTTP_STATUS } from "../../../shared/constants/constants";
+import { HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 
 @injectable()
 export class AgencyActivityController implements IAgencyActivityController {
@@ -24,7 +24,7 @@ export class AgencyActivityController implements IAgencyActivityController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.CREATED,
-      "Activity created successfully",
+      SUCCESS_MESSAGE.PACKAGE.ACTIVITY_CREATED,
       activity
     );
   }
@@ -37,7 +37,7 @@ export class AgencyActivityController implements IAgencyActivityController {
     ResponseHelper.success(
       res,
       HTTP_STATUS.OK,
-      "Activities retrieved successfully",
+      SUCCESS_MESSAGE.PACKAGE.ACTIVITY_RETRIEVED,
       activities
     );
   }

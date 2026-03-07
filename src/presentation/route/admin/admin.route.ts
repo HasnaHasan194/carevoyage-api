@@ -10,8 +10,10 @@ import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { GetUsersRequestDTO } from "../../../application/dto/request/get-users-request.dto";
 import { GetAgenciesRequestDTO } from "../../../application/dto/request/get-agencies-request.dto";
 import { RejectAgencyRequestDTO } from "../../../application/dto/request/reject-agency-request.dto";
+import { GetSalesReportRequestDTO } from "../../../application/dto/request/get-sales-report-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { adminAuth } from "../../middlewares/adminAuth-middleware";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class AdminRoutes extends BaseRoute {
@@ -22,7 +24,7 @@ export class AdminRoutes extends BaseRoute {
   protected initializeRoutes(): void {
     // User Management Routes
     this.router.get(
-      "/users",
+      ROUTES.ADMIN.USERS,
       asyncHandler(verifyAuth),
       adminAuth,
       validationMiddleware(GetUsersRequestDTO),
@@ -30,21 +32,21 @@ export class AdminRoutes extends BaseRoute {
     );
 
     this.router.get(
-      "/users/:userId",
+      ROUTES.ADMIN.USER_DETAIL,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(adminUserController.getUserDetails.bind(adminUserController))
     );
 
     this.router.patch(
-      "/users/:userId/block",
+      ROUTES.ADMIN.USER_BLOCK,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(adminUserController.blockUser.bind(adminUserController))
     );
 
     this.router.patch(
-      "/users/:userId/unblock",
+      ROUTES.ADMIN.USER_UNBLOCK,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(adminUserController.unblockUser.bind(adminUserController))
@@ -52,7 +54,7 @@ export class AdminRoutes extends BaseRoute {
 
     // Agency Management Routes
     this.router.get(
-      "/agencies",
+      ROUTES.ADMIN.AGENCIES,
       asyncHandler(verifyAuth),
       adminAuth,
       validationMiddleware(GetAgenciesRequestDTO),
@@ -60,7 +62,7 @@ export class AdminRoutes extends BaseRoute {
     );
 
     this.router.get(
-      "/agencies/:agencyId",
+      ROUTES.ADMIN.AGENCY_DETAIL,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(
@@ -69,14 +71,14 @@ export class AdminRoutes extends BaseRoute {
     );
 
     this.router.patch(
-      "/agencies/:agencyId/block",
+      ROUTES.ADMIN.AGENCY_BLOCK,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(adminAgencyController.blockAgency.bind(adminAgencyController))
     );
 
     this.router.patch(
-      "/agencies/:agencyId/unblock",
+      ROUTES.ADMIN.AGENCY_UNBLOCK,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(
@@ -85,7 +87,7 @@ export class AdminRoutes extends BaseRoute {
     );
 
     this.router.patch(
-      "/agencies/:agencyId/verify",
+      ROUTES.ADMIN.AGENCY_VERIFY,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(
@@ -94,7 +96,7 @@ export class AdminRoutes extends BaseRoute {
     );
 
     this.router.patch(
-      "/agencies/:agencyId/reject",
+      ROUTES.ADMIN.AGENCY_REJECT,
       asyncHandler(verifyAuth),
       adminAuth,
       validationMiddleware(RejectAgencyRequestDTO),
@@ -105,12 +107,35 @@ export class AdminRoutes extends BaseRoute {
 
     // Wallet Transactions - Admin overview
     this.router.get(
-      "/wallet-transactions",
+      ROUTES.ADMIN.WALLET_TRANSACTIONS,
       asyncHandler(verifyAuth),
       adminAuth,
       asyncHandler(
         adminController.getWalletTransactions.bind(adminController)
       )
+    );
+
+    // Sales Report
+    this.router.get(
+      ROUTES.ADMIN.SALES_REPORT,
+      asyncHandler(verifyAuth),
+      adminAuth,
+      validationMiddleware(GetSalesReportRequestDTO),
+      asyncHandler(adminController.getSalesReport.bind(adminController))
+    );
+    this.router.get(
+      ROUTES.ADMIN.SALES_REPORT_PDF,
+      asyncHandler(verifyAuth),
+      adminAuth,
+      validationMiddleware(GetSalesReportRequestDTO),
+      asyncHandler(adminController.getSalesReportPdf.bind(adminController))
+    );
+    this.router.get(
+      ROUTES.ADMIN.SALES_REPORT_EXCEL,
+      asyncHandler(verifyAuth),
+      adminAuth,
+      validationMiddleware(GetSalesReportRequestDTO),
+      asyncHandler(adminController.getSalesReportExcel.bind(adminController))
     );
   }
 }

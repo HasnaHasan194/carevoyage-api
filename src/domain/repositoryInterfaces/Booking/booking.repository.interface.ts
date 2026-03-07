@@ -17,4 +17,6 @@ export interface IBookingRepository extends IBaseRepository<IBookingEntity> {
     bookingId: string,
     agencyId: string
   ): Promise<IBookingEntity | null>;
+
+
 }

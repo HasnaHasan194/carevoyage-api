@@ -8,8 +8,11 @@ import {
   IsDateString,
   IsIn,
 } from "class-validator";
-import { Type } from "class-transformer";
-import { PACKAGE_CATEGORIES } from "../../../domain/constants/package-categories";
+import { Transform, Type } from "class-transformer";
+import {
+  PACKAGE_CATEGORIES,
+  normalizePackageCategory,
+} from "../../../domain/constants/package-categories";
 
 export enum SortOrder {
   ASC = "asc",
@@ -32,9 +35,15 @@ export class BrowsePackagesRequestDTO {
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => {
+    if (value == null) return undefined;
+    const raw = String(value).trim();
+    const normalized = normalizePackageCategory(raw);
+    return normalized ?? raw;
+  })
   @IsIn(PACKAGE_CATEGORIES, {
     message:
-      "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage",
+      "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage, belief",
   })
   category?: string;
 

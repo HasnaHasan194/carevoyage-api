@@ -7,7 +7,7 @@ export class CaretakerProfileResponseMapper {
     profile: ICaretakerProfileEntity,
     user: IUserEntity
   ): CaretakerProfileResponseDTO {
-    // Helper function to validate and cast gender
+  
     const getGender = (gender?: string): "male" | "female" | "other" | undefined => {
       if (!gender) return undefined;
       const genderLower = gender.toLowerCase();

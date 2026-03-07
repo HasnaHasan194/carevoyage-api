@@ -35,7 +35,7 @@ export const adminAuth = (
   } catch {
     res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: "Admin authorization failed",
+      message: ERROR_MESSAGE.GENERAL.SERVER_ERROR,
     });
   }
 };

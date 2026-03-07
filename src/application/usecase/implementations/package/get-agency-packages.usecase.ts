@@ -28,7 +28,7 @@ export class GetAgencyPackagesUsecase implements IGetAgencyPackagesUsecase {
     sortBy?: string,
     sortOrder?: "asc" | "desc"
   ): Promise<PackageResponseDTO[] | PaginatedAgencyPackagesResponse> {
-    // If pagination parameters are provided, use paginated method
+
     if (page !== undefined && limit !== undefined) {
       const pageNum = Math.max(1, Math.floor(page) || 1);
       const limitNum = Math.max(1, Math.floor(limit) || 10);
@@ -70,7 +70,7 @@ export class GetAgencyPackagesUsecase implements IGetAgencyPackagesUsecase {
               ? await this._activityRepository.findByIds(uniqueActivityIds, pkg._id)
               : [];
 
-          // Create activities map for quick lookup
+          
           const activitiesMap = new Map(
             activities.map((activity) => [activity._id, activity])
           );
@@ -87,7 +87,7 @@ export class GetAgencyPackagesUsecase implements IGetAgencyPackagesUsecase {
       };
     }
 
-    // Fallback to non-paginated method for backward compatibility
+   
     const packages = await this._packageRepository.findByAgencyId(
       agencyId,
       status
@@ -118,7 +118,7 @@ export class GetAgencyPackagesUsecase implements IGetAgencyPackagesUsecase {
             ? await this._activityRepository.findByIds(uniqueActivityIds, pkg._id)
             : [];
 
-        // Create activities map for quick lookup
+        
         const activitiesMap = new Map(
           activities.map((activity) => [activity._id, activity])
         );

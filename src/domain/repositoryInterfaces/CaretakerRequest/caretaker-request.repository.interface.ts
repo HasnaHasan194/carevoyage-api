@@ -7,4 +7,14 @@ export interface ICaretakerRequestRepository extends IBaseRepository<ICaretakerR
     packageId: string
   ): Promise<ICaretakerRequestEntity | null>;
   findByAgencyId(agencyId: string): Promise<ICaretakerRequestEntity[]>;
+  findByAgencyIdPaginated(
+    agencyId: string,
+    page: number,
+    limit: number,
+    status?: "pending" | "fulfilled"
+  ): Promise<ICaretakerRequestEntity[]>;
+  countByAgencyId(
+    agencyId: string,
+    status?: "pending" | "fulfilled"
+  ): Promise<number>;
 }

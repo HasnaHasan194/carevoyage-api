@@ -12,6 +12,7 @@ import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { UpdateUserProfileRequestDTO } from "../../../application/dto/request/update-user-profile-request.dto";
 import { AddToWishlistRequestDTO } from "../../../application/dto/request/add-to-wishlist-request.dto";
 import multer from "multer";
+import { ROUTES } from "../routes.constants";
 
 @injectable()
 export class UserRoutes extends BaseRoute {
@@ -24,12 +25,12 @@ export class UserRoutes extends BaseRoute {
     this.router.use(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware));
 
     this.router.get(
-      "/profile",
+      ROUTES.USER.PROFILE,
       asyncHandler(userController.getProfile.bind(userController))
     );
 
     this.router.put(
-      "/profile",
+      ROUTES.USER.PROFILE,
       validationMiddleware(UpdateUserProfileRequestDTO),
       asyncHandler(userController.updateProfile.bind(userController))
     );
@@ -54,7 +55,7 @@ export class UserRoutes extends BaseRoute {
 
     
     this.router.post(
-      "/upload/profile-image",
+      ROUTES.USER.UPLOAD_PROFILE_IMAGE,
       upload.single("image"),
       asyncHandler(
         profileUploadController.uploadProfileImage.bind(profileUploadController)
@@ -63,7 +64,7 @@ export class UserRoutes extends BaseRoute {
 
     // Documents/KYC upload 
     this.router.post(
-      "/upload/documents",
+      ROUTES.USER.UPLOAD_DOCUMENTS,
       documentUpload.array("documents", 10),
       asyncHandler(
         profileUploadController.uploadDocuments.bind(profileUploadController)
@@ -72,7 +73,7 @@ export class UserRoutes extends BaseRoute {
 
     
     this.router.get(
-      "/signed-url",
+      ROUTES.USER.SIGNED_URL,
       asyncHandler(
         profileUploadController.getSignedUrl.bind(profileUploadController)
       )
@@ -80,7 +81,7 @@ export class UserRoutes extends BaseRoute {
 
     // Get multiple signed URLs
     this.router.post(
-      "/signed-urls",
+      ROUTES.USER.SIGNED_URLS,
       asyncHandler(
         profileUploadController.getSignedUrls.bind(profileUploadController)
       )
@@ -88,25 +89,25 @@ export class UserRoutes extends BaseRoute {
 
     // Wishlist/Bucket List Routes
     this.router.post(
-      "/wishlist",
+      ROUTES.USER.WISHLIST_BASE,
       validationMiddleware(AddToWishlistRequestDTO),
       asyncHandler(wishlistController.addToWishlist.bind(wishlistController))
     );
 
     this.router.delete(
-      "/wishlist/:packageId",
+      ROUTES.USER.WISHLIST_DETAIL,
       asyncHandler(
         wishlistController.removeFromWishlist.bind(wishlistController)
       )
     );
 
     this.router.get(
-      "/wishlist",
+      ROUTES.USER.WISHLIST_BASE,
       asyncHandler(wishlistController.getWishlist.bind(wishlistController))
     );
 
     this.router.get(
-      "/wishlist/:packageId/status",
+      ROUTES.USER.WISHLIST_STATUS,
       asyncHandler(
         wishlistController.checkWishlistStatus.bind(wishlistController)
       )
