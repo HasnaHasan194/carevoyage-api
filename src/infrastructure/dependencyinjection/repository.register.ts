@@ -45,6 +45,8 @@ import { ISalesReportRepository } from "../../domain/repositoryInterfaces/SalesR
 import { SalesReportRepository } from "../repository/sales-report/sales-report.repository";
 import { ICaretakerDashboardRepository } from "../../domain/repositoryInterfaces/CaretakerDashboard/caretaker-dashboard.repository.interface";
 import { CaretakerDashboardRepository } from "../repository/caretaker-dashboard/caretaker-dashboard.repository";
+import { IChatRepository } from "../../domain/repositoryInterfaces/Chat/chat.repository.interface";
+import { ChatRepository } from "../repository/chat/chat.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -169,6 +171,13 @@ export class RepositoryRegister {
       {
         useClass: CaretakerDashboardRepository,
       } as ClassProvider<ICaretakerDashboardRepository>
+    );
+
+    container.register<IChatRepository>(
+      "IChatRepository",
+      {
+        useClass: ChatRepository,
+      } as ClassProvider<IChatRepository>
     );
   }
 }

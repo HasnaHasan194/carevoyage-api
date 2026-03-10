@@ -133,6 +133,11 @@ export const ROUTES = {
     DASHBOARD: "/dashboard",
     TRIPS: "/trips",
   },
+
+  CHAT: {
+    CONVERSATIONS: "/conversations",
+    BOOKING_MESSAGES: "/bookings/:bookingId/messages",
+  },
 } as const;
 
 export const API_PREFIX = "/api/v1";
@@ -145,6 +150,7 @@ export const API_MOUNTS = {
   CARETAKER: `${API_PREFIX}/caretaker`,
   PACKAGES: `${API_PREFIX}/packages`,
   BOOKING: `${API_PREFIX}/booking`,
+  CHAT: `${API_PREFIX}/chat`,
   WALLETS: `${API_PREFIX}/wallets`,
   PAYMENT_WEBHOOK: `${API_PREFIX}/payments/webhook`,
 } as const;

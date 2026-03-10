@@ -4,6 +4,7 @@ import { IBaseRepository } from "../baseRepository.interface";
 export interface IBookingRepository extends IBaseRepository<IBookingEntity> {
   findByStripeSessionId(sessionId: string): Promise<IBookingEntity | null>;
   findByPackageId(packageId: string): Promise<IBookingEntity[]>;
+  markConfirmedBookingsCompletedByPackageId(packageId: string): Promise<number>;
   findByClientId(clientId: string): Promise<IBookingEntity[]>;
   findByAgencyIdAndPackageId(
     agencyId: string,

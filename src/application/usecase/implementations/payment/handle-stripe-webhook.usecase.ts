@@ -5,6 +5,7 @@ import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Book
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IHandleStripeWebhookUsecase } from "../../interfaces/payment/handle-stripe-webhook-usecase.interface";
 import type { ICreditBookingPayoutUseCase } from "../../interfaces/wallet/credit-booking-payout.interface";
+import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 
 @injectable()
 export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
@@ -16,7 +17,9 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
     @inject("ICaretakerProfileRepository")
     private _caretakerProfileRepository: ICaretakerProfileRepository,
     @inject("ICreditBookingPayoutUseCase")
-    private _creditBookingPayoutUseCase: ICreditBookingPayoutUseCase
+    private _creditBookingPayoutUseCase: ICreditBookingPayoutUseCase,
+    @inject("IChatConversationProvisioner")
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner
   ) {}
 
   async execute(
@@ -61,5 +64,10 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
         totalAmount: booking.totalAmount,
       }
     );
+
+    await this._chatConversationProvisioner.provisionForBooking({
+      ...booking,
+      status: "CONFIRMED",
+    });
   }
 }

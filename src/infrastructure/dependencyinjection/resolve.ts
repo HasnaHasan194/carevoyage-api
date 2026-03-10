@@ -52,6 +52,8 @@ import { IAgencySalesReportController } from "../../presentation/interfaces/cont
 import { AgencySalesReportController } from "../../presentation/controllers/agency/agency-sales-report.controller";
 import { IWishlistController } from "../../presentation/interfaces/controllers/user/wishlist.controller.interface";
 import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
+import { ChatController } from "../../presentation/controllers/chat/chat.controller";
+import { ChatRoutes } from "../../presentation/route/chat/chat.route";
 
 DependencyInjection.registerAll();
 
@@ -279,3 +281,13 @@ export const walletRoutes = container.resolve(WalletRoutes);
  * Payment controller (for Stripe webhook)
  */
 export const paymentController = container.resolve(PaymentController);
+
+/**
+ * Chat controller
+ */
+export const chatController = container.resolve(ChatController);
+
+/**
+ * Chat routes
+ */
+export const chatRoutes = container.resolve(ChatRoutes);

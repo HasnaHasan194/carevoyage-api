@@ -11,6 +11,7 @@ import {
   caretakerRoutes,
   packageRoutes,
   bookingRoutes,
+  chatRoutes,
   walletRoutes,
   paymentController,
 } from "../../dependencyinjection/resolve";
@@ -66,6 +67,7 @@ export class App {
     this._app.use(API_MOUNTS.PACKAGES, packageRoutes.router);
     this._app.use(API_MOUNTS.BOOKING, bookingRoutes.router);
     this._app.use(API_MOUNTS.WALLETS, walletRoutes.router);
+    this._app.use(API_MOUNTS.CHAT, chatRoutes.router);
   }
 
   private configureErrorMiddleware() {

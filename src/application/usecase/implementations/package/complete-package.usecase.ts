@@ -9,6 +9,7 @@ import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 
 @injectable()
 export class CompletePackageUsecase implements ICompletePackageUsecase {
@@ -20,7 +21,9 @@ export class CompletePackageUsecase implements ICompletePackageUsecase {
     @inject("IBookingRepository")
     private _bookingRepository: IBookingRepository,
     @inject("ICaretakerProfileRepository")
-    private _caretakerProfileRepository: ICaretakerProfileRepository
+    private _caretakerProfileRepository: ICaretakerProfileRepository,
+    @inject("IChatConversationProvisioner")
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner
   ) {}
 
   async execute(
@@ -59,11 +62,20 @@ export class CompletePackageUsecase implements ICompletePackageUsecase {
       throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
 
+    // Mark CONFIRMED bookings as COMPLETED for this package
+    await this._bookingRepository.markConfirmedBookingsCompletedByPackageId(
+      packageId
+    );
+
     // When a trip is completed, release any BUSY caretakers attached
     const bookingsWithCaretakers = await this._bookingRepository.findByPackageId(
       packageId
     );
     for (const booking of bookingsWithCaretakers) {
+      await this._chatConversationProvisioner.syncChatEnabledForBooking(
+        booking._id,
+        booking.status
+      );
       if (booking.caretakerId) {
         await this._caretakerProfileRepository.updateAvailabilityStatus(
           booking.caretakerId,

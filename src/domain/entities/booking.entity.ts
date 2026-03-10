@@ -1,6 +1,7 @@
 export type TBookingStatus =
   | "pending_payment"
   | "CONFIRMED"
+  | "COMPLETED"
   | "CANCELLED_BY_USER"
   | "REFUNDED";
 

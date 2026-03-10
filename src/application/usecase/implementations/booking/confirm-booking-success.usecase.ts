@@ -4,6 +4,7 @@ import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterf
 import { IDBSession } from "../../../../infrastructure/interface/session.interface";
 import { IConfirmBookingSuccessUseCase } from "../../interfaces/booking/confirm-booking-success.interface";
 import type { ICreditBookingPayoutUseCase } from "../../interfaces/wallet/credit-booking-payout.interface";
+import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 
 @injectable()
 export class ConfirmBookingSuccessUseCase implements IConfirmBookingSuccessUseCase {
@@ -15,7 +16,9 @@ export class ConfirmBookingSuccessUseCase implements IConfirmBookingSuccessUseCa
     @inject("IDBSession")
     private _dbSession: IDBSession,
     @inject("ICreditBookingPayoutUseCase")
-    private _creditBookingPayoutUseCase: ICreditBookingPayoutUseCase
+    private _creditBookingPayoutUseCase: ICreditBookingPayoutUseCase,
+    @inject("IChatConversationProvisioner")
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner
   ) {}
 
   async execute(sessionId: string): Promise<void> {
@@ -50,6 +53,11 @@ export class ConfirmBookingSuccessUseCase implements IConfirmBookingSuccessUseCa
         },
         session
       );
+    });
+
+    await this._chatConversationProvisioner.provisionForBooking({
+      ...booking,
+      status: "CONFIRMED",
     });
   }
 }
