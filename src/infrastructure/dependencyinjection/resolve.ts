@@ -29,6 +29,8 @@ import { IUserController } from "../../presentation/interfaces/controllers/user/
 import { ProfileUploadController } from "../../presentation/controllers/user/profile-upload.controller";
 import { LoggerMiddleware } from "../../presentation/middlewares/logger.middleware";
 import { CaretakerVerificationController } from "../../presentation/controllers/caretaker/caretaker-verification.controller";
+import { ICaretakerDashboardController } from "../../presentation/interfaces/controllers/caretaker/caretaker-dashboard.controller.interface";
+import { CaretakerDashboardController } from "../../presentation/controllers/caretaker/caretaker-dashboard.controller";
 import { CaretakerRoutes } from "../../presentation/route/caretaker/caretaker.route";
 import { PackageController } from "../../presentation/controllers/package/package.controller";
 import { PackageRoutes } from "../../presentation/route/package/package.route";
@@ -226,6 +228,12 @@ export const userRoutes = container.resolve(UserRoutes);
  * Caretaker Verification controller
  */
 export const caretakerVerificationController = container.resolve(CaretakerVerificationController);
+
+/**
+ * Caretaker Dashboard controller
+ */
+export const caretakerDashboardController =
+  container.resolve<ICaretakerDashboardController>(CaretakerDashboardController);
 
 /**
  * Caretaker routes

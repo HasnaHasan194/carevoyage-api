@@ -130,6 +130,8 @@ export const ROUTES = {
     VERIFICATION: "/verification",
     VERIFICATION_STATUS: "/verification/status",
     PROFILE: "/profile",
+    DASHBOARD: "/dashboard",
+    TRIPS: "/trips",
   },
 } as const;
 

@@ -43,6 +43,8 @@ import { IRefundRequestRepository } from "../../domain/repositoryInterfaces/Refu
 import { RefundRequestRepository } from "../repository/refund/refund-request.repository";
 import { ISalesReportRepository } from "../../domain/repositoryInterfaces/SalesReport/sales-report.repository.interface";
 import { SalesReportRepository } from "../repository/sales-report/sales-report.repository";
+import { ICaretakerDashboardRepository } from "../../domain/repositoryInterfaces/CaretakerDashboard/caretaker-dashboard.repository.interface";
+import { CaretakerDashboardRepository } from "../repository/caretaker-dashboard/caretaker-dashboard.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -160,6 +162,13 @@ export class RepositoryRegister {
       {
         useClass: SalesReportRepository,
       } as ClassProvider<ISalesReportRepository>
+    );
+
+    container.register<ICaretakerDashboardRepository>(
+      "ICaretakerDashboardRepository",
+      {
+        useClass: CaretakerDashboardRepository,
+      } as ClassProvider<ICaretakerDashboardRepository>
     );
   }
 }

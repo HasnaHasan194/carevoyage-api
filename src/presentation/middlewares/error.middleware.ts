@@ -26,9 +26,9 @@ export class ErrorMiddleware implements IErrorMiddleware {
       message = err.message;
     }
 
-    // #region agent log
+    
     try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'error.middleware.ts:handleError',message:'Error middleware caught error',data:{statusCode,errMessage:message,errName:err.name,errStack:err.stack?.substring(0,500),url:req.originalUrl},timestamp:Date.now(),hypothesisId:'H5'})+'\n'); } catch(e){}
-    // #endregion
+    
     console.error(
       `statusCode ${statusCode}`,
       `message ${message}, error : ${err}`

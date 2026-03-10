@@ -89,6 +89,10 @@ import { ISubmitCaretakerVerificationUsecase } from "../../application/usecase/i
 import { SubmitCaretakerVerificationUsecase } from "../../application/usecase/implementations/caretaker/submit-verification.usecase";
 import { IGetCaretakerProfileUsecase } from "../../application/usecase/interfaces/caretaker/get-caretaker-profile.interface";
 import { GetCaretakerProfileUsecase } from "../../application/usecase/implementations/caretaker/get-caretaker-profile.usecase";
+import { IGetCaretakerDashboardUseCase } from "../../application/usecase/interfaces/caretaker/get-caretaker-dashboard.interface";
+import { GetCaretakerDashboardUseCase } from "../../application/usecase/implementations/caretaker/get-caretaker-dashboard.usecase";
+import { IListCaretakerTripsUseCase } from "../../application/usecase/interfaces/caretaker/list-caretaker-trips.interface";
+import { ListCaretakerTripsUseCase } from "../../application/usecase/implementations/caretaker/list-caretaker-trips.usecase";
 import { IBrowsePackagesUsecase } from "../../application/usecase/interfaces/package/browse-packages.interface";
 import { BrowsePackagesUsecase } from "../../application/usecase/implementations/package/browse-packages.usecase";
 import { IGetUpcomingClientPackagesUsecase } from "../../application/usecase/interfaces/package/get-upcoming-client-packages.interface";
@@ -295,6 +299,12 @@ export class UsecaseRegistory {
 
     container.register<IGetCaretakerProfileUsecase>("IGetCaretakerProfileUsecase", {
       useClass: GetCaretakerProfileUsecase,
+    });
+    container.register<IGetCaretakerDashboardUseCase>("IGetCaretakerDashboardUseCase", {
+      useClass: GetCaretakerDashboardUseCase,
+    });
+    container.register<IListCaretakerTripsUseCase>("IListCaretakerTripsUseCase", {
+      useClass: ListCaretakerTripsUseCase,
     });
 
     // Forgot Password use cases
