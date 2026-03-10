@@ -201,6 +201,8 @@ import { IGetAgencySalesReportUseCase } from "../../application/usecase/interfac
 import { GetAgencySalesReportUseCase } from "../../application/usecase/implementations/sales-report/get-agency-sales-report.usecase";
 import { IExportSalesReportUseCase } from "../../application/usecase/interfaces/sales-report/export-sales-report.interface";
 import { ExportSalesReportUseCase } from "../../application/usecase/implementations/sales-report/export-sales-report.usecase";
+import { IListChatConversationsUseCase } from "../../application/usecase/interfaces/chat/list-chat-conversations.interface";
+import { ListChatConversationsUseCase } from "../../application/usecase/implementations/chat/list-chat-conversations.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -638,6 +640,11 @@ export class UsecaseRegistory {
     container.register<IExportSalesReportUseCase>(
       "IExportSalesReportUseCase",
       { useClass: ExportSalesReportUseCase }
+    );
+
+    container.register<IListChatConversationsUseCase>(
+      "IListChatConversationsUseCase",
+      { useClass: ListChatConversationsUseCase }
     );
   }
 }

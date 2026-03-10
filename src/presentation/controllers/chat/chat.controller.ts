@@ -5,6 +5,7 @@ import { HTTP_STATUS, ERROR_MESSAGE } from "../../../shared/constants/constants"
 import type { IChatRepository } from "../../../domain/repositoryInterfaces/Chat/chat.repository.interface";
 import type { IBookingRepository } from "../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
 import type { ICaretakerProfileRepository } from "../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
+import type { IListChatConversationsUseCase } from "../../../application/usecase/interfaces/chat/list-chat-conversations.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 
 @injectable()
@@ -15,7 +16,9 @@ export class ChatController {
     @inject("IBookingRepository")
     private readonly _bookingRepository: IBookingRepository,
     @inject("ICaretakerProfileRepository")
-    private readonly _caretakerProfileRepository: ICaretakerProfileRepository
+    private readonly _caretakerProfileRepository: ICaretakerProfileRepository,
+    @inject("IListChatConversationsUseCase")
+    private readonly _listChatConversationsUseCase: IListChatConversationsUseCase
   ) {}
 
   async listConversations(req: CustomRequest, res: Response): Promise<void> {
@@ -37,11 +40,11 @@ export class ChatController {
     const limitRaw = req.query.limit as string | undefined;
     const limit = limitRaw ? Number(limitRaw) : undefined;
 
-    const conversations = await this._chatRepository.listConversations({
-      userId: req.user.id,
+    const conversations = await this._listChatConversationsUseCase.execute(
+      req.user.id,
       role,
-      limit,
-    });
+      limit
+    );
 
     ResponseHelper.success(res, HTTP_STATUS.OK, "Conversations retrieved", conversations);
   }
