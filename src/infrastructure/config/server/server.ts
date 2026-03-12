@@ -11,6 +11,7 @@ import {
   caretakerRoutes,
   packageRoutes,
   bookingRoutes,
+  chatRoutes,
   walletRoutes,
   paymentController,
 } from "../../dependencyinjection/resolve";
@@ -29,17 +30,12 @@ export class App {
   }
 
   private configureMiddleware() {
-   
-    this._app.use((req, res, next) => { if (req.originalUrl.includes('send-otp')) { try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'server.ts:globalMiddleware',message:'Request reached Express',data:{method:req.method,url:req.originalUrl,contentType:req.headers['content-type'],origin:req.headers['origin']},timestamp:Date.now(),hypothesisId:'H6'})+'\n'); } catch(e){} } next(); });
-   
     this._app.use(
       cors({
         origin: config.client.URI,
         credentials: true,
       }),
     );
-    
-    this._app.use((req, res, next) => { if (req.originalUrl.includes('send-otp')) { try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'server.ts:afterCORS',message:'Request passed CORS',data:{method:req.method,url:req.originalUrl},timestamp:Date.now(),hypothesisId:'H6'})+'\n'); } catch(e){} } next(); });
     
     this._app.use(
       API_MOUNTS.PAYMENT_WEBHOOK,
@@ -66,6 +62,7 @@ export class App {
     this._app.use(API_MOUNTS.PACKAGES, packageRoutes.router);
     this._app.use(API_MOUNTS.BOOKING, bookingRoutes.router);
     this._app.use(API_MOUNTS.WALLETS, walletRoutes.router);
+    this._app.use(API_MOUNTS.CHAT, chatRoutes.router);
   }
 
   private configureErrorMiddleware() {

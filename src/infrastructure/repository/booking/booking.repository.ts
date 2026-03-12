@@ -28,6 +28,18 @@ export class BookingRepository
     return docs.map((doc) => BookingMapper.toEntity(doc));
   }
 
+  async markConfirmedBookingsCompletedByPackageId(
+    packageId: string,
+  ): Promise<number> {
+    const result = await bookingDB
+      .updateMany(
+        { packageId, status: "CONFIRMED" },
+        { $set: { status: "COMPLETED" } },
+      )
+      .exec();
+    return result.modifiedCount ?? 0;
+  }
+
   async findByAgencyIdAndPackageId(
     agencyId: string,
     packageId: string,

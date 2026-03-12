@@ -39,10 +39,16 @@ import { IWalletRepository } from "../../domain/repositoryInterfaces/Wallet/wall
 import { WalletRepository } from "../repository/wallet/wallet.repository";
 import { IWalletTransactionRepository } from "../../domain/repositoryInterfaces/Wallet/wallet-transaction.repository.interface";
 import { WalletTransactionRepository } from "../repository/wallet/wallet-transaction.repository";
+import type { IAgencyReviewRepository } from "../../domain/repositoryInterfaces/AgencyReview/agency-review.repository.interface";
+import { AgencyReviewRepository } from "../repository/agency-review/agency-review.repository";
 import { IRefundRequestRepository } from "../../domain/repositoryInterfaces/Refund/refund-request.repository.interface";
 import { RefundRequestRepository } from "../repository/refund/refund-request.repository";
 import { ISalesReportRepository } from "../../domain/repositoryInterfaces/SalesReport/sales-report.repository.interface";
 import { SalesReportRepository } from "../repository/sales-report/sales-report.repository";
+import { ICaretakerDashboardRepository } from "../../domain/repositoryInterfaces/CaretakerDashboard/caretaker-dashboard.repository.interface";
+import { CaretakerDashboardRepository } from "../repository/caretaker-dashboard/caretaker-dashboard.repository";
+import { IChatRepository } from "../../domain/repositoryInterfaces/Chat/chat.repository.interface";
+import { ChatRepository } from "../repository/chat/chat.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -160,6 +166,27 @@ export class RepositoryRegister {
       {
         useClass: SalesReportRepository,
       } as ClassProvider<ISalesReportRepository>
+    );
+
+    container.register<ICaretakerDashboardRepository>(
+      "ICaretakerDashboardRepository",
+      {
+        useClass: CaretakerDashboardRepository,
+      } as ClassProvider<ICaretakerDashboardRepository>
+    );
+
+    container.register<IChatRepository>(
+      "IChatRepository",
+      {
+        useClass: ChatRepository,
+      } as ClassProvider<IChatRepository>
+    );
+
+    container.register<IAgencyReviewRepository>(
+      "IAgencyReviewRepository",
+      {
+        useClass: AgencyReviewRepository,
+      } as ClassProvider<IAgencyReviewRepository>
     );
   }
 }

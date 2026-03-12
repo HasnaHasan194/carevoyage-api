@@ -6,6 +6,7 @@ import { type ICancelClientBookingUseCase } from "../../interfaces/booking/cance
 import { ERROR_MESSAGE, HTTP_STATUS } from "../../../../shared/constants/constants";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { CustomError } from "../../../../domain/errors/customError";
+import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 
 @injectable()
 export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
@@ -15,6 +16,9 @@ export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
 
     @inject("ICaretakerProfileRepository")
     private readonly _caretakerProfileRepository: ICaretakerProfileRepository,
+
+    @inject("IChatConversationProvisioner")
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner,
   ) {}
 
   async execute(
@@ -43,6 +47,11 @@ export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
       status: "CANCELLED_BY_USER",
       cancellationReason: reason?.trim() || undefined,
     });
+
+    await this._chatConversationProvisioner.syncChatEnabledForBooking(
+      bookingId,
+      "CANCELLED_BY_USER"
+    );
 
     if (booking.caretakerId) {
       await this._caretakerProfileRepository.updateAvailabilityStatus(

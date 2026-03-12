@@ -5,7 +5,8 @@ import { verifyAuth } from "../../middlewares/auth.middleware";
 import { authorizeRole } from "../../middlewares/auth.middleware";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { CaretakerVerificationRequestDTO } from "../../../application/dto/request/caretaker-verification-request.dto";
-import { caretakerVerificationController, profileUploadController } from "../../../infrastructure/dependencyinjection/resolve";
+import { GetCaretakerTripsRequestDTO } from "../../../application/dto/request/get-caretaker-trips-request.dto";
+import { caretakerVerificationController, profileUploadController, caretakerDashboardController } from "../../../infrastructure/dependencyinjection/resolve";
 import multer from "multer";
 import { ROUTES } from "../routes.constants";
 
@@ -76,6 +77,29 @@ export class CaretakerRoutes extends BaseRoute {
       asyncHandler(
         caretakerVerificationController.getProfile.bind(
           caretakerVerificationController
+        )
+      )
+    );
+
+    this.router.get(
+      ROUTES.CARETAKER.DASHBOARD,
+      asyncHandler(verifyAuth),
+      authorizeRole(["caretaker"]),
+      asyncHandler(
+        caretakerDashboardController.getDashboard.bind(
+          caretakerDashboardController
+        )
+      )
+    );
+
+    this.router.get(
+      ROUTES.CARETAKER.TRIPS,
+      asyncHandler(verifyAuth),
+      authorizeRole(["caretaker"]),
+      validationMiddleware(GetCaretakerTripsRequestDTO),
+      asyncHandler(
+        caretakerDashboardController.getTrips.bind(
+          caretakerDashboardController
         )
       )
     );

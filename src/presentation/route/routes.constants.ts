@@ -54,6 +54,7 @@ export const ROUTES = {
     SALES_REPORT: "/sales-report",
     SALES_REPORT_PDF: "/sales-report/pdf",
     SALES_REPORT_EXCEL: "/sales-report/excel",
+    REVIEWS: "/reviews",
   },
 
   AGENCY_CATEGORY: {
@@ -101,6 +102,7 @@ export const ROUTES = {
     WISHLIST_BASE: "/wishlist",
     WISHLIST_DETAIL: "/wishlist/:packageId",
     WISHLIST_STATUS: "/wishlist/:packageId/status",
+    AGENCY_REVIEWS: "/agency-reviews",
   },
 
   WALLET: {
@@ -130,6 +132,13 @@ export const ROUTES = {
     VERIFICATION: "/verification",
     VERIFICATION_STATUS: "/verification/status",
     PROFILE: "/profile",
+    DASHBOARD: "/dashboard",
+    TRIPS: "/trips",
+  },
+
+  CHAT: {
+    CONVERSATIONS: "/conversations",
+    BOOKING_MESSAGES: "/bookings/:bookingId/messages",
   },
 } as const;
 
@@ -143,6 +152,7 @@ export const API_MOUNTS = {
   CARETAKER: `${API_PREFIX}/caretaker`,
   PACKAGES: `${API_PREFIX}/packages`,
   BOOKING: `${API_PREFIX}/booking`,
+  CHAT: `${API_PREFIX}/chat`,
   WALLETS: `${API_PREFIX}/wallets`,
   PAYMENT_WEBHOOK: `${API_PREFIX}/payments/webhook`,
 } as const;

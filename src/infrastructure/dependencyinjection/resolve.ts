@@ -29,6 +29,8 @@ import { IUserController } from "../../presentation/interfaces/controllers/user/
 import { ProfileUploadController } from "../../presentation/controllers/user/profile-upload.controller";
 import { LoggerMiddleware } from "../../presentation/middlewares/logger.middleware";
 import { CaretakerVerificationController } from "../../presentation/controllers/caretaker/caretaker-verification.controller";
+import { ICaretakerDashboardController } from "../../presentation/interfaces/controllers/caretaker/caretaker-dashboard.controller.interface";
+import { CaretakerDashboardController } from "../../presentation/controllers/caretaker/caretaker-dashboard.controller";
 import { CaretakerRoutes } from "../../presentation/route/caretaker/caretaker.route";
 import { PackageController } from "../../presentation/controllers/package/package.controller";
 import { PackageRoutes } from "../../presentation/route/package/package.route";
@@ -50,6 +52,10 @@ import { IAgencySalesReportController } from "../../presentation/interfaces/cont
 import { AgencySalesReportController } from "../../presentation/controllers/agency/agency-sales-report.controller";
 import { IWishlistController } from "../../presentation/interfaces/controllers/user/wishlist.controller.interface";
 import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
+import { ChatController } from "../../presentation/controllers/chat/chat.controller";
+import { ChatRoutes } from "../../presentation/route/chat/chat.route";
+import type { IReviewController } from "../../presentation/interfaces/controllers/review/review.controller.interface";
+import { ReviewController } from "../../presentation/controllers/review/review.controller";
 
 DependencyInjection.registerAll();
 
@@ -208,6 +214,12 @@ export const agencySalesReportController =
   container.resolve<IAgencySalesReportController>(AgencySalesReportController);
 
 /**
+ * Review controller - MUST be resolved BEFORE AgencyRoutes
+ * because AgencyRoutes.initializeRoutes uses it synchronously.
+ */
+export const reviewController = container.resolve<IReviewController>(ReviewController);
+
+/**
  * Agency routes
  */
 export const agencyRoutes = container.resolve(AgencyRoutes);
@@ -226,6 +238,12 @@ export const userRoutes = container.resolve(UserRoutes);
  * Caretaker Verification controller
  */
 export const caretakerVerificationController = container.resolve(CaretakerVerificationController);
+
+/**
+ * Caretaker Dashboard controller
+ */
+export const caretakerDashboardController =
+  container.resolve<ICaretakerDashboardController>(CaretakerDashboardController);
 
 /**
  * Caretaker routes
@@ -271,3 +289,13 @@ export const walletRoutes = container.resolve(WalletRoutes);
  * Payment controller (for Stripe webhook)
  */
 export const paymentController = container.resolve(PaymentController);
+
+/**
+ * Chat controller
+ */
+export const chatController = container.resolve(ChatController);
+
+/**
+ * Chat routes
+ */
+export const chatRoutes = container.resolve(ChatRoutes);

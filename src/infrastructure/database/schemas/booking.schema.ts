@@ -40,6 +40,7 @@ export const bookingSchema = new Schema<IBookingModel>(
       enum: [
         "pending_payment",
         "CONFIRMED",
+        "COMPLETED",
         "CANCELLED_BY_USER",
         "REFUNDED",
       ] as TBookingStatus[],

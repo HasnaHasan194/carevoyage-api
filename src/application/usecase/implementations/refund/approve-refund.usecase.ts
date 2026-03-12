@@ -9,6 +9,7 @@ import { ValidationError } from "../../../../domain/errors/validationError";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 import type { IDebitWalletUseCase } from "../../interfaces/wallet/debit-wallet.interface";
 import type { ICreditWalletUseCase } from "../../interfaces/wallet/credit-wallet.interface";
+import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 
 @injectable()
 export class ApproveRefundUseCase implements IApproveRefundUseCase {
@@ -24,7 +25,9 @@ export class ApproveRefundUseCase implements IApproveRefundUseCase {
     @inject("ICreditWalletUseCase")
     private readonly _creditWalletUseCase: ICreditWalletUseCase,
     @inject("IDBSession")
-    private readonly _dbSession: IDBSession
+    private readonly _dbSession: IDBSession,
+    @inject("IChatConversationProvisioner")
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner
   ) {}
 
   async execute(agencyId: string, refundRequestId: string): Promise<void> {
@@ -91,6 +94,11 @@ export class ApproveRefundUseCase implements IApproveRefundUseCase {
         status: "REFUNDED",
       }, session);
     });
+
+    await this._chatConversationProvisioner.syncChatEnabledForBooking(
+      booking._id,
+      "REFUNDED"
+    );
   }
 }
 

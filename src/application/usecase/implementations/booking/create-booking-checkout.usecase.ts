@@ -17,6 +17,7 @@ import {
 import { config } from "../../../../shared/config";
 import { IPackageEntity } from "../../../../domain/entities/package.entity";
 import { CustomError } from "../../../../domain/errors/customError";
+import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 
 @injectable()
 export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCase {
@@ -31,6 +32,8 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
     private _caretakerProfileRepository: ICaretakerProfileRepository,
     @inject("IPaymentService")
     private _paymentService: IPaymentService,
+    @inject("IChatConversationProvisioner")
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner,
   ) {}
 
   async execute(
@@ -151,6 +154,8 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
         ? selectedSpecialNeedIds
         : undefined,
     });
+
+    await this._chatConversationProvisioner.provisionForBooking(booking);
 
     const baseUrl = config.client.URI || "http://localhost:5173";
     const successUrl = `${baseUrl}/booking/success?session_id={CHECKOUT_SESSION_ID}`;

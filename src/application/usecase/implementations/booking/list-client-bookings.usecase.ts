@@ -13,6 +13,8 @@ function mapStatusToLabel(status: string): string {
   switch (status) {
     case "CONFIRMED":
       return "Confirmed";
+    case "COMPLETED":
+      return "Completed";
     case "CANCELLED_BY_USER":
       return "Cancelled by you";
     case "REFUNDED":

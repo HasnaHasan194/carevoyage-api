@@ -16,6 +16,13 @@ import { ISalesReportExportService } from "../../domain/service-interfaces/sales
 import { PdfSalesReportExportService } from "../service/sales-report/pdf-sales-report-export.service";
 import { ExcelSalesReportExportService } from "../service/sales-report/excel-sales-report-export.service";
 import { SalesReportExportService } from "../service/sales-report/sales-report-export.service";
+import {
+  ChatConversationProvisioner,
+  type IChatConversationProvisioner,
+} from "../../application/services/chat/chat-conversation-provisioner";
+import { ChatService, type IChatService } from "../../application/services/chat/chat.service";
+import type { ITripReviewNotificationService } from "../../domain/service-interfaces/trip-review-notification-service.interface";
+import { TripReviewNotificationService } from "../service/trip-review-notification.service";
 
 export class ServiceRegistery {
   static registerService(): void {
@@ -52,6 +59,21 @@ export class ServiceRegistery {
     });
     container.register<ISalesReportExportService>("ISalesReportExportService", {
       useClass: SalesReportExportService,
+    });
+
+    container.register<IChatConversationProvisioner>(
+      "IChatConversationProvisioner",
+      {
+        useClass: ChatConversationProvisioner,
+      }
+    );
+
+    container.register<IChatService>("IChatService", {
+      useClass: ChatService,
+    });
+
+    container.register<ITripReviewNotificationService>("ITripReviewNotificationService", {
+      useClass: TripReviewNotificationService,
     });
   }
 }

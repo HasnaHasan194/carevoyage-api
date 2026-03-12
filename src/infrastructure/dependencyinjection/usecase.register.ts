@@ -89,6 +89,10 @@ import { ISubmitCaretakerVerificationUsecase } from "../../application/usecase/i
 import { SubmitCaretakerVerificationUsecase } from "../../application/usecase/implementations/caretaker/submit-verification.usecase";
 import { IGetCaretakerProfileUsecase } from "../../application/usecase/interfaces/caretaker/get-caretaker-profile.interface";
 import { GetCaretakerProfileUsecase } from "../../application/usecase/implementations/caretaker/get-caretaker-profile.usecase";
+import { IGetCaretakerDashboardUseCase } from "../../application/usecase/interfaces/caretaker/get-caretaker-dashboard.interface";
+import { GetCaretakerDashboardUseCase } from "../../application/usecase/implementations/caretaker/get-caretaker-dashboard.usecase";
+import { IListCaretakerTripsUseCase } from "../../application/usecase/interfaces/caretaker/list-caretaker-trips.interface";
+import { ListCaretakerTripsUseCase } from "../../application/usecase/implementations/caretaker/list-caretaker-trips.usecase";
 import { IBrowsePackagesUsecase } from "../../application/usecase/interfaces/package/browse-packages.interface";
 import { BrowsePackagesUsecase } from "../../application/usecase/implementations/package/browse-packages.usecase";
 import { IGetUpcomingClientPackagesUsecase } from "../../application/usecase/interfaces/package/get-upcoming-client-packages.interface";
@@ -197,6 +201,12 @@ import { IGetAgencySalesReportUseCase } from "../../application/usecase/interfac
 import { GetAgencySalesReportUseCase } from "../../application/usecase/implementations/sales-report/get-agency-sales-report.usecase";
 import { IExportSalesReportUseCase } from "../../application/usecase/interfaces/sales-report/export-sales-report.interface";
 import { ExportSalesReportUseCase } from "../../application/usecase/implementations/sales-report/export-sales-report.usecase";
+import { IListChatConversationsUseCase } from "../../application/usecase/interfaces/chat/list-chat-conversations.interface";
+import { ListChatConversationsUseCase } from "../../application/usecase/implementations/chat/list-chat-conversations.usecase";
+import type { ICreateAgencyReviewUseCase } from "../../application/usecase/interfaces/review/create-agency-review.interface";
+import { CreateAgencyReviewUseCase } from "../../application/usecase/implementations/review/create-agency-review.usecase";
+import type { IListAgencyReviewsUseCase } from "../../application/usecase/interfaces/review/list-agency-reviews.interface";
+import { ListAgencyReviewsUseCase } from "../../application/usecase/implementations/review/list-agency-reviews.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -295,6 +305,12 @@ export class UsecaseRegistory {
 
     container.register<IGetCaretakerProfileUsecase>("IGetCaretakerProfileUsecase", {
       useClass: GetCaretakerProfileUsecase,
+    });
+    container.register<IGetCaretakerDashboardUseCase>("IGetCaretakerDashboardUseCase", {
+      useClass: GetCaretakerDashboardUseCase,
+    });
+    container.register<IListCaretakerTripsUseCase>("IListCaretakerTripsUseCase", {
+      useClass: ListCaretakerTripsUseCase,
     });
 
     // Forgot Password use cases
@@ -628,6 +644,21 @@ export class UsecaseRegistory {
     container.register<IExportSalesReportUseCase>(
       "IExportSalesReportUseCase",
       { useClass: ExportSalesReportUseCase }
+    );
+
+    container.register<IListChatConversationsUseCase>(
+      "IListChatConversationsUseCase",
+      { useClass: ListChatConversationsUseCase }
+    );
+
+    container.register<ICreateAgencyReviewUseCase>(
+      "ICreateAgencyReviewUseCase",
+      { useClass: CreateAgencyReviewUseCase }
+    );
+
+    container.register<IListAgencyReviewsUseCase>(
+      "IListAgencyReviewsUseCase",
+      { useClass: ListAgencyReviewsUseCase }
     );
   }
 }
