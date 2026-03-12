@@ -1,4 +1,4 @@
-import type { IChatConversationEntity } from "../../../domain/entities/chat-conversation.entity";
+import type { IChatConversationEntity } from "../../../../domain/entities/chat-conversation.entity";
 
 export interface IListChatConversationsUseCase {
   execute(

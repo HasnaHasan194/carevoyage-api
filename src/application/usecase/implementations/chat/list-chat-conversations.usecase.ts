@@ -1,11 +1,11 @@
 import { inject, injectable } from "tsyringe";
-import type { IListChatConversationsUseCase } from "../../usecase/interfaces/chat/list-chat-conversations.interface";
-import type { IChatRepository } from "../../../domain/repositoryInterfaces/Chat/chat.repository.interface";
-import type { IBookingRepository } from "../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
-import type { ICaretakerProfileRepository } from "../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
-import type { IUserRepository } from "../../../domain/repositoryInterfaces/User/user.repository.interface";
-import type { IPackageRepository } from "../../../domain/repositoryInterfaces/Package/package.repository.interface";
-import type { IChatConversationEntity } from "../../../domain/entities/chat-conversation.entity";
+import type { IListChatConversationsUseCase } from "../../interfaces/chat/list-chat-conversations.interface";
+import type { IChatRepository } from "../../../../domain/repositoryInterfaces/Chat/chat.repository.interface";
+import type { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import type { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
+import type { IUserRepository } from "../../../../domain/repositoryInterfaces/User/user.repository.interface";
+import type { IPackageRepository } from "../../../../domain/repositoryInterfaces/Package/package.repository.interface";
+import type { IChatConversationEntity } from "../../../../domain/entities/chat-conversation.entity";
 
 @injectable()
 export class ListChatConversationsUseCase implements IListChatConversationsUseCase {
@@ -21,7 +21,7 @@ export class ListChatConversationsUseCase implements IListChatConversationsUseCa
     @inject("IPackageRepository")
     private readonly _packageRepository: IPackageRepository
   ) {}
-
+ 
   async execute(
     userId: string,
     role: "client" | "caretaker",

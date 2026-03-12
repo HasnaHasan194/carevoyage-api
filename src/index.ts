@@ -18,10 +18,7 @@ async function startServer() {
       await connectRedis();
       console.log("Redis connected");
     } catch (redisError) {
-      console.warn(
-        "[startup] Redis connection failed, continuing without Redis:",
-        (redisError as Error).message,
-      );
+      console.error("Redis connection failed, continuing without Redis:", redisError);
     }
 
     const mongo = new MongoConnect();
@@ -36,19 +33,16 @@ async function startServer() {
 
     initSocketServer(httpServer);
 
+    httpServer.on("error", (err: NodeJS.ErrnoException) => {
+      console.error("HTTP server error:", err);
+      process.exit(1);
+    });
+
     httpServer.listen(PORT, () => {
       console.log(`Server running at port ${PORT}`);
-      
-      try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'index.ts:startup',message:'SERVER STARTED - canary log',data:{port:PORT,cwd:process.cwd()},timestamp:Date.now(),hypothesisId:'CANARY'})+'\n'); } catch(e){ console.error('CANARY LOG FAILED:', e); }
-     
     });
   } catch (error) {
     console.error("Server startup failed:", error);
-    if (error instanceof Error) {
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
-    }
     process.exit(1);
   }
 }

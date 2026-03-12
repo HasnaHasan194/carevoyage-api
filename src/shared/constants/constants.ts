@@ -511,4 +511,5 @@ export const EVENT_EMMITER_TYPE = {
 export enum MAIL_CONTENT_PURPOSE {
   LOGIN = "login",
   OTP = "otp",
+  TRIP_REVIEW_INVITE = "trip_review_invite",
 }

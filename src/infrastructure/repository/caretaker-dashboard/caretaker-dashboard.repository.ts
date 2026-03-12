@@ -77,12 +77,17 @@ export class CaretakerDashboardRepository
             $max: [
               1,
               {
-                $ceil: {
-                  $divide: [
-                    { $subtract: ["$pkg.endDate", "$pkg.startDate"] },
-                    MS_PER_DAY,
-                  ],
-                },
+                $add: [
+                  1,
+                  {
+                    $ceil: {
+                      $divide: [
+                        { $subtract: ["$pkg.endDate", "$pkg.startDate"] },
+                        MS_PER_DAY,
+                      ],
+                    },
+                  },
+                ],
               },
             ],
           },
@@ -266,11 +271,52 @@ export class CaretakerDashboardRepository
     caretakerId: string,
     page: number,
     limit: number
-  ): Promise<{ trips: CaretakerAssignedTripRow[]; total: number }> {
+  ): Promise<{ trips: CaretakerAssignedTripRow[]; total: number; totalIncome: number }> {
     const careId = new mongoose.Types.ObjectId(caretakerId);
     const skip = (page - 1) * limit;
 
-    const [trips, total] = await Promise.all([
+    const incomeFieldsPipeline: mongoose.PipelineStage[] = [
+      {
+        $addFields: {
+          tripDays: {
+            $max: [
+              1,
+              {
+                $add: [
+                  1,
+                  {
+                    $ceil: {
+                      $divide: [
+                        { $subtract: ["$pkg.endDate", "$pkg.startDate"] },
+                        MS_PER_DAY,
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "caretaker_profiles",
+          localField: "caretakerId",
+          foreignField: "_id",
+          as: "caretaker",
+        },
+      },
+      {
+        $addFields: {
+          pricePerDay: {
+            $ifNull: [{ $arrayElemAt: ["$caretaker.pricePerDay", 0] }, 0],
+          },
+        },
+      },
+      { $addFields: { income: { $multiply: ["$pricePerDay", "$tripDays"] } } },
+    ];
+
+    const [trips, total, totalIncomeAgg] = await Promise.all([
       bookingDB
         .aggregate([
           { $match: { caretakerId: careId, status: CONFIRMED_STATUS } },
@@ -311,6 +357,7 @@ export class CaretakerDashboardRepository
               endDate: "$pkg.endDate",
             },
           },
+          ...incomeFieldsPipeline,
           {
             $project: {
               bookingId: { $toString: "$_id" },
@@ -319,6 +366,9 @@ export class CaretakerDashboardRepository
               startDate: 1,
               endDate: 1,
               status: 1,
+              tripDays: 1,
+              pricePerDay: 1,
+              income: 1,
             },
           },
         ])
@@ -327,6 +377,22 @@ export class CaretakerDashboardRepository
         caretakerId: careId,
         status: CONFIRMED_STATUS,
       } as unknown as BookingCountDocumentsParam),
+      bookingDB
+        .aggregate([
+          { $match: { caretakerId: careId, status: CONFIRMED_STATUS } },
+          {
+            $lookup: {
+              from: "packages",
+              localField: "packageId",
+              foreignField: "_id",
+              as: "pkg",
+            },
+          },
+          { $unwind: { path: "$pkg", preserveNullAndEmptyArrays: false } },
+          ...incomeFieldsPipeline,
+          { $group: { _id: null, sum: { $sum: "$income" } } },
+        ])
+        .exec(),
     ]);
 
     const typedTrips: CaretakerAssignedTripRow[] = (trips as Record<string, unknown>[]).map(
@@ -337,9 +403,15 @@ export class CaretakerDashboardRepository
         startDate: r.startDate instanceof Date ? r.startDate : new Date(r.startDate as string),
         endDate: r.endDate instanceof Date ? r.endDate : new Date(r.endDate as string),
         status: String(r.status),
+        tripDays: typeof r.tripDays === "number" ? r.tripDays : undefined,
+        pricePerDay: typeof r.pricePerDay === "number" ? r.pricePerDay : undefined,
+        income: typeof r.income === "number" ? r.income : undefined,
       })
     );
 
-    return { trips: typedTrips, total };
+    const totalIncomeRow = (totalIncomeAgg as Array<{ sum?: unknown } | null>)[0];
+    const totalIncome = typeof totalIncomeRow?.sum === "number" ? totalIncomeRow.sum : 0;
+
+    return { trips: typedTrips, total, totalIncome };
   }
 }

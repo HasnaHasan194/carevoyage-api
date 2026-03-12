@@ -5,6 +5,9 @@ export interface AssignedTripDTO {
   startDate: string;
   endDate: string;
   status: string;
+  tripDays?: number;
+  pricePerDay?: number;
+  income?: number;
 }
 
 export interface PaginatedCaretakerTripsResponseDTO {
@@ -13,4 +16,5 @@ export interface PaginatedCaretakerTripsResponseDTO {
   page: number;
   limit: number;
   totalPages: number;
+  totalIncome: number;
 }

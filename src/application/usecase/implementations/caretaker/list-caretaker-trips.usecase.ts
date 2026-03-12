@@ -28,7 +28,7 @@ export class ListCaretakerTripsUseCase implements IListCaretakerTripsUseCase {
       throw new NotFoundError(ERROR_MESSAGE.CARETAKER.PROFILE_NOT_FOUND);
     }
 
-    const { trips, total } =
+    const { trips, total, totalIncome } =
       await this._dashboardRepository.getAssignedTripsPaginated(
         profile._id,
         params.page,
@@ -45,11 +45,15 @@ export class ListCaretakerTripsUseCase implements IListCaretakerTripsUseCase {
         startDate: t.startDate.toISOString(),
         endDate: t.endDate.toISOString(),
         status: t.status,
+        tripDays: t.tripDays,
+        pricePerDay: t.pricePerDay,
+        income: t.income,
       })),
       total,
       page: params.page,
       limit: params.limit,
       totalPages,
+      totalIncome,
     };
   }
 }

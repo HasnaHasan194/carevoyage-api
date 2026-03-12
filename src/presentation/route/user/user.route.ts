@@ -13,6 +13,8 @@ import { UpdateUserProfileRequestDTO } from "../../../application/dto/request/up
 import { AddToWishlistRequestDTO } from "../../../application/dto/request/add-to-wishlist-request.dto";
 import multer from "multer";
 import { ROUTES } from "../routes.constants";
+import { reviewController } from "../../../infrastructure/dependencyinjection/resolve";
+import { CreateAgencyReviewRequestDTO } from "../../../application/dto/request/create-agency-review-request.dto";
 
 @injectable()
 export class UserRoutes extends BaseRoute {
@@ -111,6 +113,12 @@ export class UserRoutes extends BaseRoute {
       asyncHandler(
         wishlistController.checkWishlistStatus.bind(wishlistController)
       )
+    );
+
+    this.router.post(
+      ROUTES.USER.AGENCY_REVIEWS,
+      validationMiddleware(CreateAgencyReviewRequestDTO),
+      asyncHandler(reviewController.createAgencyReview.bind(reviewController))
     );
   }
 }

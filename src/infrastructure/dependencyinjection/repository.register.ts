@@ -39,6 +39,8 @@ import { IWalletRepository } from "../../domain/repositoryInterfaces/Wallet/wall
 import { WalletRepository } from "../repository/wallet/wallet.repository";
 import { IWalletTransactionRepository } from "../../domain/repositoryInterfaces/Wallet/wallet-transaction.repository.interface";
 import { WalletTransactionRepository } from "../repository/wallet/wallet-transaction.repository";
+import type { IAgencyReviewRepository } from "../../domain/repositoryInterfaces/AgencyReview/agency-review.repository.interface";
+import { AgencyReviewRepository } from "../repository/agency-review/agency-review.repository";
 import { IRefundRequestRepository } from "../../domain/repositoryInterfaces/Refund/refund-request.repository.interface";
 import { RefundRequestRepository } from "../repository/refund/refund-request.repository";
 import { ISalesReportRepository } from "../../domain/repositoryInterfaces/SalesReport/sales-report.repository.interface";
@@ -178,6 +180,13 @@ export class RepositoryRegister {
       {
         useClass: ChatRepository,
       } as ClassProvider<IChatRepository>
+    );
+
+    container.register<IAgencyReviewRepository>(
+      "IAgencyReviewRepository",
+      {
+        useClass: AgencyReviewRepository,
+      } as ClassProvider<IAgencyReviewRepository>
     );
   }
 }

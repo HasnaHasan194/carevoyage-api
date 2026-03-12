@@ -72,9 +72,6 @@ export const validationMiddleware = <T extends object>(
 
       next();
     } catch (error) {
-     
-      if (req.path === '/send-otp' || req.originalUrl.includes('send-otp')) { try { require('fs').appendFileSync(require('path').join(process.cwd(),'debug.log'), JSON.stringify({location:'validation.middleware.ts:catch',message:'Validation middleware CRASHED',data:{error:String(error),stack:(error as Error).stack?.substring(0,500)},timestamp:Date.now(),hypothesisId:'H2'})+'\n'); } catch(e){} }
-     
       console.error("Validation Middleware Error:", error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,

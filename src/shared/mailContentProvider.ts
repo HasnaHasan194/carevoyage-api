@@ -1,11 +1,18 @@
 
 import { MAIL_CONTENT_PURPOSE } from "./constants/constants";
 
+type TripReviewInviteData = {
+  clientName: string;
+  packageName: string;
+  reviewUrl: string;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mailContentProvider(purpose: string, data?: any): string {
   const {
     LOGIN,
     OTP,
+    TRIP_REVIEW_INVITE,
   } = MAIL_CONTENT_PURPOSE;
 
   switch (purpose) {
@@ -110,6 +117,80 @@ export function mailContentProvider(purpose: string, data?: any): string {
     </div>
   </div>
   `;
+
+    case TRIP_REVIEW_INVITE: {
+      const typed = data as TripReviewInviteData | undefined;
+      if (!typed) {
+        return "";
+      }
+      return `
+  <div style="
+    max-width: 560px;
+    margin: 40px auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    overflow: hidden;
+  ">
+    <div style="
+      background: linear-gradient(135deg, #ec4899, #6366f1);
+      padding: 24px;
+      text-align: center;
+      color: #ffffff;
+    ">
+      <h2 style="margin: 0; font-size: 24px;">
+        How was your recent trip?
+      </h2>
+      <p style="margin-top: 8px; font-size: 14px;">
+        Share your feedback with CareVoyage
+      </p>
+    </div>
+
+    <div style="padding: 32px;">
+      <p style="font-size: 16px; color: #111827;">
+        Hi ${typed.clientName},
+      </p>
+
+      <p style="font-size: 15px; color: #374151; line-height: 1.6;">
+        We hope you enjoyed your recent trip:
+        <strong>${typed.packageName}</strong>.
+        Your feedback helps agencies and caretakers improve future experiences.
+      </p>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a
+          href="${typed.reviewUrl}"
+          style="
+            display: inline-block;
+            background-color: #4f46e5;
+            color: #ffffff;
+            padding: 12px 28px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+          "
+        >
+          Add your review
+        </a>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280;">
+        This will only take a minute and helps other travellers choose the right agency.
+      </p>
+
+      <div style="margin-top: 32px; text-align: center; font-size: 13px; color: #9ca3af;">
+        <p style="margin: 0;">
+          Thank you,<br />
+          <strong>CareVoyage Team</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+  `;
+    }
 
     default:
       return "";

@@ -24,6 +24,9 @@ export interface CaretakerAssignedTripRow {
   startDate: Date;
   endDate: Date;
   status: string;
+  tripDays?: number;
+  pricePerDay?: number;
+  income?: number;
 }
 
 export interface ICaretakerDashboardRepository {
@@ -33,5 +36,5 @@ export interface ICaretakerDashboardRepository {
     caretakerId: string,
     page: number,
     limit: number
-  ): Promise<{ trips: CaretakerAssignedTripRow[]; total: number }>;
+  ): Promise<{ trips: CaretakerAssignedTripRow[]; total: number; totalIncome: number }>;
 }

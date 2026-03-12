@@ -27,6 +27,7 @@ import { verifyAuth } from "../../middlewares/auth.middleware";
 import { authorizeRole } from "../../middlewares/auth.middleware";
 import multer from "multer";
 import { ROUTES } from "../routes.constants";
+import { reviewController } from "../../../infrastructure/dependencyinjection/resolve";
 
 @injectable()
 export class AgencyRoutes extends BaseRoute {
@@ -214,6 +215,12 @@ export class AgencyRoutes extends BaseRoute {
       asyncHandler(
         agencyPackageController.completePackage.bind(agencyPackageController)
       )
+    );
+
+    this.router.get(
+      ROUTES.AGENCY.REVIEWS,
+      authorizeRole(["agency_owner"]),
+      asyncHandler(reviewController.listAgencyReviews.bind(reviewController))
     );
 
     this.router.patch(
