@@ -18,6 +18,10 @@ export interface IBookingRepository extends IBaseRepository<IBookingEntity> {
     bookingId: string,
     agencyId: string
   ): Promise<IBookingEntity | null>;
-
-
+  findByCaretakerProfileIdPaginated(
+    caretakerProfileId: string,
+    page: number,
+    limit: number
+  ): Promise<IBookingEntity[]>;
+  countByCaretakerProfileId(caretakerProfileId: string): Promise<number>;
 }

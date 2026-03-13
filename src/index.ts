@@ -17,8 +17,8 @@ async function startServer() {
     try {
       await connectRedis();
       console.log("Redis connected");
-    } catch (redisError) {
-      console.error("Redis connection failed, continuing without Redis:", redisError);
+    } catch {
+      // continue without Redis
     }
 
     const mongo = new MongoConnect();
@@ -33,8 +33,7 @@ async function startServer() {
 
     initSocketServer(httpServer);
 
-    httpServer.on("error", (err: NodeJS.ErrnoException) => {
-      console.error("HTTP server error:", err);
+    httpServer.on("error", () => {
       process.exit(1);
     });
 

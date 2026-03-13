@@ -1,174 +1,105 @@
-import { injectable } from "tsyringe";
-import mongoose from "mongoose";
-import { bookingDB } from "../../database/models/booking.model";
 import type {
-  ICaretakerDashboardRepository,
   CaretakerDashboardStats,
-  CaretakerNextTripRow,
-  CaretakerAssignedTripRow,
+  CaretakerNextTrip,
+  ICaretakerDashboardRepository,
 } from "../../../domain/repositoryInterfaces/CaretakerDashboard/caretaker-dashboard.repository.interface";
+import { bookingDB } from "../../database/models/booking.model";
+import { packageDB } from "../../database/models/package.model";
+import { userDB } from "../../database/models/client.model";
 
-/** Filter shape for caretaker CONFIRMED bookings (mongoose 9 does not export QueryFilter). */
-interface CaretakerBookingCountFilter {
-  caretakerId: mongoose.Types.ObjectId;
-  status: string;
-  startDate?: { $gt: Date } | { $lte: Date };
-}
-type BookingCountDocumentsParam = Parameters<typeof bookingDB.countDocuments>[0];
-
-const CONFIRMED_STATUS = "CONFIRMED";
-const MS_PER_DAY = 86400000;
-
-function getStartOfWeek(d: Date): Date {
-  const date = new Date(d);
-  const day = date.getDay();
-  const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-  date.setDate(diff);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function getStartOfMonth(d: Date): Date {
-  const date = new Date(d);
-  date.setDate(1);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function getStartOfYear(d: Date): Date {
-  const date = new Date(d);
-  date.setMonth(0, 1);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-@injectable()
-export class CaretakerDashboardRepository
-  implements ICaretakerDashboardRepository
-{
-  async getDashboardStats(
-    caretakerId: string
-  ): Promise<CaretakerDashboardStats> {
-    const careId = new mongoose.Types.ObjectId(caretakerId);
+export class CaretakerDashboardRepository implements ICaretakerDashboardRepository {
+  async getDashboardStats(caretakerProfileId: string): Promise<CaretakerDashboardStats> {
     const now = new Date();
-    const weekStart = getStartOfWeek(now);
-    const monthStart = getStartOfMonth(now);
-    const yearStart = getStartOfYear(now);
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
 
-    const pipeline: mongoose.PipelineStage[] = [
-      {
-        $match: {
-          caretakerId: careId,
-          status: CONFIRMED_STATUS,
-        },
-      },
-      {
-        $lookup: {
-          from: "packages",
-          localField: "packageId",
-          foreignField: "_id",
-          as: "pkg",
-        },
-      },
-      { $unwind: { path: "$pkg", preserveNullAndEmptyArrays: false } },
-      {
-        $addFields: {
-          tripDays: {
-            $max: [
-              1,
-              {
-                $add: [
-                  1,
-                  {
-                    $ceil: {
-                      $divide: [
-                        { $subtract: ["$pkg.endDate", "$pkg.startDate"] },
-                        MS_PER_DAY,
-                      ],
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "caretaker_profiles",
-          localField: "caretakerId",
-          foreignField: "_id",
-          as: "caretaker",
-        },
-      },
-      {
-        $addFields: {
-          pricePerDay: {
-            $ifNull: [
-              { $arrayElemAt: ["$caretaker.pricePerDay", 0] },
-              0,
-            ],
-          },
-        },
-      },
-      {
-        $addFields: {
-          income: { $multiply: ["$pricePerDay", "$tripDays"] },
-        },
-      },
-      {
-        $facet: {
-          totalIncome: [
-            { $group: { _id: null, sum: { $sum: "$income" } } },
-          ],
-          weeklyIncome: [
-            { $match: { startDate: { $gte: weekStart } } },
-            { $group: { _id: null, sum: { $sum: "$income" } } },
-          ],
-          monthlyIncome: [
-            { $match: { startDate: { $gte: monthStart } } },
-            { $group: { _id: null, sum: { $sum: "$income" } } },
-          ],
-          yearlyIncome: [
-            { $match: { startDate: { $gte: yearStart } } },
-            { $group: { _id: null, sum: { $sum: "$income" } } },
-          ],
-        },
-      },
-    ];
+    // Load all bookings assigned to this caretaker that are confirmed or completed
+    const bookings = await bookingDB
+      .find({
+        caretakerId: caretakerProfileId,
+        status: { $in: ["CONFIRMED", "COMPLETED"] },
+      })
+      .lean()
+      .exec();
 
-    const [result] = await bookingDB.aggregate(pipeline).exec();
-    const facet = result as {
-      totalIncome?: Array<{ sum: number }>;
-      weeklyIncome?: Array<{ sum: number }>;
-      monthlyIncome?: Array<{ sum: number }>;
-      yearlyIncome?: Array<{ sum: number }>;
-    } | undefined;
+    if (bookings.length === 0) {
+      return {
+        totalIncome: 0,
+        weeklyIncome: 0,
+        monthlyIncome: 0,
+        yearlyIncome: 0,
+        totalTrips: 0,
+        upcomingTripsCount: 0,
+        completedTripsCount: 0,
+      };
+    }
 
-    const totalIncome =
-      (Array.isArray(facet?.totalIncome) && facet.totalIncome[0]?.sum) || 0;
-    const weeklyIncome =
-      (Array.isArray(facet?.weeklyIncome) && facet.weeklyIncome[0]?.sum) || 0;
-    const monthlyIncome =
-      (Array.isArray(facet?.monthlyIncome) && facet.monthlyIncome[0]?.sum) || 0;
-    const yearlyIncome =
-      (Array.isArray(facet?.yearlyIncome) && facet.yearlyIncome[0]?.sum) || 0;
+    const packageIds = Array.from(
+      new Set<string>(bookings.map((b) => b.packageId.toString()))
+    );
 
-    const baseFilter: CaretakerBookingCountFilter = {
-      caretakerId: careId,
-      status: CONFIRMED_STATUS,
-    };
-    const [totalTrips, upcomingCount, completedCount] = await Promise.all([
-      bookingDB.countDocuments(baseFilter as unknown as BookingCountDocumentsParam),
-      bookingDB.countDocuments({
-        ...baseFilter,
-        startDate: { $gt: now },
-      } as unknown as BookingCountDocumentsParam),
-      bookingDB.countDocuments({
-        ...baseFilter,
-        startDate: { $lte: now },
-      } as unknown as BookingCountDocumentsParam),
-    ]);
+    const packages = await packageDB
+      .find({ _id: { $in: packageIds } })
+      .lean()
+      .exec();
+
+    const packageById = new Map<string, { startDate?: Date; endDate?: Date }>();
+    packages.forEach((pkg) => {
+      packageById.set(pkg._id.toString(), {
+        startDate: pkg.startDate,
+        endDate: pkg.endDate,
+      });
+    });
+
+    let totalIncome = 0;
+    let weeklyIncome = 0;
+    let monthlyIncome = 0;
+    let yearlyIncome = 0;
+
+    let totalTrips = 0;
+    let upcomingTripsCount = 0;
+    let completedTripsCount = 0;
+
+    bookings.forEach((booking) => {
+      // Income: sum of caretakerFee for confirmed/completed trips
+      const caretakerFee = typeof booking.caretakerFee === "number" ? booking.caretakerFee : 0;
+      totalIncome += caretakerFee;
+
+      const pkgDates = packageById.get(booking.packageId.toString());
+      const startDate = pkgDates?.startDate ?? booking.startDate;
+
+      if (startDate >= weekAgo && startDate <= now) {
+        weeklyIncome += caretakerFee;
+      }
+
+      const startMonth = startDate.getMonth();
+      const startYear = startDate.getFullYear();
+
+      // Monthly income: sum of all assigned trips in the current calendar month
+      if (startMonth === currentMonth && startYear === currentYear) {
+        monthlyIncome += caretakerFee;
+      }
+
+      // Yearly income: sum of all assigned trips in the current calendar year
+      if (startYear === currentYear) {
+        yearlyIncome += caretakerFee;
+      }
+
+      totalTrips += 1;
+
+      if (booking.status === "COMPLETED") {
+        completedTripsCount += 1;
+      }
+
+      if (booking.status === "CONFIRMED") {
+        const tripStart =
+          pkgDates?.startDate ?? booking.startDate ?? booking.createdAt;
+        if (tripStart > now) {
+          upcomingTripsCount += 1;
+        }
+      }
+    });
 
     return {
       totalIncome,
@@ -176,242 +107,60 @@ export class CaretakerDashboardRepository
       monthlyIncome,
       yearlyIncome,
       totalTrips,
-      upcomingTripsCount: upcomingCount,
-      completedTripsCount: completedCount,
+      upcomingTripsCount,
+      completedTripsCount,
     };
   }
 
-  async getNextTrip(
-    caretakerId: string
-  ): Promise<CaretakerNextTripRow | null> {
-    const careId = new mongoose.Types.ObjectId(caretakerId);
+  async getNextTrip(caretakerProfileId: string): Promise<CaretakerNextTrip | null> {
     const now = new Date();
 
-    const pipeline: mongoose.PipelineStage[] = [
-      {
-        $match: {
-          caretakerId: careId,
-          status: CONFIRMED_STATUS,
-          startDate: { $gte: now },
-        },
-      },
-      { $sort: { startDate: 1 } },
-      { $limit: 1 },
-      {
-        $lookup: {
-          from: "packages",
-          localField: "packageId",
-          foreignField: "_id",
-          as: "pkg",
-        },
-      },
-      { $unwind: { path: "$pkg", preserveNullAndEmptyArrays: false } },
-      {
-        $lookup: {
-          from: "users",
-          localField: "clientId",
-          foreignField: "_id",
-          as: "client",
-        },
-      },
-      {
-        $addFields: {
-          packageName: "$pkg.PackageName",
-          clientName: {
-            $trim: {
-              input: {
-                $concat: [
-                  { $ifNull: [{ $arrayElemAt: ["$client.firstName", 0] }, ""] },
-                  " ",
-                  { $ifNull: [{ $arrayElemAt: ["$client.lastName", 0] }, ""] },
-                ],
-              },
-            },
-          },
-          endDate: "$pkg.endDate",
-        },
-      },
-      {
-        $project: {
-          bookingId: { $toString: "$_id" },
-          packageName: 1,
-          clientName: 1,
-          startDate: 1,
-          endDate: 1,
-          status: 1,
-        },
-      },
-    ];
+    const booking = await bookingDB
+      .findOne({
+        caretakerId: caretakerProfileId,
+        status: { $in: ["CONFIRMED", "COMPLETED"] },
+        startDate: { $gte: now },
+      })
+      .sort({ startDate: 1 })
+      .lean()
+      .exec();
 
-    const rows = await bookingDB.aggregate(pipeline).exec();
-    const row = rows[0] as
-      | {
-          bookingId: string;
-          packageName: string;
-          clientName: string;
-          startDate: Date;
-          endDate: Date;
-          status: string;
-        }
-      | undefined;
+    if (!booking) {
+      return null;
+    }
 
-    if (!row) return null;
-
-    return {
-      bookingId: row.bookingId,
-      packageName: String(row.packageName ?? "").trim(),
-      clientName: String(row.clientName ?? "").trim(),
-      startDate: row.startDate,
-      endDate: row.endDate,
-      status: row.status,
-    };
-  }
-
-  async getAssignedTripsPaginated(
-    caretakerId: string,
-    page: number,
-    limit: number
-  ): Promise<{ trips: CaretakerAssignedTripRow[]; total: number; totalIncome: number }> {
-    const careId = new mongoose.Types.ObjectId(caretakerId);
-    const skip = (page - 1) * limit;
-
-    const incomeFieldsPipeline: mongoose.PipelineStage[] = [
-      {
-        $addFields: {
-          tripDays: {
-            $max: [
-              1,
-              {
-                $add: [
-                  1,
-                  {
-                    $ceil: {
-                      $divide: [
-                        { $subtract: ["$pkg.endDate", "$pkg.startDate"] },
-                        MS_PER_DAY,
-                      ],
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "caretaker_profiles",
-          localField: "caretakerId",
-          foreignField: "_id",
-          as: "caretaker",
-        },
-      },
-      {
-        $addFields: {
-          pricePerDay: {
-            $ifNull: [{ $arrayElemAt: ["$caretaker.pricePerDay", 0] }, 0],
-          },
-        },
-      },
-      { $addFields: { income: { $multiply: ["$pricePerDay", "$tripDays"] } } },
-    ];
-
-    const [trips, total, totalIncomeAgg] = await Promise.all([
-      bookingDB
-        .aggregate([
-          { $match: { caretakerId: careId, status: CONFIRMED_STATUS } },
-          { $sort: { startDate: -1 } },
-          { $skip: skip },
-          { $limit: limit },
-          {
-            $lookup: {
-              from: "packages",
-              localField: "packageId",
-              foreignField: "_id",
-              as: "pkg",
-            },
-          },
-          { $unwind: { path: "$pkg", preserveNullAndEmptyArrays: false } },
-          {
-            $lookup: {
-              from: "users",
-              localField: "clientId",
-              foreignField: "_id",
-              as: "client",
-            },
-          },
-          {
-            $addFields: {
-              packageName: "$pkg.PackageName",
-              clientName: {
-                $trim: {
-                  input: {
-                    $concat: [
-                      { $ifNull: [{ $arrayElemAt: ["$client.firstName", 0] }, ""] },
-                      " ",
-                      { $ifNull: [{ $arrayElemAt: ["$client.lastName", 0] }, ""] },
-                    ],
-                  },
-                },
-              },
-              endDate: "$pkg.endDate",
-            },
-          },
-          ...incomeFieldsPipeline,
-          {
-            $project: {
-              bookingId: { $toString: "$_id" },
-              packageName: 1,
-              clientName: 1,
-              startDate: 1,
-              endDate: 1,
-              status: 1,
-              tripDays: 1,
-              pricePerDay: 1,
-              income: 1,
-            },
-          },
-        ])
-        .exec(),
-      bookingDB.countDocuments({
-        caretakerId: careId,
-        status: CONFIRMED_STATUS,
-      } as unknown as BookingCountDocumentsParam),
-      bookingDB
-        .aggregate([
-          { $match: { caretakerId: careId, status: CONFIRMED_STATUS } },
-          {
-            $lookup: {
-              from: "packages",
-              localField: "packageId",
-              foreignField: "_id",
-              as: "pkg",
-            },
-          },
-          { $unwind: { path: "$pkg", preserveNullAndEmptyArrays: false } },
-          ...incomeFieldsPipeline,
-          { $group: { _id: null, sum: { $sum: "$income" } } },
-        ])
-        .exec(),
+    const [pkg, client] = await Promise.all([
+      packageDB.findById(booking.packageId).lean().exec(),
+      userDB.findById(booking.clientId).lean().exec(),
     ]);
 
-    const typedTrips: CaretakerAssignedTripRow[] = (trips as Record<string, unknown>[]).map(
-      (r) => ({
-        bookingId: String(r.bookingId),
-        packageName: String(r.packageName ?? ""),
-        clientName: String(r.clientName ?? ""),
-        startDate: r.startDate instanceof Date ? r.startDate : new Date(r.startDate as string),
-        endDate: r.endDate instanceof Date ? r.endDate : new Date(r.endDate as string),
-        status: String(r.status),
-        tripDays: typeof r.tripDays === "number" ? r.tripDays : undefined,
-        pricePerDay: typeof r.pricePerDay === "number" ? r.pricePerDay : undefined,
-        income: typeof r.income === "number" ? r.income : undefined,
-      })
-    );
+    const packageName =
+      (pkg as { PackageName?: string } | null)?.PackageName ?? "Trip";
 
-    const totalIncomeRow = (totalIncomeAgg as Array<{ sum?: unknown } | null>)[0];
-    const totalIncome = typeof totalIncomeRow?.sum === "number" ? totalIncomeRow.sum : 0;
+    let clientName: string | undefined;
+    if (client) {
+      const c = client as {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+      };
+      const fullName = `${c.firstName ?? ""} ${c.lastName ?? ""}`.trim();
+      clientName = fullName || c.email || "Client";
+    } else {
+      clientName = "Client";
+    }
 
-    return { trips: typedTrips, total, totalIncome };
+    const packageEndDate =
+      (pkg as { endDate?: Date } | null)?.endDate ?? booking.startDate;
+
+    return {
+      bookingId: booking._id.toString(),
+      packageName,
+      clientName,
+      startDate: booking.startDate,
+      endDate: packageEndDate,
+      status: booking.status,
+    };
   }
 }
+

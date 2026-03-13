@@ -54,8 +54,6 @@ import { IWishlistController } from "../../presentation/interfaces/controllers/u
 import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
 import { ChatController } from "../../presentation/controllers/chat/chat.controller";
 import { ChatRoutes } from "../../presentation/route/chat/chat.route";
-import type { IReviewController } from "../../presentation/interfaces/controllers/review/review.controller.interface";
-import { ReviewController } from "../../presentation/controllers/review/review.controller";
 
 DependencyInjection.registerAll();
 
@@ -212,12 +210,6 @@ export { agencySpecialNeedsRoutes };
  */
 export const agencySalesReportController =
   container.resolve<IAgencySalesReportController>(AgencySalesReportController);
-
-/**
- * Review controller - MUST be resolved BEFORE AgencyRoutes
- * because AgencyRoutes.initializeRoutes uses it synchronously.
- */
-export const reviewController = container.resolve<IReviewController>(ReviewController);
 
 /**
  * Agency routes

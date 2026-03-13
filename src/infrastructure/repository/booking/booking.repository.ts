@@ -77,10 +77,32 @@ export class BookingRepository
     return BookingMapper.toEntity(doc);
   }
 
-  
- 
+  async findByCaretakerProfileIdPaginated(
+    caretakerProfileId: string,
+    page: number,
+    limit: number,
+  ): Promise<IBookingEntity[]> {
+    const skip = (page - 1) * limit;
 
- 
+    const docs = await bookingDB
+      .find({
+        caretakerId: caretakerProfileId,
+        status: { $in: ["CONFIRMED", "COMPLETED"] },
+      })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .exec();
 
-  
+    return docs.map((doc) => BookingMapper.toEntity(doc));
+  }
+
+  async countByCaretakerProfileId(caretakerProfileId: string): Promise<number> {
+    const count = await bookingDB.countDocuments({
+      caretakerId: caretakerProfileId,
+      status: { $in: ["CONFIRMED", "COMPLETED"] },
+    });
+    return count;
+  }
 }
+

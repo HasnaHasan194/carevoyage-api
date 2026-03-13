@@ -21,8 +21,6 @@ import {
   type IChatConversationProvisioner,
 } from "../../application/services/chat/chat-conversation-provisioner";
 import { ChatService, type IChatService } from "../../application/services/chat/chat.service";
-import type { ITripReviewNotificationService } from "../../domain/service-interfaces/trip-review-notification-service.interface";
-import { TripReviewNotificationService } from "../service/trip-review-notification.service";
 
 export class ServiceRegistery {
   static registerService(): void {
@@ -70,10 +68,6 @@ export class ServiceRegistery {
 
     container.register<IChatService>("IChatService", {
       useClass: ChatService,
-    });
-
-    container.register<ITripReviewNotificationService>("ITripReviewNotificationService", {
-      useClass: TripReviewNotificationService,
     });
   }
 }
