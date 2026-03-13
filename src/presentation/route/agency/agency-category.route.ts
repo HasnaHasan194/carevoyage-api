@@ -15,6 +15,7 @@ export class AgencyCategoryRoutes extends BaseRoute {
 
   protected initializeRoutes(): void {
    
+
     let agencyCategoryController: any;
     try {
       const resolveModule = require("../../../infrastructure/dependencyinjection/resolve");

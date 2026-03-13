@@ -203,10 +203,6 @@ import { IExportSalesReportUseCase } from "../../application/usecase/interfaces/
 import { ExportSalesReportUseCase } from "../../application/usecase/implementations/sales-report/export-sales-report.usecase";
 import { IListChatConversationsUseCase } from "../../application/usecase/interfaces/chat/list-chat-conversations.interface";
 import { ListChatConversationsUseCase } from "../../application/usecase/implementations/chat/list-chat-conversations.usecase";
-import type { ICreateAgencyReviewUseCase } from "../../application/usecase/interfaces/review/create-agency-review.interface";
-import { CreateAgencyReviewUseCase } from "../../application/usecase/implementations/review/create-agency-review.usecase";
-import type { IListAgencyReviewsUseCase } from "../../application/usecase/interfaces/review/list-agency-reviews.interface";
-import { ListAgencyReviewsUseCase } from "../../application/usecase/implementations/review/list-agency-reviews.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -649,16 +645,6 @@ export class UsecaseRegistory {
     container.register<IListChatConversationsUseCase>(
       "IListChatConversationsUseCase",
       { useClass: ListChatConversationsUseCase }
-    );
-
-    container.register<ICreateAgencyReviewUseCase>(
-      "ICreateAgencyReviewUseCase",
-      { useClass: CreateAgencyReviewUseCase }
-    );
-
-    container.register<IListAgencyReviewsUseCase>(
-      "IListAgencyReviewsUseCase",
-      { useClass: ListAgencyReviewsUseCase }
     );
   }
 }

@@ -8,33 +8,17 @@ export interface CaretakerDashboardStats {
   completedTripsCount: number;
 }
 
-export interface CaretakerNextTripRow {
+export interface CaretakerNextTrip {
   bookingId: string;
   packageName: string;
   clientName: string;
   startDate: Date;
   endDate: Date;
   status: string;
-}
-
-export interface CaretakerAssignedTripRow {
-  bookingId: string;
-  packageName: string;
-  clientName: string;
-  startDate: Date;
-  endDate: Date;
-  status: string;
-  tripDays?: number;
-  pricePerDay?: number;
-  income?: number;
 }
 
 export interface ICaretakerDashboardRepository {
-  getDashboardStats(caretakerId: string): Promise<CaretakerDashboardStats>;
-  getNextTrip(caretakerId: string): Promise<CaretakerNextTripRow | null>;
-  getAssignedTripsPaginated(
-    caretakerId: string,
-    page: number,
-    limit: number
-  ): Promise<{ trips: CaretakerAssignedTripRow[]; total: number; totalIncome: number }>;
+  getDashboardStats(caretakerProfileId: string): Promise<CaretakerDashboardStats>;
+  getNextTrip(caretakerProfileId: string): Promise<CaretakerNextTrip | null>;
 }
+

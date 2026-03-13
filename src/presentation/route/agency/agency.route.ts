@@ -7,10 +7,9 @@ import {
   agencyActivityController,
   agencyUploadController,
   agencyProfileController,
-  agencySalesReportController,
   blockedUserMiddleware,
+  agencySalesReportController,
 } from "../../../infrastructure/dependencyinjection/resolve";
-import { GetSalesReportRequestDTO } from "../../../application/dto/request/get-sales-report-request.dto";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
 import { UpdateCaretakerAvailabilityRequestDTO } from "../../../application/dto/request/update-caretaker-availability-request.dto";
@@ -23,11 +22,11 @@ import { UpdatePackageItineraryDTO } from "../../../application/dto/request/upda
 import { CreateActivityRequestDTO } from "../../../application/dto/request/create-activity-request.dto";
 import { UpdateAgencyProfileRequestDTO } from "../../../application/dto/request/update-agency-profile-request.dto";
 import { FulfillCaretakerRequestRequestDTO } from "../../../application/dto/request/fulfill-caretaker-request-request.dto";
+import { GetSalesReportRequestDTO } from "../../../application/dto/request/get-sales-report-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { authorizeRole } from "../../middlewares/auth.middleware";
 import multer from "multer";
 import { ROUTES } from "../routes.constants";
-import { reviewController } from "../../../infrastructure/dependencyinjection/resolve";
 
 @injectable()
 export class AgencyRoutes extends BaseRoute {
@@ -113,6 +112,40 @@ export class AgencyRoutes extends BaseRoute {
       ROUTES.AGENCY.REFUND_REQUEST_REJECT,
       authorizeRole(["agency_owner"]),
       asyncHandler(agencyController.rejectRefundRequest.bind(agencyController))
+    );
+
+    // Sales report (agency self-view)
+    this.router.get(
+      ROUTES.AGENCY.SALES_REPORT,
+      authorizeRole(["agency_owner"]),
+      validationMiddleware(GetSalesReportRequestDTO),
+      asyncHandler(
+        agencySalesReportController.getSalesReport.bind(
+          agencySalesReportController
+        )
+      )
+    );
+
+    this.router.get(
+      ROUTES.AGENCY.SALES_REPORT_PDF,
+      authorizeRole(["agency_owner"]),
+      validationMiddleware(GetSalesReportRequestDTO),
+      asyncHandler(
+        agencySalesReportController.getSalesReportPdf.bind(
+          agencySalesReportController
+        )
+      )
+    );
+
+    this.router.get(
+      ROUTES.AGENCY.SALES_REPORT_EXCEL,
+      authorizeRole(["agency_owner"]),
+      validationMiddleware(GetSalesReportRequestDTO),
+      asyncHandler(
+        agencySalesReportController.getSalesReportExcel.bind(
+          agencySalesReportController
+        )
+      )
     );
 
     this.router.get(
@@ -217,12 +250,6 @@ export class AgencyRoutes extends BaseRoute {
       )
     );
 
-    this.router.get(
-      ROUTES.AGENCY.REVIEWS,
-      authorizeRole(["agency_owner"]),
-      asyncHandler(reviewController.listAgencyReviews.bind(reviewController))
-    );
-
     this.router.patch(
       ROUTES.AGENCY.PACKAGE_CANCEL,
       authorizeRole(["agency_owner"]),
@@ -288,38 +315,6 @@ export class AgencyRoutes extends BaseRoute {
       upload.array("images", 10),
       asyncHandler(
         agencyUploadController.uploadMultipleImages.bind(agencyUploadController)
-      )
-    );
-
-    // Sales Report
-    this.router.get(
-      ROUTES.AGENCY.SALES_REPORT,
-      authorizeRole(["agency_owner"]),
-      validationMiddleware(GetSalesReportRequestDTO),
-      asyncHandler(
-        agencySalesReportController.getSalesReport.bind(
-          agencySalesReportController
-        )
-      )
-    );
-    this.router.get(
-      ROUTES.AGENCY.SALES_REPORT_PDF,
-      authorizeRole(["agency_owner"]),
-      validationMiddleware(GetSalesReportRequestDTO),
-      asyncHandler(
-        agencySalesReportController.getSalesReportPdf.bind(
-          agencySalesReportController
-        )
-      )
-    );
-    this.router.get(
-      ROUTES.AGENCY.SALES_REPORT_EXCEL,
-      authorizeRole(["agency_owner"]),
-      validationMiddleware(GetSalesReportRequestDTO),
-      asyncHandler(
-        agencySalesReportController.getSalesReportExcel.bind(
-          agencySalesReportController
-        )
       )
     );
 
