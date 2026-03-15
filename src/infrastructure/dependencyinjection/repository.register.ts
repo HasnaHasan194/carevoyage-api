@@ -47,6 +47,8 @@ import { ICaretakerDashboardRepository } from "../../domain/repositoryInterfaces
 import { CaretakerDashboardRepository } from "../repository/caretaker-dashboard/caretaker-dashboard.repository";
 import { IChatRepository } from "../../domain/repositoryInterfaces/Chat/chat.repository.interface";
 import { ChatRepository } from "../repository/chat/chat.repository";
+import { IAgencyReviewRepository } from "../../domain/repositoryInterfaces/AgencyReview/agency-review.repository.interface";
+import { AgencyReviewRepository } from "../repository/agency-review/agency-review.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -178,6 +180,13 @@ export class RepositoryRegister {
       {
         useClass: ChatRepository,
       } as ClassProvider<IChatRepository>
+    );
+
+    container.register<IAgencyReviewRepository>(
+      "IAgencyReviewRepository",
+      {
+        useClass: AgencyReviewRepository,
+      } as ClassProvider<IAgencyReviewRepository>
     );
   }
 }

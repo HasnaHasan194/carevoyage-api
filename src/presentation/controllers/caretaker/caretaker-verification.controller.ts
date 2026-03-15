@@ -22,34 +22,20 @@ export class CaretakerVerificationController {
     private _s3Service: IS3Service,
   ) {}
   
-  private ensureAuthenticated(req: CustomRequest): string {
-    if (!req.user) {
-      throw new Error(ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED);
-    }
-    return req.user.id;
-  }
-
-  private async attachSignedUrlIfNeeded(
-    key: string | undefined,
-  ): Promise<string | undefined> {
-    if (!key || key.startsWith("http")) {
-      return key;
-    }
-    try {
-      return await this._s3Service.getSignedUrl(key);
-    } catch (error) {
-      console.error("Error generating signed URL:", error);
-      return undefined;
-    }
-  }
-
   async submitVerification(req: CustomRequest, res: Response): Promise<void> {
-    const userId = this.ensureAuthenticated(req);
+    if (!req.user) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED,
+        HTTP_STATUS.UNAUTHORIZED,
+      );
+      return;
+    }
 
     const verificationData = req.body as CaretakerVerificationRequestDTO;
     console.log(verificationData,"------->c data")
     await this._submitVerificationUsecase.execute(
-      userId,
+      req.user.id,
       verificationData,
     );
 
@@ -64,10 +50,17 @@ export class CaretakerVerificationController {
     req: CustomRequest,
     res: Response,
   ): Promise<void> {
-    const userId = this.ensureAuthenticated(req);
+    if (!req.user) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED,
+        HTTP_STATUS.UNAUTHORIZED,
+      );
+      return;
+    }
 
     const status = await this._caretakerProfileRepository.getVerificationStatus(
-      userId,
+      req.user.id,
     );
 
     ResponseHelper.success(
@@ -82,29 +75,52 @@ export class CaretakerVerificationController {
   }
 
   async getProfile(req: CustomRequest, res: Response): Promise<void> {
-    const userId = this.ensureAuthenticated(req);
+    if (!req.user) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED,
+        HTTP_STATUS.UNAUTHORIZED,
+      );
+      return;
+    }
 
     try {
-      const profileDTO = await this._getCaretakerProfileUsecase.execute(userId);
+      const profileDTO = await this._getCaretakerProfileUsecase.execute(req.user.id);
 
-      profileDTO.profileImage = await this.attachSignedUrlIfNeeded(
-        profileDTO.profileImage,
-      );
+      // Generate signed URLs for profile image and documents =>(if they're S3 keys)
+      if (profileDTO.profileImage && !profileDTO.profileImage.startsWith("http")) {
+        try {
+          profileDTO.profileImage = await this._s3Service.getSignedUrl(profileDTO.profileImage);
+        } catch (error) {
+          console.error("Error generating signed URL for profile image:", error);
+          profileDTO.profileImage = undefined;
+        }
+      }
 
-      profileDTO.documents.caretakerLicense =
-        (await this.attachSignedUrlIfNeeded(
-          profileDTO.documents.caretakerLicense,
-        )) ?? profileDTO.documents.caretakerLicense;
+      // Generate signed URLs for documents
+      if (profileDTO.documents.caretakerLicense && !profileDTO.documents.caretakerLicense.startsWith("http")) {
+        try {
+          profileDTO.documents.caretakerLicense = await this._s3Service.getSignedUrl(profileDTO.documents.caretakerLicense);
+        } catch (error) {
+          console.error("Error generating signed URL for caretaker license:", error);
+        }
+      }
 
-      profileDTO.documents.governmentIdProof =
-        (await this.attachSignedUrlIfNeeded(
-          profileDTO.documents.governmentIdProof,
-        )) ?? profileDTO.documents.governmentIdProof;
+      if (profileDTO.documents.governmentIdProof && !profileDTO.documents.governmentIdProof.startsWith("http")) {
+        try {
+          profileDTO.documents.governmentIdProof = await this._s3Service.getSignedUrl(profileDTO.documents.governmentIdProof);
+        } catch (error) {
+          console.error("Error generating signed URL for government ID proof:", error);
+        }
+      }
 
-      profileDTO.documents.firstAidCertificate =
-        (await this.attachSignedUrlIfNeeded(
-          profileDTO.documents.firstAidCertificate,
-        )) ?? profileDTO.documents.firstAidCertificate;
+      if (profileDTO.documents.firstAidCertificate && !profileDTO.documents.firstAidCertificate.startsWith("http")) {
+        try {
+          profileDTO.documents.firstAidCertificate = await this._s3Service.getSignedUrl(profileDTO.documents.firstAidCertificate);
+        } catch (error) {
+          console.error("Error generating signed URL for first aid certificate:", error);
+        }
+      }
 
       ResponseHelper.success(
         res,

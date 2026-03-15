@@ -52,6 +52,7 @@ import { IAgencySalesReportController } from "../../presentation/interfaces/cont
 import { AgencySalesReportController } from "../../presentation/controllers/agency/agency-sales-report.controller";
 import { IWishlistController } from "../../presentation/interfaces/controllers/user/wishlist.controller.interface";
 import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
+import { ReviewController } from "../../presentation/controllers/review/review.controller";
 import { ChatController } from "../../presentation/controllers/chat/chat.controller";
 import { ChatRoutes } from "../../presentation/route/chat/chat.route";
 
@@ -212,6 +213,11 @@ export const agencySalesReportController =
   container.resolve<IAgencySalesReportController>(AgencySalesReportController);
 
 /**
+ * Review controller - MUST be resolved BEFORE AgencyRoutes and UserRoutes (both use it)
+ */
+export const reviewController = container.resolve(ReviewController);
+
+/**
  * Agency routes
  */
 export const agencyRoutes = container.resolve(AgencyRoutes);
@@ -222,7 +228,7 @@ export const agencyRoutes = container.resolve(AgencyRoutes);
 export const wishlistController = container.resolve<IWishlistController>(WishlistController);
 
 /**
- * User routes - Resolved AFTER wishlistController to avoid circular dependency
+ * User routes - Resolved AFTER wishlistController and reviewController to avoid circular dependency
  */
 export const userRoutes = container.resolve(UserRoutes);
 

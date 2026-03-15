@@ -18,21 +18,6 @@ export class AgencyProfileController {
     private readonly _s3Service: IS3Service
   ) {}
 
-  private async enrichProfileImageUrl(
-    profileImage: string | null,
-  ): Promise<string | null> {
-    if (!profileImage || profileImage.startsWith("http")) {
-      return profileImage;
-    }
-    try {
-      const signedUrl = await this._s3Service.getSignedUrl(profileImage);
-      return signedUrl;
-    } catch (error) {
-      console.error("Error generating signed URL for agency profile image:", error);
-      return null;
-    }
-  }
-
   async getProfile(req: CustomRequest, res: Response): Promise<void> {
     console.log(req.user,"-->users");
     if (!req.user?.id) {
@@ -46,9 +31,15 @@ export class AgencyProfileController {
 
     const profile = await this._getAgencyProfileUsecase.execute(req.user.id);
 
-    profile.profileImage = await this.enrichProfileImageUrl(
-      profile.profileImage,
-    );
+    if (profile.profileImage && !profile.profileImage.startsWith("http")) {
+      try {
+        const signedUrl = await this._s3Service.getSignedUrl(profile.profileImage);
+        profile.profileImage = signedUrl;
+      } catch (error) {
+        console.error("Error generating signed URL for agency profile image:", error);
+        profile.profileImage = null;
+      }
+    }
 
     ResponseHelper.success(
       res,
@@ -75,9 +66,15 @@ export class AgencyProfileController {
       updateData
     );
 
-    updatedProfile.profileImage = await this.enrichProfileImageUrl(
-      updatedProfile.profileImage,
-    );
+    if (updatedProfile.profileImage && !updatedProfile.profileImage.startsWith("http")) {
+      try {
+        const signedUrl = await this._s3Service.getSignedUrl(updatedProfile.profileImage);
+        updatedProfile.profileImage = signedUrl;
+      } catch (error) {
+        console.error("Error generating signed URL for agency profile image:", error);
+        updatedProfile.profileImage = null;
+      }
+    }
 
     ResponseHelper.success(
       res,

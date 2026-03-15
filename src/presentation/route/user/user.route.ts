@@ -7,10 +7,13 @@ import {
   userController,
   profileUploadController,
   wishlistController,
+  reviewController,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
+import { authorizeRole } from "../../middlewares/auth.middleware";
 import { UpdateUserProfileRequestDTO } from "../../../application/dto/request/update-user-profile-request.dto";
 import { AddToWishlistRequestDTO } from "../../../application/dto/request/add-to-wishlist-request.dto";
+import { CreateAgencyReviewRequestDTO } from "../../../application/dto/request/create-agency-review-request.dto";
 import multer from "multer";
 import { ROUTES } from "../routes.constants";
 
@@ -113,6 +116,13 @@ export class UserRoutes extends BaseRoute {
       )
     );
 
-    // Trip review endpoint will be wired in later with full review feature.
+    // Client agency review (submit review for a completed booking)
+    // Path must match frontend: POST /api/v1/user/agency-reviews
+    this.router.post(
+      "/agency-reviews",
+      authorizeRole(["client"]),
+      validationMiddleware(CreateAgencyReviewRequestDTO),
+      asyncHandler(reviewController.createAgencyReview.bind(reviewController))
+    );
   }
 }

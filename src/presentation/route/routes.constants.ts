@@ -54,6 +54,7 @@ export const ROUTES = {
     SALES_REPORT: "/sales-report",
     SALES_REPORT_PDF: "/sales-report/pdf",
     SALES_REPORT_EXCEL: "/sales-report/excel",
+    REVIEWS: "/reviews",
   },
 
   AGENCY_CATEGORY: {
@@ -101,6 +102,7 @@ export const ROUTES = {
     WISHLIST_BASE: "/wishlist",
     WISHLIST_DETAIL: "/wishlist/:packageId",
     WISHLIST_STATUS: "/wishlist/:packageId/status",
+    AGENCY_REVIEWS: "/agency-reviews",
   },
 
   WALLET: {
