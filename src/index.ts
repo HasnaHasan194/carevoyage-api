@@ -1,12 +1,10 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
-import http from "http";
 import { App } from "./infrastructure/config/server/server";
 import { config } from "./shared/config";
 import { MongoConnect } from "./infrastructure/database/mongoDB/mongoConnect";
 import { connectRedis } from "./infrastructure/config/redis.config";
 import { ServiceRegistery } from "./infrastructure/dependencyinjection/service.register";
-import { initSocketServer } from "./infrastructure/realtime/socketServer";
 
 dotenv.config();
 
@@ -17,8 +15,11 @@ async function startServer() {
     try {
       await connectRedis();
       console.log("Redis connected");
-    } catch {
-      // continue without Redis
+    } catch (redisError) {
+      console.warn(
+        "[startup] Redis connection failed, continuing without Redis:",
+        (redisError as Error).message,
+      );
     }
 
     const mongo = new MongoConnect();
@@ -29,19 +30,16 @@ async function startServer() {
     const expressServer = app.getApp();
 
     const PORT = Number(config.server.PORT) || 3000;
-    const httpServer = http.createServer(expressServer);
-
-    initSocketServer(httpServer);
-
-    httpServer.on("error", () => {
-      process.exit(1);
-    });
-
-    httpServer.listen(PORT, () => {
+    expressServer.listen(PORT, () => {
       console.log(`Server running at port ${PORT}`);
     });
   } catch (error) {
     console.error("Server startup failed:", error);
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     process.exit(1);
   }
 }

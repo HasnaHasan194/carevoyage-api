@@ -121,6 +121,10 @@ import { IGetWishlistUsecase } from "../../application/usecase/interfaces/wishli
 import { GetWishlistUsecase } from "../../application/usecase/implementations/wishlist/get-wishlist.usecase";
 import { ICheckWishlistStatusUsecase } from "../../application/usecase/interfaces/wishlist/check-wishlist-status.interface";
 import { CheckWishlistStatusUsecase } from "../../application/usecase/implementations/wishlist/check-wishlist-status.usecase";
+import { ICreateAgencyReviewUseCase } from "../../application/usecase/interfaces/review/create-agency-review.interface";
+import { CreateAgencyReviewUseCase } from "../../application/usecase/implementations/review/create-agency-review.usecase";
+import { IListAgencyReviewsUseCase } from "../../application/usecase/interfaces/review/list-agency-reviews.interface";
+import { ListAgencyReviewsUseCase } from "../../application/usecase/implementations/review/list-agency-reviews.usecase";
 import { IListActiveSpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/special-needs-master/list-active-special-needs-master.interface";
 import { ListActiveSpecialNeedsMasterUsecase } from "../../application/usecase/implementations/special-needs-master/list-active-special-needs-master.usecase";
 import { IEnableSpecialNeedUsecase } from "../../application/usecase/interfaces/agency-special-needs/enable-special-need.interface";
@@ -483,6 +487,14 @@ export class UsecaseRegistory {
 
     container.register<ICheckWishlistStatusUsecase>("ICheckWishlistStatusUsecase", {
       useClass: CheckWishlistStatusUsecase,
+    });
+
+    // Review use cases
+    container.register<ICreateAgencyReviewUseCase>("ICreateAgencyReviewUseCase", {
+      useClass: CreateAgencyReviewUseCase,
+    });
+    container.register<IListAgencyReviewsUseCase>("IListAgencyReviewsUseCase", {
+      useClass: ListAgencyReviewsUseCase,
     });
 
     // Special Needs Master use cases

@@ -9,6 +9,7 @@ import {
   agencyProfileController,
   blockedUserMiddleware,
   agencySalesReportController,
+  reviewController,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
@@ -146,6 +147,13 @@ export class AgencyRoutes extends BaseRoute {
           agencySalesReportController
         )
       )
+    );
+
+    // Agency reviews (list with pagination, default limit 10)
+    this.router.get(
+      ROUTES.AGENCY.REVIEWS,
+      authorizeRole(["agency_owner"]),
+      asyncHandler(reviewController.listAgencyReviews.bind(reviewController))
     );
 
     this.router.get(

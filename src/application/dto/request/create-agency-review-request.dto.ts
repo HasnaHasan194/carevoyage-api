@@ -1,0 +1,17 @@
+import { IsString, IsNotEmpty, IsMongoId, IsInt, Min, Max } from "class-validator";
+
+export class CreateAgencyReviewRequestDTO {
+  @IsString({ message: "Booking ID must be a string" })
+  @IsNotEmpty({ message: "Booking ID is required" })
+  @IsMongoId({ message: "Booking ID must be a valid MongoDB ObjectId" })
+  bookingId!: string;
+
+  @IsInt({ message: "Rating must be an integer" })
+  @Min(1, { message: "Rating must be at least 1" })
+  @Max(5, { message: "Rating must be at most 5" })
+  rating!: number;
+
+  @IsString({ message: "Review text must be a string" })
+  @IsNotEmpty({ message: "Review text is required" })
+  reviewText!: string;
+}
