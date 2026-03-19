@@ -5,8 +5,8 @@ import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Book
 import { type ICancelClientBookingUseCase } from "../../interfaces/booking/cancel-client-booking.interface";
 import { ERROR_MESSAGE, HTTP_STATUS } from "../../../../shared/constants/constants";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
-import { CustomError } from "../../../../domain/errors/customError";
 import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
+
 
 @injectable()
 export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
@@ -19,6 +19,8 @@ export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
 
     @inject("IChatConversationProvisioner")
     private readonly _chatConversationProvisioner: IChatConversationProvisioner,
+
+  
   ) {}
 
   async execute(
@@ -31,10 +33,8 @@ export class CancelClientBookingUseCase implements ICancelClientBookingUseCase {
       clientId,
     );
 
-   
-
-    
-
+  
+  
     if (!booking) {
       throw new NotFoundError(ERROR_MESSAGE.BOOKING.NOT_FOUND);
     }

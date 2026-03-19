@@ -35,7 +35,7 @@ export class CreateCaretakerRequestUseCase implements ICreateCaretakerRequestUse
       throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
     }
 
-    // case: User refreshed page and resubmitted, or double-click — one pending per client+package.
+    
     const existing = await this._caretakerRequestRepository.findPendingByClientAndPackage(
       clientId,
       packageId

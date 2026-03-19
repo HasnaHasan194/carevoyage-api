@@ -145,13 +145,13 @@ export const agencyProfileController =
   container.resolve(AgencyProfileController);
 
 /**
- * Agency Category controller - Resolve directly like other controllers
+ * Agency Category controller 
  */
 export const agencyCategoryController =
   container.resolve<IAgencyCategoryController>(AgencyCategoryController);
 
 /**
- * Agency Category routes - MUST be resolved BEFORE AgencyRoutes because AgencyRoutes imports it
+ * Agency Category routes 
  */
 let agencyCategoryRoutes: AgencyCategoryRoutes;
 try {
@@ -162,7 +162,7 @@ try {
 export { agencyCategoryRoutes };
 
 /**
- * Agency Special Needs Master controller - MUST be resolved BEFORE routes
+ * Agency Special Needs Master controller 
  */
 let agencySpecialNeedsMasterController: IAgencySpecialNeedsMasterController;
 try {
@@ -175,7 +175,7 @@ try {
 export { agencySpecialNeedsMasterController };
 
 /**
- * Agency Special Needs Master routes - Resolved AFTER controller is fully exported
+ * Agency Special Needs Master routes - (Resolved after controller is fully exported)
  */
 let agencySpecialNeedsMasterRoutes: AgencySpecialNeedsMasterRoutes;
 try {
@@ -213,7 +213,7 @@ export const agencySalesReportController =
   container.resolve<IAgencySalesReportController>(AgencySalesReportController);
 
 /**
- * Review controller - MUST be resolved BEFORE AgencyRoutes and UserRoutes (both use it)
+ * Review controller 
  */
 export const reviewController = container.resolve(ReviewController);
 
@@ -223,12 +223,12 @@ export const reviewController = container.resolve(ReviewController);
 export const agencyRoutes = container.resolve(AgencyRoutes);
 
 /**
- * Wishlist controller - MUST be resolved BEFORE UserRoutes because UserRoutes imports it
+ * Wishlist controller 
  */
 export const wishlistController = container.resolve<IWishlistController>(WishlistController);
 
 /**
- * User routes - Resolved AFTER wishlistController and reviewController to avoid circular dependency
+ * User routes 
  */
 export const userRoutes = container.resolve(UserRoutes);
 

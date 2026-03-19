@@ -10,7 +10,7 @@ import { PriceDescSortStrategy } from "./strategies/price-desc.strategy";
 
 /**
  * Centralized sorting mechanism (Strategy + Factory).
- * OCP: Add new sort strategies without touching the use case/repository.
+ *
  */
 export class PackageSortFactory {
   static fromSortKey(sortKey: PackageSortKey): IPackageSortStrategy {
@@ -32,9 +32,7 @@ export class PackageSortFactory {
     }
   }
 
-  /**
-   * Backward compatibility: if sortKey is absent, fall back to sortBy/sortOrder.
-   */
+  
   static resolve(params: {
     sortKey?: PackageSortKey;
     sortBy?: string;

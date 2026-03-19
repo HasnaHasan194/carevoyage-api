@@ -1,10 +1,12 @@
 import "reflect-metadata";
 import dotenv from "dotenv";
+import http from "http";
 import { App } from "./infrastructure/config/server/server";
 import { config } from "./shared/config";
 import { MongoConnect } from "./infrastructure/database/mongoDB/mongoConnect";
 import { connectRedis } from "./infrastructure/config/redis.config";
 import { ServiceRegistery } from "./infrastructure/dependencyinjection/service.register";
+import { initSocketServer } from "./infrastructure/realtime/socketServer";
 
 dotenv.config();
 
@@ -27,10 +29,12 @@ async function startServer() {
     console.log("MongoDB connected");
 
     const app = new App();
-    const expressServer = app.getApp();
+    const expressApp = app.getApp();
+    const httpServer = http.createServer(expressApp);
+    initSocketServer(httpServer);
 
     const PORT = Number(config.server.PORT) || 3000;
-    expressServer.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`Server running at port ${PORT}`);
     });
   } catch (error) {

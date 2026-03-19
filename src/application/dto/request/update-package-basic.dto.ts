@@ -107,7 +107,6 @@ export class UpdatePackageBasicDTO {
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  // Note: Image validation (at least one exists) is handled in usecase
   images?: string[];
 }
 

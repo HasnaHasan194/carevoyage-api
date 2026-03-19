@@ -15,18 +15,18 @@ export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
     @inject("IAgencySpecialNeedsRepository")
     private _agencySpecialNeedsRepository: IAgencySpecialNeedsRepository,
     @inject("IAgencySpecialNeedsMasterRepository")
-    private _agencySpecialNeedsMasterRepository: IAgencySpecialNeedsMasterRepository
+    private _agencySpecialNeedsMasterRepository: IAgencySpecialNeedsMasterRepository,
   ) {}
 
   async execute(
     agencyId: string,
-    data: EnableSpecialNeedRequestDTO
+    data: EnableSpecialNeedRequestDTO,
   ): Promise<AgencySpecialNeedsResponseDTO> {
     // Check if special need exists in agency's master list
     const specialNeedMaster =
       await this._agencySpecialNeedsMasterRepository.findByIdAndAgencyId(
         data.specialNeedId,
-        agencyId
+        agencyId,
       );
     if (!specialNeedMaster) {
       throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.NOT_FOUND);
@@ -37,14 +37,14 @@ export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
     }
 
     // Check if already exists (including soft-deleted)
-    const existing = await this._agencySpecialNeedsRepository.findByAgencyIdAndSpecialNeedId(
-      agencyId,
-      data.specialNeedId
-    );
+    const existing =
+      await this._agencySpecialNeedsRepository.findByAgencyIdAndSpecialNeedId(
+        agencyId,
+        data.specialNeedId,
+      );
 
     if (existing) {
       if (existing.isDeleted) {
-        // Restore and update - use updateById instead of save to avoid duplicate key error
         const restored = await this._agencySpecialNeedsRepository.updateById(
           existing._id,
           {
@@ -53,16 +53,17 @@ export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
             isActive: true,
             isDeleted: false,
             deletedAt: undefined,
-          }
+          },
         );
 
         if (!restored) {
           throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CONFIG_NOT_FOUND);
         }
-        const master = await this._agencySpecialNeedsMasterRepository.findByIdAndAgencyId(
-          restored.specialNeedId,
-          agencyId
-        );
+        const master =
+          await this._agencySpecialNeedsMasterRepository.findByIdAndAgencyId(
+            restored.specialNeedId,
+            agencyId,
+          );
         if (!master) {
           return AgencySpecialNeedsMapper.toResponseDto(restored);
         }
@@ -74,7 +75,7 @@ export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
         });
       } else {
         throw new ValidationError(
-          "This special need is already configured for your agency"
+          "This special need is already configured for your agency",
         );
       }
     }
@@ -89,14 +90,11 @@ export class EnableSpecialNeedUsecase implements IEnableSpecialNeedUsecase {
       isDeleted: false,
     });
 
-    return AgencySpecialNeedsMapper.toResponseDto(
-      agencySpecialNeed,
-      {
-        id: specialNeedMaster._id.toString(),
-        name: specialNeedMaster.name,
-        shortCode: undefined,
-        description: specialNeedMaster.description,
-      }
-    );
+    return AgencySpecialNeedsMapper.toResponseDto(agencySpecialNeed, {
+      id: specialNeedMaster._id.toString(),
+      name: specialNeedMaster.name,
+      shortCode: undefined,
+      description: specialNeedMaster.description,
+    });
   }
 }

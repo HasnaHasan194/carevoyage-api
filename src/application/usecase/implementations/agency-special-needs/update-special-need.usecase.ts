@@ -36,7 +36,6 @@ export class UpdateSpecialNeedUsecase implements IUpdateSpecialNeedUsecase {
       throw new NotFoundError(ERROR_MESSAGE.SPECIAL_NEEDS.CANNOT_UPDATE_DELETED);
     }
 
-    // Update fields - use updateById instead of save to avoid duplicate key error
     const updated = await this._agencySpecialNeedsRepository.updateById(
       existing._id,
       {

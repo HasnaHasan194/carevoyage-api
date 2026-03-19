@@ -7,15 +7,15 @@ import {
   userController,
   profileUploadController,
   wishlistController,
-  reviewController,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
-import { authorizeRole } from "../../middlewares/auth.middleware";
 import { UpdateUserProfileRequestDTO } from "../../../application/dto/request/update-user-profile-request.dto";
 import { AddToWishlistRequestDTO } from "../../../application/dto/request/add-to-wishlist-request.dto";
 import { CreateAgencyReviewRequestDTO } from "../../../application/dto/request/create-agency-review-request.dto";
 import multer from "multer";
-import { ROUTES } from "../routes.constants";
+import { ReviewController } from "../../controllers/review/review.controller";
+import { ICreateAgencyReviewUseCase } from "../../../application/usecase/interfaces/review/create-agency-review.interface";
+import { container } from "tsyringe";
 
 @injectable()
 export class UserRoutes extends BaseRoute {
@@ -25,15 +25,17 @@ export class UserRoutes extends BaseRoute {
 
   protected initializeRoutes(): void {
     this.router.use(verifyAuth);
-    this.router.use(blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware));
+    this.router.use(
+      blockedUserMiddleware.checkBlockedUser.bind(blockedUserMiddleware),
+    );
 
     this.router.get(
-      ROUTES.USER.PROFILE,
+      "/profile",
       asyncHandler(userController.getProfile.bind(userController))
     );
 
     this.router.put(
-      ROUTES.USER.PROFILE,
+      "/profile",
       validationMiddleware(UpdateUserProfileRequestDTO),
       asyncHandler(userController.updateProfile.bind(userController))
     );
@@ -58,7 +60,7 @@ export class UserRoutes extends BaseRoute {
 
     
     this.router.post(
-      ROUTES.USER.UPLOAD_PROFILE_IMAGE,
+      "/upload/profile-image",
       upload.single("image"),
       asyncHandler(
         profileUploadController.uploadProfileImage.bind(profileUploadController)
@@ -67,7 +69,7 @@ export class UserRoutes extends BaseRoute {
 
     // Documents/KYC upload 
     this.router.post(
-      ROUTES.USER.UPLOAD_DOCUMENTS,
+      "/upload/documents",
       documentUpload.array("documents", 10),
       asyncHandler(
         profileUploadController.uploadDocuments.bind(profileUploadController)
@@ -76,7 +78,7 @@ export class UserRoutes extends BaseRoute {
 
     
     this.router.get(
-      ROUTES.USER.SIGNED_URL,
+      "/signed-url",
       asyncHandler(
         profileUploadController.getSignedUrl.bind(profileUploadController)
       )
@@ -84,7 +86,7 @@ export class UserRoutes extends BaseRoute {
 
     // Get multiple signed URLs
     this.router.post(
-      ROUTES.USER.SIGNED_URLS,
+      "/signed-urls",
       asyncHandler(
         profileUploadController.getSignedUrls.bind(profileUploadController)
       )
@@ -92,37 +94,49 @@ export class UserRoutes extends BaseRoute {
 
     // Wishlist/Bucket List Routes
     this.router.post(
-      ROUTES.USER.WISHLIST_BASE,
+      "/wishlist",
       validationMiddleware(AddToWishlistRequestDTO),
       asyncHandler(wishlistController.addToWishlist.bind(wishlistController))
     );
 
     this.router.delete(
-      ROUTES.USER.WISHLIST_DETAIL,
+      "/wishlist/:packageId",
       asyncHandler(
         wishlistController.removeFromWishlist.bind(wishlistController)
       )
     );
 
     this.router.get(
-      ROUTES.USER.WISHLIST_BASE,
+      "/wishlist",
       asyncHandler(wishlistController.getWishlist.bind(wishlistController))
     );
 
     this.router.get(
-      ROUTES.USER.WISHLIST_STATUS,
+      "/wishlist/:packageId/status",
       asyncHandler(
         wishlistController.checkWishlistStatus.bind(wishlistController)
       )
     );
 
-    // Client agency review (submit review for a completed booking)
-    // Path must match frontend: POST /api/v1/user/agency-reviews
+    // Client: submit agency review for a completed booking
+    const createAgencyReviewUseCase =
+      container.resolve<ICreateAgencyReviewUseCase>("ICreateAgencyReviewUseCase");
+
+    const reviewController = new ReviewController(
+      // list use case is not needed for client review submission, pass a dummy that is unused
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      {} as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      {} as any,
+      createAgencyReviewUseCase,
+    );
+
     this.router.post(
       "/agency-reviews",
-      authorizeRole(["client"]),
       validationMiddleware(CreateAgencyReviewRequestDTO),
-      asyncHandler(reviewController.createAgencyReview.bind(reviewController))
+      asyncHandler(
+        reviewController.createAgencyReview.bind(reviewController),
+      ),
     );
   }
 }

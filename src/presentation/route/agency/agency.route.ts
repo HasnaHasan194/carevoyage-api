@@ -149,7 +149,7 @@ export class AgencyRoutes extends BaseRoute {
       )
     );
 
-    // Agency reviews (list with pagination, default limit 10)
+    // Agency reviews 
     this.router.get(
       ROUTES.AGENCY.REVIEWS,
       authorizeRole(["agency_owner"]),

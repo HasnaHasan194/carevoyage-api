@@ -14,7 +14,7 @@ export class CaretakerDashboardRepository implements ICaretakerDashboardReposito
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
-    // Load all bookings assigned to this caretaker that are confirmed or completed
+    // Loading all bookings assigned to this caretaker that are confirmed or completed
     const bookings = await bookingDB
       .find({
         caretakerId: caretakerProfileId,

@@ -30,7 +30,7 @@ export class AdminController implements IAdminController {
 
   async getAllUsers(req: Request, res: Response): Promise<void> {
     const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const limit = Number(req.query.limit) || 20;
 
     const data = await this._getAllUsersUsecase.execute(page, limit);
 
@@ -54,7 +54,7 @@ export class AdminController implements IAdminController {
 
   async getWalletTransactions(req: Request, res: Response): Promise<void> {
     const page = Math.max(1, Number(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
 
     const rawType = req.query.type as string | undefined;
     const rawSource = req.query.source as string | undefined;

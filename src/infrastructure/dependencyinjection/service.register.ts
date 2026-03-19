@@ -21,6 +21,7 @@ import {
   type IChatConversationProvisioner,
 } from "../../application/services/chat/chat-conversation-provisioner";
 import { ChatService, type IChatService } from "../../application/services/chat/chat.service";
+import { RefundPolicyService } from "../../application/services/refund-policy.service";
 
 export class ServiceRegistery {
   static registerService(): void {
@@ -68,6 +69,11 @@ export class ServiceRegistery {
 
     container.register<IChatService>("IChatService", {
       useClass: ChatService,
+    });
+
+    // Refund policy service used in refund use case
+    container.register(RefundPolicyService, {
+      useClass: RefundPolicyService,
     });
   }
 }
