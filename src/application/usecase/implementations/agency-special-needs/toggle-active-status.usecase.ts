@@ -37,7 +37,7 @@ export class ToggleActiveStatusUsecase implements IToggleActiveStatusUsecase {
       );
     }
 
-    // Update isActive status - use updateById instead of save to avoid duplicate key error
+  
     const updated = await this._agencySpecialNeedsRepository.updateById(
       existing._id,
       {
@@ -60,7 +60,7 @@ export class ToggleActiveStatusUsecase implements IToggleActiveStatusUsecase {
     }
 
     return AgencySpecialNeedsMapper.toResponseDto(updated, {
-      id: master._id,
+      id: master._id, 
       name: master.name,
       shortCode: undefined,
       description: master.description,

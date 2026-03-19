@@ -1,113 +1,86 @@
+import type { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
-import { Response } from "express";
-import type { Request } from "express";
-import { ERROR_MESSAGE, HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
+import type { IListAgencyReviewsUseCase } from "../../../application/usecase/interfaces/review/list-agency-reviews.interface";
+import type { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import type { CustomRequest } from "../../middlewares/auth.middleware";
-import { ICreateAgencyReviewUseCase } from "../../../application/usecase/interfaces/review/create-agency-review.interface";
-import { IListAgencyReviewsUseCase } from "../../../application/usecase/interfaces/review/list-agency-reviews.interface";
-import { IAgencyRepository } from "../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
-import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
+import { NotFoundError } from "../../../domain/errors/notFoundError";
+import { ERROR_MESSAGE, HTTP_STATUS } from "../../../shared/constants/constants";
+import type { ICreateAgencyReviewUseCase } from "../../../application/usecase/interfaces/review/create-agency-review.interface";
 
-const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 6;
 
 @injectable()
 export class ReviewController {
   constructor(
-    @inject("ICreateAgencyReviewUseCase")
-    private readonly createAgencyReviewUseCase: ICreateAgencyReviewUseCase,
     @inject("IListAgencyReviewsUseCase")
-    private readonly listAgencyReviewsUseCase: IListAgencyReviewsUseCase,
+    private readonly _listAgencyReviewsUseCase: IListAgencyReviewsUseCase,
     @inject("IAgencyRepository")
-    private readonly agencyRepository: IAgencyRepository
+    private readonly _agencyRepository: IAgencyRepository,
+    @inject("ICreateAgencyReviewUseCase")
+    private readonly _createAgencyReviewUseCase: ICreateAgencyReviewUseCase
   ) {}
 
-  async createAgencyReview(req: CustomRequest, res: Response): Promise<void> {
+  private async getAgencyId(req: CustomRequest): Promise<string> {
     if (!req.user) {
-      ResponseHelper.error(
-        res,
-        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
-        HTTP_STATUS.UNAUTHORIZED
-      );
-      return;
-    }
-
-    try {
-      const { bookingId, rating, reviewText } = req.body as {
-        bookingId: string;
-        rating: number;
-        reviewText: string;
-      };
-
-      const review = await this.createAgencyReviewUseCase.execute({
-        clientId: req.user.id,
-        bookingId,
-        rating,
-        reviewText,
-      });
-
-      ResponseHelper.success(
-        res,
-        HTTP_STATUS.CREATED,
-        SUCCESS_MESSAGE.REVIEW.CREATED,
-        review
-      );
-    } catch (error: unknown) {
-      const err = error as { message?: string; statusCode?: number };
-      ResponseHelper.error(
-        res,
-        err.message ?? ERROR_MESSAGE.GENERAL.SERVER_ERROR,
-        err.statusCode ?? HTTP_STATUS.INTERNAL_SERVER_ERROR
+      throw new NotFoundError(
+        ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED
       );
     }
+    const agency = await this._agencyRepository.findByUserId(req.user.id);
+    if (!agency) {
+      throw new NotFoundError(ERROR_MESSAGE.AGENCY.NOT_FOUND);
+    }
+    return agency._id;
   }
 
-  async listAgencyReviews(req: CustomRequest, res: Response): Promise<void> {
-    if (!req.user) {
-      ResponseHelper.error(
-        res,
-        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
-        HTTP_STATUS.UNAUTHORIZED
-      );
-      return;
-    }
+  async listAgencyReviews(req: Request, res: Response): Promise<void> {
+    const customReq = req as CustomRequest;
+    const agencyId = await this.getAgencyId(customReq);
 
-    try {
-      const agency = await this.agencyRepository.findByUserId(req.user.id);
-      if (!agency) {
-        ResponseHelper.error(
-          res,
-          ERROR_MESSAGE.AGENCY.NOT_FOUND,
-          HTTP_STATUS.NOT_FOUND
-        );
-        return;
-      }
+    const page = Math.max(1, Number(req.query.page ?? 1) || 1);
+    const limit = Math.max(
+      1,
+      Number(req.query.limit ?? DEFAULT_LIMIT) || DEFAULT_LIMIT
+    );
 
-      const page = Math.max(1, parseInt(String((req as Request).query.page), 10) || DEFAULT_PAGE);
-      const limit = Math.min(
-        100,
-        Math.max(1, parseInt(String((req as Request).query.limit), 10) || DEFAULT_LIMIT)
-      );
+    const data = await this._listAgencyReviewsUseCase.execute({
+      agencyId,
+      page,
+      limit,
+    });
 
-      const data = await this.listAgencyReviewsUseCase.execute({
-        agencyId: agency._id,
-        page,
-        limit,
-      });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data,
+    });
+  }
 
-      ResponseHelper.success(
-        res,
-        HTTP_STATUS.OK,
-        SUCCESS_MESSAGE.REVIEW.FETCHED,
-        data
-      );
-    } catch (error: unknown) {
-      const err = error as { message?: string; statusCode?: number };
-      ResponseHelper.error(
-        res,
-        err.message ?? ERROR_MESSAGE.GENERAL.SERVER_ERROR,
-        err.statusCode ?? HTTP_STATUS.INTERNAL_SERVER_ERROR
+  async createAgencyReview(req: Request, res: Response): Promise<void> {
+    const customReq = req as CustomRequest;
+
+    if (!customReq.user) {
+      throw new NotFoundError(
+        ERROR_MESSAGE.AUTHENTICATION.USER_NOT_AUTHENTICATED
       );
     }
+
+    const { bookingId, rating, reviewText } = req.body as {
+      bookingId: string;
+      rating: number;
+      reviewText: string;
+    };
+
+    const review = await this._createAgencyReviewUseCase.execute({
+      clientId: customReq.user.id,
+      bookingId,
+      rating,
+      reviewText,
+    });
+
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      data: review,
+    });
   }
 }
+ 

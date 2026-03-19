@@ -1,11 +1,13 @@
 import { ClientSession, PipelineStage } from "mongoose";
 import { PackageMapper } from "../../../application/mapper/package.mapper";
-import { IPackageEntity, TPackageStatus } from "../../../domain/entities/package.entity";
+import {
+  IPackageEntity,
+  TPackageStatus,
+} from "../../../domain/entities/package.entity";
 import { IPackageModel, packageDB } from "../../database/models/package.model";
 import { IPackageRepository } from "../../../domain/repositoryInterfaces/Package/package.repository.interface";
 import { BaseRepository } from "../baseRepository";
 import { PackageCategory } from "../../../domain/constants/package-categories";
-
 
 export class PackageRepository
   extends BaseRepository<IPackageModel, IPackageEntity>
@@ -19,7 +21,7 @@ export class PackageRepository
     agencyId: string,
     status: TPackageStatus | "all" = "all",
     includeDeleted: boolean = false,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity[]> {
     const query: Record<string, unknown> = { agencyId };
 
@@ -50,7 +52,7 @@ export class PackageRepository
     search?: string,
     category?: string,
     sortBy?: string,
-    sortOrder?: "asc" | "desc"
+    sortOrder?: "asc" | "desc",
   ): Promise<{ packages: IPackageEntity[]; total: number }> {
     const query: Record<string, unknown> = { agencyId };
 
@@ -106,7 +108,7 @@ export class PackageRepository
     packageId: string,
     agencyId: string,
     includeDeleted: boolean = false,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity | null> {
     const query: Record<string, unknown> = { _id: packageId, agencyId };
 
@@ -126,12 +128,12 @@ export class PackageRepository
 
   async deletePackage(
     packageId: string,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity | null> {
     const mongooseQuery = packageDB.findByIdAndUpdate(
       packageId,
       { $set: { isDeleted: true, deletedAt: new Date() } },
-      { new: true }
+      { new: true },
     );
 
     if (session) {
@@ -145,12 +147,12 @@ export class PackageRepository
   async updateStatus(
     packageId: string,
     status: TPackageStatus,
-    session?: ClientSession
+    session?: ClientSession,
   ): Promise<IPackageEntity | null> {
     const mongooseQuery = packageDB.findByIdAndUpdate(
       packageId,
       { $set: { status } },
-      { new: true }
+      { new: true },
     );
 
     if (session) {
@@ -190,7 +192,6 @@ export class PackageRepository
       activeCategoryNames,
     } = filters;
 
- 
     const page = Math.max(1, Math.floor(filters.page) || 1);
     const limit = Math.max(1, Math.floor(filters.limit) || 2);
 
@@ -198,10 +199,9 @@ export class PackageRepository
 
     console.log(`[browsePackages] page=${page}, limit=${limit}, skip=${skip}`);
 
-    
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    
+
     const matchConditions: Record<string, unknown> = {
       isDeleted: false,
       status: "published",
@@ -215,10 +215,9 @@ export class PackageRepository
       }
       // Filter by active category names
       if (category) {
-        // If user provided category filter, filter active categories first, then apply regex
         const categoryRegex = new RegExp(category.trim(), "i");
         const filteredActiveCategories = activeCategoryNames.filter((cat) =>
-          categoryRegex.test(cat)
+          categoryRegex.test(cat),
         );
         if (filteredActiveCategories.length === 0) {
           return { packages: [], total: 0 };
@@ -244,21 +243,19 @@ export class PackageRepository
       matchConditions.basePrice = priceFilter;
     }
 
-   
-  
     let normalizedStartDate: Date | undefined;
     if (startDate) {
       normalizedStartDate = new Date(startDate);
       normalizedStartDate.setUTCHours(0, 0, 0, 0);
     }
-    
 
-    const minEndDate = normalizedStartDate && normalizedStartDate > today 
-      ? normalizedStartDate 
-      : today;
-    
+    const minEndDate =
+      normalizedStartDate && normalizedStartDate > today
+        ? normalizedStartDate
+        : today;
+
     matchConditions.endDate = { $gte: minEndDate };
-   
+
     if (endDate) {
       const normalizedEndDate = new Date(endDate);
       normalizedEndDate.setUTCHours(23, 59, 59, 999);
@@ -277,19 +274,15 @@ export class PackageRepository
 
     // Build aggregation pipeline
     const pipeline: PipelineStage[] = [
-     
       {
         $match: matchConditions,
       },
-     
+
       {
         $addFields: {
           duration: {
             $ceil: {
-              $divide: [
-                { $subtract: ["$endDate", "$startDate"] },
-                86400000,
-              ],
+              $divide: [{ $subtract: ["$endDate", "$startDate"] }, 86400000],
             },
           },
         },
@@ -316,10 +309,7 @@ export class PackageRepository
       // Stage 5: Facet for pagination metadata
       {
         $facet: {
-          packages: [
-            { $skip: Number(skip) },
-            { $limit: Number(limit) },
-          ],
+          packages: [{ $skip: Number(skip) }, { $limit: Number(limit) }],
           totalCount: [{ $count: "count" }],
         },
       },
@@ -347,7 +337,9 @@ export class PackageRepository
 
     const { packages: packageDocs, total } = result[0];
 
-    const packages = packageDocs.map((doc: IPackageModel) => PackageMapper.toEntity(doc));
+    const packages = packageDocs.map((doc: IPackageModel) =>
+      PackageMapper.toEntity(doc),
+    );
 
     return { packages, total };
   }
@@ -382,10 +374,10 @@ export class PackageRepository
     } = filters;
 
     const page = Math.max(1, Math.floor(filters.page) || 1);
-    const limit = Math.max(1, Math.floor(filters.limit) || 10 );
+    const limit = Math.max(1, Math.floor(filters.limit) || 10);
     const skip = (page - 1) * limit;
 
-  //  packages must  startDate > today
+    //  packages must  startDate > today
     const todayStartUTC = new Date();
     todayStartUTC.setUTCHours(0, 0, 0, 0);
 
@@ -407,7 +399,7 @@ export class PackageRepository
         // If user provided category filter, filter active categories first, then apply regex
         const categoryRegex = new RegExp(category.trim(), "i");
         const filteredActiveCategories = activeCategoryNames.filter((cat) =>
-          categoryRegex.test(cat)
+          categoryRegex.test(cat),
         );
         if (filteredActiveCategories.length === 0) {
           return { packages: [], total: 0 };
@@ -443,10 +435,7 @@ export class PackageRepository
         $addFields: {
           duration: {
             $ceil: {
-              $divide: [
-                { $subtract: ["$endDate", "$startDate"] },
-                86400000,
-              ],
+              $divide: [{ $subtract: ["$endDate", "$startDate"] }, 86400000],
             },
           },
         },
@@ -470,10 +459,7 @@ export class PackageRepository
       },
       {
         $facet: {
-          packages: [
-            { $skip: Number(skip) },
-            { $limit: Number(limit) },
-          ],
+          packages: [{ $skip: Number(skip) }, { $limit: Number(limit) }],
           totalCount: [{ $count: "count" }],
         },
       },
@@ -499,25 +485,23 @@ export class PackageRepository
 
     const { packages: packageDocs, total } = result[0];
     const packages = packageDocs.map((doc: IPackageModel) =>
-      PackageMapper.toEntity(doc)
+      PackageMapper.toEntity(doc),
     );
 
     return { packages, total };
   }
 
   async findConflictingPackages(
-  packageIds: string[],
-  newStartDate: Date,
-  newEndDate: Date
-): Promise<IPackageEntity[]> {
-  if (!packageIds.length) return [];
+    packageIds: string[],
+    newStartDate: Date,
+    newEndDate: Date,
+  ): Promise<IPackageEntity[]> {
+    if (!packageIds.length) return [];
 
-  return packageDB.find({
-    _id: { $in: packageIds },
-    startDate: { $lte: newEndDate },
-    endDate: { $gte: newStartDate },
-  });
+    return packageDB.find({
+      _id: { $in: packageIds },
+      startDate: { $lte: newEndDate },
+      endDate: { $gte: newStartDate },
+    });
+  }
 }
-  
-}
-

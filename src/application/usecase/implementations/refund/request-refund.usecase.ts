@@ -18,6 +18,7 @@ export class RequestRefundUseCase implements IRequestRefundUseCase {
     private readonly _refundRequestRepository: IRefundRequestRepository,
     @inject("IPackageRepository")
     private readonly _packageRepository: IPackageRepository,
+    @inject(RefundPolicyService)
     private readonly _refundPolicyService: RefundPolicyService
   ) {}
 

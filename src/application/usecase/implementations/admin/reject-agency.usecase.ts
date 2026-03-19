@@ -55,7 +55,7 @@ export class RejectAgencyUsecase implements IRejectAgencyUsecase {
             reverifyLink = `${config.client.URI}/agency/reverify?token=${token}`;
           }
         } catch {
-          // Continue without reverify link if Redis unavailable
+          
         }
       }
       const html = this.getRejectionEmailHtml(

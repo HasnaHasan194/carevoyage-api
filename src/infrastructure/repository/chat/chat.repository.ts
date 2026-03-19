@@ -131,7 +131,7 @@ export class ChatRepository implements IChatRepository {
       .limit(limit)
       .exec();
 
-    // return chronological (oldest->newest) for UI
+    
     return docs.reverse().map(toMessageEntity);
   }
 

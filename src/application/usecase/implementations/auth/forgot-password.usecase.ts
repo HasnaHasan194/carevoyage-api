@@ -7,7 +7,10 @@ import { IEmailService } from "../../../../domain/service-interfaces/email-servi
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
-import { redisClient, connectRedis } from "../../../../infrastructure/config/redis.config";
+import {
+  redisClient,
+  connectRedis,
+} from "../../../../infrastructure/config/redis.config";
 import { config } from "../../../../shared/config";
 
 @injectable()
@@ -23,11 +26,16 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     private _tokenService: ITokenService,
 
     @inject("IEmailService")
-    private _emailService: IEmailService
+    private _emailService: IEmailService,
   ) {}
 
   async execute(email: string, role?: string): Promise<void> {
-    let user: { id: string; email: string; role: string; isBlocked: boolean } | null = null;
+    let user: {
+      id: string;
+      email: string;
+      role: string;
+      isBlocked: boolean;
+    } | null = null;
 
     // Find user based on role
     if (role === "admin") {
@@ -45,7 +53,6 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
       const foundUser = await this._userRepository.findByEmail(email);
 
       if (foundUser) {
-        // If role is specified, verify it matches
         if (role && foundUser.role !== role) {
           throw new NotFoundError(ERROR_MESSAGE.AUTHENTICATION.EMAIL_NOT_FOUND);
         }
@@ -77,7 +84,7 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     if (!config.client?.URI || config.client.URI.trim() === "") {
       console.error("Forgot password: CLIENT_URI is not configured");
       throw new ValidationError(
-        "Password reset is not configured. Please contact support."
+        "Password reset is not configured. Please contact support.",
       );
     }
 
@@ -88,7 +95,7 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     if (!redisClient.isOpen) {
       console.warn("Forgot password: Redis is not available");
       throw new ValidationError(
-        "Password reset is temporarily unavailable. Please try again later."
+        "Password reset is temporarily unavailable. Please try again later.",
       );
     }
 
@@ -98,7 +105,7 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     } catch (redisErr) {
       console.error("Forgot password: Redis set failed", redisErr);
       throw new ValidationError(
-        "Unable to process password reset. Please try again later."
+        "Unable to process password reset. Please try again later.",
       );
     }
 
@@ -111,12 +118,12 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
       await this._emailService.sendMail(
         user.email,
         "Reset Your Password - CareVoyage",
-        emailHtml
+        emailHtml,
       );
     } catch (emailErr) {
       console.error("Forgot password: Send email failed", emailErr);
       throw new ValidationError(
-        "Unable to send reset email. Please try again later or contact support."
+        "Unable to send reset email. Please try again later or contact support.",
       );
     }
   }
@@ -153,11 +160,3 @@ export class ForgotPasswordUsecase implements IForgotPasswordUsecase {
     `;
   }
 }
-
-
-
-
-
-
-
-

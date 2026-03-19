@@ -36,7 +36,7 @@ export class CaretakerProfileResponseMapper {
         }
       });
 
-      // If no matches found, assign in order
+      
       if (!documents.caretakerLicense && profile.kycDocs[0]) {
         documents.caretakerLicense = profile.kycDocs[0];
       }

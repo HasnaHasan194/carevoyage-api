@@ -28,7 +28,7 @@ export class GetWishlistUsecase implements IGetWishlistUsecase {
     page?: number,
     limit?: number
   ): Promise<WishlistResponseDTO[] | PaginatedWishlistResponse> {
-    // If pagination parameters are provided, use paginated method
+    
     if (page !== undefined && limit !== undefined) {
       const pageNum = Math.max(1, Math.floor(page) || 1);
       const limitNum = Math.max(1, Math.floor(limit) || 10);
@@ -91,7 +91,7 @@ export class GetWishlistUsecase implements IGetWishlistUsecase {
         })
       );
 
-      // Filter out null values (deleted packages)
+      // Filter out deleted packages
       const validWishlistItems = wishlistWithPackages.filter(
         (item): item is WishlistResponseDTO => item !== null
       );
@@ -104,7 +104,7 @@ export class GetWishlistUsecase implements IGetWishlistUsecase {
       };
     }
 
-    // Fallback to non-paginated method
+    
     const wishlistItems = await this._wishlistRepository.findByUserId(userId);
 
     const wishlistWithPackages = await Promise.all(
@@ -157,7 +157,7 @@ export class GetWishlistUsecase implements IGetWishlistUsecase {
       })
     );
 
-    // Filter out null values (deleted packages)
+    // Filter out deleted packages
     return wishlistWithPackages.filter(
       (item): item is WishlistResponseDTO => item !== null
     );

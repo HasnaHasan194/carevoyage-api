@@ -52,7 +52,6 @@ export interface ClientBookingDetailDTO extends ClientBookingSummaryDTO {
   meetingPoint?: string;
   canCancel: boolean;
   cancellationReason?: string;
-  /** Filtered payment breakdown based on paymentType query param. */
   paymentBreakdown: PaymentBreakdownItemDTO[];
   caretaker?: CaretakerSummaryInBookingDTO;
 }

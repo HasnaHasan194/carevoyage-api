@@ -17,7 +17,7 @@ export class ListActiveAgencySpecialNeedsMasterUsecase
       await this._agencySpecialNeedsMasterRepository.findActiveByAgencyId(
         agencyId
       );
-    // Defensive: only return entities that are explicitly not deleted
+    
     const activeEntities = entities.filter(
       (entity) => entity.isDeleted === false
     );

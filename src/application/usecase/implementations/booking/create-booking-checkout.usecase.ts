@@ -50,11 +50,10 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       throw new NotFoundError(ERROR_MESSAGE.PACKAGE.NOT_FOUND);
     }
     if (pkg.status !== "published") {
-      throw new ValidationError(ERROR_MESSAGE.BOOKING.ONLY_PUBLISHED_CAN_BE_BOOKED);
+      throw new ValidationError(
+        ERROR_MESSAGE.BOOKING.ONLY_PUBLISHED_CAN_BE_BOOKED,
+      );
     }
-
-   
-   
 
     const bookings = await this._bookingRepository.findByClientId(clientId);
 
@@ -102,7 +101,9 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
         throw new ValidationError(ERROR_MESSAGE.BOOKING.CARETAKER_NOT_ACTIVE);
       }
       if (caretaker.availabilityStatus !== "AVAILABLE" || caretaker.isDeleted) {
-        throw new ValidationError(ERROR_MESSAGE.BOOKING.CARETAKER_NOT_AVAILABLE);
+        throw new ValidationError(
+          ERROR_MESSAGE.BOOKING.CARETAKER_NOT_AVAILABLE,
+        );
       }
       const pricePerDay = caretaker.pricePerDay ?? 0;
       caretakerFee = pricePerDay * tripDays;
@@ -134,9 +135,6 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
         ERROR_MESSAGE.BOOKING.TOTAL_AMOUNT_MUST_BE_GREATER_THAN_ZERO,
       );
     }
-    
-
-   
 
     const booking = await this._bookingRepository.save({
       clientId,
