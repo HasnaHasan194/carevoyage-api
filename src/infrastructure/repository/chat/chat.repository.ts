@@ -29,13 +29,26 @@ function toConversationEntity(doc: any): IChatConversationEntity {
 }
 
 function toMessageEntity(doc: any): IChatMessageEntity {
+  const attachmentsRaw = Array.isArray(doc.attachments) ? doc.attachments : [];
+  const attachments = attachmentsRaw
+    .map((a: any) => ({
+      kind: a?.kind,
+      s3Key: a?.s3Key,
+      originalName: a?.originalName,
+      mimeType: a?.mimeType,
+      sizeBytes: a?.sizeBytes,
+      url: a?.url,
+    }))
+    .filter((a: any) => Boolean(a?.s3Key));
+
   return {
     _id: String(doc._id),
     conversationId: String(doc.conversationId),
     bookingId: String(doc.bookingId),
     senderUserId: doc.senderUserId,
     senderRole: doc.senderRole,
-    text: doc.text,
+    text: doc.text ?? "",
+    attachments,
     clientMessageId: doc.clientMessageId ?? null,
     createdAt: doc.createdAt,
   };
@@ -141,7 +154,8 @@ export class ChatRepository implements IChatRepository {
       conversationId: new mongoose.Types.ObjectId(input.conversationId),
       senderUserId: input.senderUserId,
       senderRole: input.senderRole,
-      text: input.text,
+      text: input.text ?? "",
+      attachments: input.attachments ?? [],
       clientMessageId: input.clientMessageId ?? null,
     });
     return toMessageEntity(doc);

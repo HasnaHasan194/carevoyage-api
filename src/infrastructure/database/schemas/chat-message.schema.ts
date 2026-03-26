@@ -24,7 +24,19 @@ export const chatMessageSchema = new Schema<IChatMessageModel>(
     },
     senderUserId: { type: String, required: true, index: true },
     senderRole: { type: String, enum: ["client", "caretaker"], required: true },
-    text: { type: String, required: true, trim: true },
+    text: { type: String, required: false, default: "", trim: true },
+    attachments: {
+      type: [
+        {
+          kind: { type: String, enum: ["image", "file"], required: true },
+          s3Key: { type: String, required: true },
+          originalName: { type: String, required: true },
+          mimeType: { type: String, required: true },
+          sizeBytes: { type: Number, required: true },
+        },
+      ],
+      default: [],
+    },
     clientMessageId: { type: String, default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } }

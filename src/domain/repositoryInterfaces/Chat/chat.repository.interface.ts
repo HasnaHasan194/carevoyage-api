@@ -1,3 +1,11 @@
+export interface ChatAttachmentInput {
+  kind: "image" | "file";
+  s3Key: string;
+  originalName: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
 import type { IChatConversationEntity } from "../../entities/chat-conversation.entity";
 import type { IChatMessageEntity } from "../../entities/chat-message.entity";
 
@@ -28,6 +36,7 @@ export interface CreateMessageInput {
   senderUserId: string;
   senderRole: "client" | "caretaker";
   text: string;
+  attachments?: ChatAttachmentInput[] | null;
   clientMessageId?: string;
 }
 

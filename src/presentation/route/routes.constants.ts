@@ -140,6 +140,7 @@ export const ROUTES = {
   CHAT: {
     CONVERSATIONS: "/conversations",
     BOOKING_MESSAGES: "/bookings/:bookingId/messages",
+    ATTACHMENTS_UPLOAD: "/attachments",
   },
 } as const;
 

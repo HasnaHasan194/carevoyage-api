@@ -54,6 +54,7 @@ import { IWishlistController } from "../../presentation/interfaces/controllers/u
 import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
 import { ReviewController } from "../../presentation/controllers/review/review.controller";
 import { ChatController } from "../../presentation/controllers/chat/chat.controller";
+import { ChatAttachmentController } from "../../presentation/controllers/chat/chat-attachment.controller";
 import { ChatRoutes } from "../../presentation/route/chat/chat.route";
 
 DependencyInjection.registerAll();
@@ -292,6 +293,11 @@ export const paymentController = container.resolve(PaymentController);
  * Chat controller
  */
 export const chatController = container.resolve(ChatController);
+
+/**
+ * Chat attachment upload controller
+ */
+export const chatAttachmentController = container.resolve(ChatAttachmentController);
 
 /**
  * Chat routes
