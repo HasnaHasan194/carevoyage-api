@@ -18,6 +18,8 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
     VERIFY_RESET_TOKEN: "/verify-reset-token",
+    VERIFY_OLD_PASSWORD: "/verify-old-password",
+    CHANGE_PASSWORD: "/change-password",
     AGENCY_REVERIFY: "/agency/reverify",
     GOOGLE_AUTH: "/google",
     ME: "/me",
@@ -102,7 +104,6 @@ export const ROUTES = {
     WISHLIST_BASE: "/wishlist",
     WISHLIST_DETAIL: "/wishlist/:packageId",
     WISHLIST_STATUS: "/wishlist/:packageId/status",
-    AGENCY_REVIEWS: "/agency-reviews",
   },
 
   WALLET: {

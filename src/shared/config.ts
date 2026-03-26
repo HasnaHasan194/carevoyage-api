@@ -1,9 +1,19 @@
 import dotenv from "dotenv"
 dotenv.config()
 
+/** Default API port; override with `PORT` in `.env` if needed. */
+export const DEFAULT_SERVER_PORT = 3000
+
+function resolveServerPort(): number {
+  const raw = process.env.PORT
+  if (raw === undefined || raw === "") return DEFAULT_SERVER_PORT
+  const n = Number(raw)
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : DEFAULT_SERVER_PORT
+}
+
 export const config = {
   server: {
-    PORT: process.env.PORT || 3000,
+    PORT: resolveServerPort(),
   },
 
   client : {
