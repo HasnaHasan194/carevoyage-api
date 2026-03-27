@@ -6,6 +6,7 @@ import { IUserRepository } from "../../../../domain/repositoryInterfaces/User/us
 import { IEmailService } from "../../../../domain/service-interfaces/email-service.interface";
 import { IFulfillCaretakerRequestUseCase } from "../../interfaces/caretaker-request/fulfill-caretaker-request.interface";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class FulfillCaretakerRequestUseCase implements IFulfillCaretakerRequestUseCase {
@@ -15,7 +16,9 @@ export class FulfillCaretakerRequestUseCase implements IFulfillCaretakerRequestU
     @inject("IUserRepository")
     private _userRepository: IUserRepository,
     @inject("IEmailService")
-    private _emailService: IEmailService
+    private _emailService: IEmailService,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(
@@ -42,6 +45,20 @@ export class FulfillCaretakerRequestUseCase implements IFulfillCaretakerRequestU
       fulfilledAt: new Date(),
       fulfilledByCaretakerId: data.caretakerId,
       agencyNoteToClient: data.noteToClient,
+    });
+
+    await this._notificationService.createAndPublish({
+      recipientUserId: request.clientId,
+      recipientRole: "client",
+      type: "CARETAKER_REQUEST_FULFILLED",
+      title: "Caretaker assigned",
+      message: "A caretaker has been assigned to your request.",
+      link: "/client/bookings",
+      metadata: {
+        type: "CARETAKER_REQUEST_FULFILLED",
+        requestId: request._id,
+        packageId: request.packageId,
+      },
     });
 
     const clientUser = await this._userRepository.findById(request.clientId);

@@ -10,6 +10,7 @@ import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 import type { IDebitWalletUseCase } from "../../interfaces/wallet/debit-wallet.interface";
 import type { ICreditWalletUseCase } from "../../interfaces/wallet/credit-wallet.interface";
 import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class ApproveRefundUseCase implements IApproveRefundUseCase {
@@ -27,7 +28,9 @@ export class ApproveRefundUseCase implements IApproveRefundUseCase {
     @inject("IDBSession")
     private readonly _dbSession: IDBSession,
     @inject("IChatConversationProvisioner")
-    private readonly _chatConversationProvisioner: IChatConversationProvisioner
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(agencyId: string, refundRequestId: string): Promise<void> {
@@ -99,6 +102,37 @@ export class ApproveRefundUseCase implements IApproveRefundUseCase {
       booking._id,
       "REFUNDED"
     );
+
+    await Promise.all([
+      this._notificationService.createAndPublish({
+        recipientUserId: booking.clientId,
+        recipientRole: "client",
+        type: "BOOKING_REFUND_APPROVED",
+        title: "Refund approved",
+        message: "Your refund request has been approved.",
+        link: `/client/bookings/${booking._id}`,
+        metadata: {
+          type: "BOOKING_REFUND_APPROVED",
+          bookingId: booking._id,
+          refundRequestId: refundRequest._id,
+          amount: refundRequest.refundAmount,
+        },
+      }),
+      this._notificationService.createAndPublish({
+        recipientUserId: agency.userId,
+        recipientRole: "agency_owner",
+        type: "BOOKING_REFUND_APPROVED",
+        title: "Refund approved",
+        message: "You approved a refund request.",
+        link: "/agency/refund-requests",
+        metadata: {
+          type: "BOOKING_REFUND_APPROVED",
+          bookingId: booking._id,
+          refundRequestId: refundRequest._id,
+          amount: refundRequest.refundAmount,
+        },
+      }),
+    ]);
   }
 }
 

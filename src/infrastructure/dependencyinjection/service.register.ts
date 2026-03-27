@@ -22,6 +22,9 @@ import {
 } from "../../application/services/chat/chat-conversation-provisioner";
 import { ChatService, type IChatService } from "../../application/services/chat/chat.service";
 import { RefundPolicyService } from "../../application/services/refund-policy.service";
+import type { INotificationRealtimePublisher } from "../../application/interfaces/realtime/notification-realtime.publisher.interface";
+import { SocketIONotificationRealtimePublisher } from "../realtime/notificationSocket.publisher";
+import { NotificationService } from "../../application/services/notification/notification.service";
 
 export class ServiceRegistery {
   static registerService(): void {
@@ -74,6 +77,17 @@ export class ServiceRegistery {
     // Refund policy service used in refund use case
     container.register(RefundPolicyService, {
       useClass: RefundPolicyService,
+    });
+
+    container.register<INotificationRealtimePublisher>(
+      "INotificationRealtimePublisher",
+      {
+        useClass: SocketIONotificationRealtimePublisher,
+      }
+    );
+
+    container.register(NotificationService, {
+      useClass: NotificationService,
     });
   }
 }

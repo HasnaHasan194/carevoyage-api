@@ -34,6 +34,15 @@ export class AgencyReviewRepository implements IAgencyReviewRepository {
     return AgencyReviewMapper.toEntity(doc);
   }
 
+  async listAllByAgency(agencyId: string): Promise<IAgencyReviewEntity[]> {
+    const oid = new mongoose.Types.ObjectId(agencyId);
+    const docs = await agencyReviewDB
+      .find({ agencyId: oid })
+      .sort({ createdAt: -1 })
+      .exec();
+    return docs.map((d) => AgencyReviewMapper.toEntity(d));
+  }
+
   async listByAgency(
     agencyId: string,
     page: number,

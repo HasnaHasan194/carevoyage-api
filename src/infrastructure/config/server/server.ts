@@ -14,6 +14,7 @@ import {
   chatRoutes,
   walletRoutes,
   paymentController,
+  notificationRoutes,
 } from "../../dependencyinjection/resolve";
 import { loggerMiddleware } from "../../dependencyinjection/resolve";
 import { API_MOUNTS } from "../../../presentation/route/routes.constants";
@@ -63,6 +64,7 @@ export class App {
     this._app.use(API_MOUNTS.BOOKING, bookingRoutes.router);
     this._app.use(API_MOUNTS.WALLETS, walletRoutes.router);
     this._app.use(API_MOUNTS.CHAT, chatRoutes.router);
+    this._app.use(API_MOUNTS.NOTIFICATIONS, notificationRoutes.router);
   }
 
   private configureErrorMiddleware() {

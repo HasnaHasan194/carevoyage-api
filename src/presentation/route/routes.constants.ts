@@ -57,6 +57,7 @@ export const ROUTES = {
     SALES_REPORT_PDF: "/sales-report/pdf",
     SALES_REPORT_EXCEL: "/sales-report/excel",
     REVIEWS: "/reviews",
+    REVIEWS_BY_PACKAGE: "/reviews/by-package",
   },
 
   AGENCY_CATEGORY: {
@@ -142,6 +143,12 @@ export const ROUTES = {
     BOOKING_MESSAGES: "/bookings/:bookingId/messages",
     ATTACHMENTS_UPLOAD: "/attachments",
   },
+
+  NOTIFICATIONS: {
+    LIST: "/",
+    MARK_READ: "/:id/read",
+    MARK_ALL_READ: "/read-all",
+  },
 } as const;
 
 export const API_PREFIX = "/api/v1";
@@ -157,5 +164,6 @@ export const API_MOUNTS = {
   CHAT: `${API_PREFIX}/chat`,
   WALLETS: `${API_PREFIX}/wallets`,
   PAYMENT_WEBHOOK: `${API_PREFIX}/payments/webhook`,
+  NOTIFICATIONS: `${API_PREFIX}/notifications`,
 } as const;
 

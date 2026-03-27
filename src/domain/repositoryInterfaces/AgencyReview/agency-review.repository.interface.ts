@@ -12,6 +12,8 @@ export interface IAgencyReviewRepository {
 
   findByBookingId(bookingId: string): Promise<IAgencyReviewEntity | null>;
 
+  listAllByAgency(agencyId: string): Promise<IAgencyReviewEntity[]>;
+
   listByAgency(
     agencyId: string,
     page: number,

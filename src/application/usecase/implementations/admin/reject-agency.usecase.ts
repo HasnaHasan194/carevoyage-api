@@ -9,6 +9,7 @@ import { ValidationError } from "../../../../domain/errors/validationError";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 import { redisClient } from "../../../../infrastructure/config/redis.config";
 import { config } from "../../../../shared/config";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class RejectAgencyUsecase implements IRejectAgencyUsecase {
@@ -18,7 +19,9 @@ export class RejectAgencyUsecase implements IRejectAgencyUsecase {
     @inject("IUserRepository")
     private _userRepository: IUserRepository,
     @inject("IEmailService")
-    private _emailService: IEmailService
+    private _emailService: IEmailService,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(agencyId: string, reason: string): Promise<void> {
@@ -42,6 +45,16 @@ export class RejectAgencyUsecase implements IRejectAgencyUsecase {
       "rejected",
       trimmedReason
     );
+
+    await this._notificationService.createAndPublish({
+      recipientUserId: agency.userId,
+      recipientRole: "agency_owner",
+      type: "AGENCY_REJECTED",
+      title: "Agency rejected",
+      message: `Your agency application was rejected: ${trimmedReason}`,
+      link: "/agency/reverify",
+      metadata: { type: "AGENCY_REJECTED", agencyId: agency._id, reason: trimmedReason },
+    });
 
     const owner = await this._userRepository.findById(agency.userId);
     if (owner?.email) {

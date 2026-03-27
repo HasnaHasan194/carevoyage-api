@@ -5,6 +5,8 @@ import { config } from "../../shared/config";
 import { TokenService } from "../service/token.service";
 import type { CustomJwtPayload } from "../../presentation/middlewares/auth.middleware";
 import { ChatHandler } from "../../presentation/realtime/chat/chat.handler";
+import { NotificationsHandler } from "../../presentation/realtime/notifications/notifications.handler";
+import { registerIoGetter } from "./getSocketIo";
 
 let ioSingleton: Server | null = null;
 
@@ -22,12 +24,20 @@ export function initSocketServer(httpServer: http.Server): Server {
 
   io.use((socket, next) => {
     try {
-      const authToken = (socket.handshake.auth as any)?.token as string | undefined;
-      const headerAuth = socket.handshake.headers.authorization as string | undefined;
+      const auth = socket.handshake.auth;
+      const authToken =
+        typeof auth === "object" && auth !== null && "token" in auth
+          ? (auth as { token?: unknown }).token
+          : undefined;
+      const tokenFromAuth = typeof authToken === "string" ? authToken : undefined;
+      const headerAuth =
+        typeof socket.handshake.headers.authorization === "string"
+          ? socket.handshake.headers.authorization
+          : undefined;
       const tokenFromHeader = headerAuth?.startsWith("Bearer ")
         ? headerAuth.split(" ")[1]
         : undefined;
-      const token = authToken || tokenFromHeader;
+      const token = tokenFromAuth || tokenFromHeader;
 
       if (!token) return next(new Error("Unauthorized"));
 
@@ -49,7 +59,11 @@ export function initSocketServer(httpServer: http.Server): Server {
   const chatHandler = container.resolve(ChatHandler);
   chatHandler.register(io);
 
+  const notificationsHandler = container.resolve(NotificationsHandler);
+  notificationsHandler.register(io);
+
   ioSingleton = io;
+  registerIoGetter(() => ioSingleton);
   return ioSingleton;
 }
 

@@ -49,6 +49,8 @@ import { IChatRepository } from "../../domain/repositoryInterfaces/Chat/chat.rep
 import { ChatRepository } from "../repository/chat/chat.repository";
 import { IAgencyReviewRepository } from "../../domain/repositoryInterfaces/AgencyReview/agency-review.repository.interface";
 import { AgencyReviewRepository } from "../repository/agency-review/agency-review.repository";
+import type { INotificationRepository } from "../../domain/repositoryInterfaces/Notification/notification.repository.interface";
+import { NotificationRepository } from "../repository/notification/notification.repository";
 
 export class RepositoryRegister {
   static registerRepository(): void {
@@ -187,6 +189,13 @@ export class RepositoryRegister {
       {
         useClass: AgencyReviewRepository,
       } as ClassProvider<IAgencyReviewRepository>
+    );
+
+    container.register<INotificationRepository>(
+      "INotificationRepository",
+      {
+        useClass: NotificationRepository,
+      } as ClassProvider<INotificationRepository>
     );
   }
 }

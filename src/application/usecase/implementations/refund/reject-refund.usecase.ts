@@ -5,6 +5,7 @@ import { IRejectRefundUseCase } from "../../interfaces/refund/reject-refund.inte
 import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class RejectRefundUseCase implements IRejectRefundUseCase {
@@ -12,7 +13,9 @@ export class RejectRefundUseCase implements IRejectRefundUseCase {
     @inject("IRefundRequestRepository")
     private readonly _refundRequestRepository: IRefundRequestRepository,
     @inject("IAgencyRepository")
-    private readonly _agencyRepository: IAgencyRepository
+    private readonly _agencyRepository: IAgencyRepository,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(
@@ -44,6 +47,39 @@ export class RejectRefundUseCase implements IRejectRefundUseCase {
       status: "REJECTED",
       reason,
     });
+
+    await Promise.all([
+      this._notificationService.createAndPublish({
+        recipientUserId: refundRequest.userId,
+        recipientRole: "client",
+        type: "BOOKING_REFUND_REJECTED",
+        title: "Refund rejected",
+        message: reason?.trim()
+          ? `Your refund request was rejected: ${reason.trim()}`
+          : "Your refund request was rejected.",
+        link: "/client/bookings",
+        metadata: {
+          type: "BOOKING_REFUND_REJECTED",
+          bookingId: refundRequest.bookingId,
+          refundRequestId: refundRequest._id,
+          reason: reason?.trim() || undefined,
+        },
+      }),
+      this._notificationService.createAndPublish({
+        recipientUserId: agency.userId,
+        recipientRole: "agency_owner",
+        type: "BOOKING_REFUND_REJECTED",
+        title: "Refund rejected",
+        message: "You rejected a refund request.",
+        link: "/agency/refund-requests",
+        metadata: {
+          type: "BOOKING_REFUND_REJECTED",
+          bookingId: refundRequest.bookingId,
+          refundRequestId: refundRequest._id,
+          reason: reason?.trim() || undefined,
+        },
+      }),
+    ]);
   }
 }
 

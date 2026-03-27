@@ -9,6 +9,7 @@ import { NotFoundError } from "../../../../domain/errors/notFoundError";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class CancelPackageUsecase implements ICancelPackageUsecase {
@@ -20,7 +21,9 @@ export class CancelPackageUsecase implements ICancelPackageUsecase {
     @inject("IBookingRepository")
     private _bookingRepository: IBookingRepository,
     @inject("ICaretakerProfileRepository")
-    private _caretakerProfileRepository: ICaretakerProfileRepository
+    private _caretakerProfileRepository: ICaretakerProfileRepository,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(
@@ -59,11 +62,35 @@ export class CancelPackageUsecase implements ICancelPackageUsecase {
     );
     for (const booking of bookingsWithCaretakers) {
       if (booking.caretakerId) {
+        const caretakerProfile = await this._caretakerProfileRepository.findById(
+          booking.caretakerId
+        );
         await this._caretakerProfileRepository.updateAvailabilityStatus(
           booking.caretakerId,
           "AVAILABLE"
         );
+        if (caretakerProfile?.userId) {
+          await this._notificationService.createAndPublish({
+            recipientUserId: caretakerProfile.userId,
+            recipientRole: "caretaker",
+            type: "PACKAGE_CANCELLED",
+            title: "Trip cancelled",
+            message: "A package you were assigned to has been cancelled.",
+            link: "/caretaker/trips",
+            metadata: { type: "PACKAGE_CANCELLED", packageId },
+          });
+        }
       }
+
+      await this._notificationService.createAndPublish({
+        recipientUserId: booking.clientId,
+        recipientRole: "client",
+        type: "PACKAGE_CANCELLED",
+        title: "Trip cancelled",
+        message: "A package in your booking was cancelled by the agency.",
+        link: "/client/bookings",
+        metadata: { type: "PACKAGE_CANCELLED", packageId },
+      });
     }
 
     // Fetch itinerary

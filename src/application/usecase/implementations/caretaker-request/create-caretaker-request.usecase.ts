@@ -8,6 +8,7 @@ import { IEmailService } from "../../../../domain/service-interfaces/email-servi
 import { ICreateCaretakerRequestUseCase } from "../../interfaces/caretaker-request/create-caretaker-request.interface";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 import { config } from "../../../../shared/config";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class CreateCaretakerRequestUseCase implements ICreateCaretakerRequestUseCase {
@@ -21,7 +22,9 @@ export class CreateCaretakerRequestUseCase implements ICreateCaretakerRequestUse
     @inject("ICaretakerRequestRepository")
     private _caretakerRequestRepository: ICaretakerRequestRepository,
     @inject("IEmailService")
-    private _emailService: IEmailService
+    private _emailService: IEmailService,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(clientId: string, packageId: string): Promise<void> {
@@ -44,12 +47,22 @@ export class CreateCaretakerRequestUseCase implements ICreateCaretakerRequestUse
       return; 
     }
 
-    await this._caretakerRequestRepository.save({
+    const created = await this._caretakerRequestRepository.save({
       clientId,
       packageId,
       agencyId: pkg.agencyId,
       status: "pending",
       requestedAt: new Date(),
+    });
+
+    await this._notificationService.createAndPublish({
+      recipientUserId: agency.userId,
+      recipientRole: "agency_owner",
+      type: "CARETAKER_REQUEST_CREATED",
+      title: "New caretaker request",
+      message: "A client requested a caretaker for one of your packages.",
+      link: "/agency/caretaker-requests",
+      metadata: { type: "CARETAKER_REQUEST_CREATED", requestId: created._id, packageId },
     });
 
     const agencyUser = await this._userRepository.findById(agency.userId);
