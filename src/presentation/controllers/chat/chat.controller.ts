@@ -7,6 +7,7 @@ import type { IBookingRepository } from "../../../domain/repositoryInterfaces/Bo
 import type { ICaretakerProfileRepository } from "../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import type { IListChatConversationsUseCase } from "../../../application/usecase/interfaces/chat/list-chat-conversations.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
+import type { IS3Service } from "../../../domain/service-interfaces/s3-service.interface";
 
 @injectable()
 export class ChatController {
@@ -17,6 +18,8 @@ export class ChatController {
     private readonly _bookingRepository: IBookingRepository,
     @inject("ICaretakerProfileRepository")
     private readonly _caretakerProfileRepository: ICaretakerProfileRepository,
+    @inject("IS3Service")
+    private readonly _s3Service: IS3Service,
     @inject("IListChatConversationsUseCase")
     private readonly _listChatConversationsUseCase: IListChatConversationsUseCase
   ) {}
@@ -93,7 +96,34 @@ export class ChatController {
       limit,
     });
 
-    ResponseHelper.success(res, HTTP_STATUS.OK, "Messages retrieved", messages);
+    const enrichedMessages = await Promise.all(
+      messages.map(async (m) => {
+        const attachments = m.attachments ?? [];
+        if (!attachments.length) return m;
+
+        const s3Keys = attachments.map((a) => a.s3Key);
+        const signedUrls = await this._s3Service.getSignedUrls(s3Keys);
+
+        return {
+          ...m,
+          attachments: attachments.map((a, idx) => ({
+            kind: a.kind,
+            s3Key: a.s3Key,
+            originalName: a.originalName,
+            mimeType: a.mimeType,
+            sizeBytes: a.sizeBytes,
+            url: signedUrls[idx],
+          })),
+        };
+      })
+    );
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Messages retrieved",
+      enrichedMessages
+    );
   }
 }
 

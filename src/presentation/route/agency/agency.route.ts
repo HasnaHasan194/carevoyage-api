@@ -10,6 +10,7 @@ import {
   blockedUserMiddleware,
   agencySalesReportController,
   reviewController,
+  agencyReviewsByPackageController,
 } from "../../../infrastructure/dependencyinjection/resolve";
 import { validationMiddleware } from "../../middlewares/validation.middleware";
 import { InviteCaretakerRequestDTO } from "../../../application/dto/request/invite-caretaker-request.dto";
@@ -154,6 +155,16 @@ export class AgencyRoutes extends BaseRoute {
       ROUTES.AGENCY.REVIEWS,
       authorizeRole(["agency_owner"]),
       asyncHandler(reviewController.listAgencyReviews.bind(reviewController))
+    );
+
+    this.router.get(
+      ROUTES.AGENCY.REVIEWS_BY_PACKAGE,
+      authorizeRole(["agency_owner"]),
+      asyncHandler(
+        agencyReviewsByPackageController.listAgencyReviewsByPackage.bind(
+          agencyReviewsByPackageController
+        )
+      )
     );
 
     this.router.get(

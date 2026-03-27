@@ -1,7 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import type { IBookingRepository } from "../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
 import type { ICaretakerProfileRepository } from "../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
-import type { IChatRepository } from "../../../domain/repositoryInterfaces/Chat/chat.repository.interface";
+import type {
+  ChatAttachmentInput,
+  IChatRepository,
+} from "../../../domain/repositoryInterfaces/Chat/chat.repository.interface";
 import type { IChatMessageEntity } from "../../../domain/entities/chat-message.entity";
 import type { IChatConversationEntity } from "../../../domain/entities/chat-conversation.entity";
 import type { IBookingEntity } from "../../../domain/entities/booking.entity";
@@ -14,7 +17,8 @@ export interface ChatAuthContext {
 export interface SendMessageInput {
   bookingId: string;
   userId: string;
-  text: string;
+  text?: string;
+  attachments?: ChatAttachmentInput[] | null;
   clientMessageId?: string;
 }
 
@@ -106,22 +110,34 @@ export class ChatService implements IChatService {
       throw new Error("Chat disabled");
     }
 
-    const text = input.text.trim();
-    if (!text) throw new Error("Empty message");
+    const trimmedText = (input.text ?? "").trim();
+    const attachments = input.attachments ?? [];
+
+    if (!trimmedText && attachments.length === 0) {
+      throw new Error("Empty message");
+    }
 
     const msg = await this._chatRepository.createMessage({
       bookingId: booking._id,
       conversationId: conversation._id,
       senderUserId: input.userId,
       senderRole: auth.role,
-      text,
+      text: trimmedText,
+      attachments,
       clientMessageId: input.clientMessageId,
     });
+
+    const lastPreview =
+      trimmedText
+        ? trimmedText.slice(0, 200)
+        : attachments[0]?.originalName
+          ? `[Attachment] ${attachments[0].originalName}`.slice(0, 200)
+          : "[Attachment]";
 
     await this._chatRepository.updateConversationLastMessageByBookingId(
       booking._id,
       msg.createdAt,
-      text.slice(0, 200)
+      lastPreview
     );
 
     return msg;

@@ -66,4 +66,10 @@ export interface IAuthController {
 
   // Current authenticated user
   getMe(req: Request, res: Response): Promise<void>;
+
+  // Verify old password before allowing change
+  verifyOldPassword(req: Request, res: Response): Promise<void>;
+
+  // Change password for logged-in user
+  changePassword(req: Request, res: Response): Promise<void>;
 }

@@ -4,6 +4,8 @@ import { IBaseRepository } from "../baseRepository.interface";
 import { PackageCategory } from "../../constants/package-categories";
 
 export interface IPackageRepository extends IBaseRepository<IPackageEntity> {
+  findByIds(packageIds: string[]): Promise<IPackageEntity[]>;
+
   findByAgencyId(
     agencyId: string,
     status?: TPackageStatus | "all",

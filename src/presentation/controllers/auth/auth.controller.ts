@@ -39,6 +39,8 @@ import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caret
 import { IForgotPasswordUsecase } from "../../../application/usecase/interfaces/auth/forgot-password.interface";
 import { IResetPasswordUsecase } from "../../../application/usecase/interfaces/auth/reset-password.interface";
 import { IVerifyResetTokenUsecase } from "../../../application/usecase/interfaces/auth/verify-reset-token.interface";
+import { IVerifyOldPasswordUseCase } from "../../../application/usecase/interfaces/auth/verify-old-password.interface";
+import { IChangePasswordUseCase } from "../../../application/usecase/interfaces/auth/change-password.interface";
 import { IReverifyAgencyUsecase } from "../../../application/usecase/interfaces/auth/reverify-agency.interface";
 import { IGoogleAuthUsecase } from "../../../application/usecase/interfaces/auth/google-auth.interface";
 import { IGetCurrentUserUsecase } from "../../../application/usecase/interfaces/auth/get-current-user.interface";
@@ -106,6 +108,12 @@ export class AuthController implements IAuthController {
 
     @inject("IVerifyResetTokenUsecase")
     private _verifyResetTokenUsecase: IVerifyResetTokenUsecase,
+
+    @inject("IVerifyOldPasswordUseCase")
+    private _verifyOldPasswordUseCase: IVerifyOldPasswordUseCase,
+
+    @inject("IChangePasswordUseCase")
+    private _changePasswordUseCase: IChangePasswordUseCase,
 
     @inject("IReverifyAgencyUsecase")
     private _reverifyAgencyUsecase: IReverifyAgencyUsecase,
@@ -535,6 +543,61 @@ export class AuthController implements IAuthController {
       HTTP_STATUS.OK,
       SUCCESS_MESSAGE.AUTHORIZATION.RESET_TOKEN_VALID,
       result,
+    );
+  }
+
+  async verifyOldPassword(req: Request, res: Response): Promise<void> {
+    const authUser = (req as CustomRequest).user;
+    if (!authUser?.id) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED,
+      );
+      return;
+    }
+
+    const { oldPassword } = req.body as { oldPassword: string };
+    await this._verifyOldPasswordUseCase.execute(authUser.id, oldPassword);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Old password verified",
+    );
+  }
+
+  async changePassword(req: Request, res: Response): Promise<void> {
+    const authUser = (req as CustomRequest).user;
+    if (!authUser?.id) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED,
+      );
+      return;
+    }
+
+    const { newPassword, confirmPassword } = req.body as {
+      newPassword: string;
+      confirmPassword: string;
+    };
+
+    if (newPassword !== confirmPassword) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.AUTHENTICATION.PASSWORD_AND_CONFIRM_PASSWORD_MUST_BE_SAME,
+        HTTP_STATUS.BAD_REQUEST,
+      );
+      return;
+    }
+
+    await this._changePasswordUseCase.execute(authUser.id, newPassword);
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      "Password changed successfully",
     );
   }
 

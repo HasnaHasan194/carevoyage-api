@@ -20,6 +20,8 @@ import { CaretakerLoginRequestDTO } from "../../../application/dto/request/caret
 import { ForgotPasswordRequestDTO } from "../../../application/dto/request/forgot-password-request.dto";
 import { ResetPasswordRequestDTO } from "../../../application/dto/request/reset-password-request.dto";
 import { VerifyResetTokenRequestDTO } from "../../../application/dto/request/verify-reset-token-request.dto";
+import { VerifyOldPasswordRequestDTO } from "../../../application/dto/request/verify-old-password-request.dto";
+import { ChangePasswordRequestDTO } from "../../../application/dto/request/change-password-request.dto";
 import { ReverifyAgencyRequestDTO } from "../../../application/dto/request/reverify-agency-request.dto";
 import { verifyAuth } from "../../middlewares/auth.middleware";
 import { ROUTES } from "../routes.constants";
@@ -129,6 +131,20 @@ export class AuthRoutes extends BaseRoute {
       ROUTES.AUTH.VERIFY_RESET_TOKEN,
       validationMiddleware(VerifyResetTokenRequestDTO),
       asyncHandler(authController.verifyResetToken.bind(authController))
+    );
+
+    this.router.post(
+      ROUTES.AUTH.VERIFY_OLD_PASSWORD,
+      asyncHandler(verifyAuth),
+      validationMiddleware(VerifyOldPasswordRequestDTO),
+      asyncHandler(authController.verifyOldPassword.bind(authController))
+    );
+
+    this.router.post(
+      ROUTES.AUTH.CHANGE_PASSWORD,
+      asyncHandler(verifyAuth),
+      validationMiddleware(ChangePasswordRequestDTO),
+      asyncHandler(authController.changePassword.bind(authController))
     );
 
     this.router.post(

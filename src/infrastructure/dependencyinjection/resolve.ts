@@ -39,6 +39,8 @@ import { BookingRoutes } from "../../presentation/route/booking/booking.route";
 import { PaymentController } from "../../presentation/controllers/payment/payment.controller";
 import { WalletController } from "../../presentation/controllers/wallet/wallet.controller";
 import { WalletRoutes } from "../../presentation/route/wallet/wallet.route";
+import { NotificationController } from "../../presentation/controllers/notification/notification.controller";
+import { NotificationRoutes } from "../../presentation/route/notification/notification.route";
 import { AgencyCategoryRoutes } from "../../presentation/route/agency/agency-category.route";
 import { IAgencyCategoryController } from "../../presentation/interfaces/controllers/agency/agency-category.controller.interface";
 import { AgencyCategoryController } from "../../presentation/controllers/agency/agency-category.controller";
@@ -53,7 +55,9 @@ import { AgencySalesReportController } from "../../presentation/controllers/agen
 import { IWishlistController } from "../../presentation/interfaces/controllers/user/wishlist.controller.interface";
 import { WishlistController } from "../../presentation/controllers/user/wishlist.controller";
 import { ReviewController } from "../../presentation/controllers/review/review.controller";
+import { AgencyReviewsByPackageController } from "../../presentation/controllers/review/agency-reviews-by-package.controller";
 import { ChatController } from "../../presentation/controllers/chat/chat.controller";
+import { ChatAttachmentController } from "../../presentation/controllers/chat/chat-attachment.controller";
 import { ChatRoutes } from "../../presentation/route/chat/chat.route";
 
 DependencyInjection.registerAll();
@@ -218,6 +222,13 @@ export const agencySalesReportController =
 export const reviewController = container.resolve(ReviewController);
 
 /**
+ * Agency reviews grouped by package controller
+ */
+export const agencyReviewsByPackageController = container.resolve(
+  AgencyReviewsByPackageController
+);
+
+/**
  * Agency routes
  */
 export const agencyRoutes = container.resolve(AgencyRoutes);
@@ -284,6 +295,16 @@ export const walletController = container.resolve(WalletController);
 export const walletRoutes = container.resolve(WalletRoutes);
 
 /**
+ * Notification controller
+ */
+export const notificationController = container.resolve(NotificationController);
+
+/**
+ * Notification routes
+ */
+export const notificationRoutes = container.resolve(NotificationRoutes);
+
+/**
  * Payment controller (for Stripe webhook)
  */
 export const paymentController = container.resolve(PaymentController);
@@ -292,6 +313,11 @@ export const paymentController = container.resolve(PaymentController);
  * Chat controller
  */
 export const chatController = container.resolve(ChatController);
+
+/**
+ * Chat attachment upload controller
+ */
+export const chatAttachmentController = container.resolve(ChatAttachmentController);
 
 /**
  * Chat routes

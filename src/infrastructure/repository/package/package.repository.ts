@@ -17,6 +17,14 @@ export class PackageRepository
     super(packageDB, PackageMapper.toEntity);
   }
 
+  async findByIds(packageIds: string[]): Promise<IPackageEntity[]> {
+    if (packageIds.length === 0) return [];
+    const docs = await packageDB
+      .find({ _id: { $in: packageIds } })
+      .exec();
+    return docs.map((pkg) => PackageMapper.toEntity(pkg));
+  }
+
   async findByAgencyId(
     agencyId: string,
     status: TPackageStatus | "all" = "all",

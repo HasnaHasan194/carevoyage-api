@@ -43,22 +43,21 @@ export class ListChatConversationsUseCase implements IListChatConversationsUseCa
     );
 
     const bookingById = new Map<string, NonNullable<(typeof bookings)[number]>>();
-    const clientIds = new Set<string>();
+    const userIds = new Set<string>();
     const caretakerProfileIds = new Set<string>();
     const packageIds = new Set<string>();
 
     bookings.forEach((b) => {
       if (!b) return;
       bookingById.set(b._id, b);
-      clientIds.add(b.clientId);
+      userIds.add(b.clientId);
       if (b.caretakerId) {
         caretakerProfileIds.add(b.caretakerId);
       }
       packageIds.add(b.packageId);
     });
 
-    const [clients, caretakerProfiles, packages] = await Promise.all([
-      Promise.all(Array.from(clientIds).map((id) => this._userRepository.findById(id))),
+    const [caretakerProfiles, packages] = await Promise.all([
       Promise.all(
         Array.from(caretakerProfileIds).map((id) =>
           this._caretakerProfileRepository.findById(id)
@@ -66,11 +65,6 @@ export class ListChatConversationsUseCase implements IListChatConversationsUseCa
       ),
       Promise.all(Array.from(packageIds).map((id) => this._packageRepository.findById(id))),
     ]);
-
-    const userById = new Map<string, NonNullable<(typeof clients)[number]>>();
-    clients.forEach((u) => {
-      if (u) userById.set(u._id, u);
-    });
 
     const caretakerProfileById = new Map<
       string,
@@ -83,6 +77,23 @@ export class ListChatConversationsUseCase implements IListChatConversationsUseCa
     const packageById = new Map<string, NonNullable<(typeof packages)[number]>>();
     packages.forEach((p) => {
       if (p) packageById.set(p._id, p);
+    });
+
+    caretakerProfiles.forEach((profile) => {
+      if (profile?.userId) {
+        userIds.add(profile.userId);
+      }
+    });
+
+    const users = await Promise.all(
+      Array.from(userIds).map((id) => this._userRepository.findById(id))
+    );
+
+    const userById = new Map<string, NonNullable<(typeof users)[number]>>();
+    users.forEach((user) => {
+      if (user) {
+        userById.set(user._id, user);
+      }
     });
 
     const enriched = conversations.map((c) => {

@@ -15,35 +15,46 @@ async function startServer() {
     ServiceRegistery.registerService();
 
     try {
-      await connectRedis();
+      await Promise.race([
+        connectRedis(),
+        new Promise<void>((_, reject) =>
+          setTimeout(
+            () =>
+              reject(
+                new Error(
+                  "Redis connect timed out after 5s (is Redis running?)",
+                ),
+              ),
+            5000,
+          ),
+        ),
+      ]);
       console.log("Redis connected");
-    } catch (redisError) {
-      console.warn(
-        "[startup] Redis connection failed, continuing without Redis:",
-        (redisError as Error).message,
-      );
+    } catch {
+      // Continue without Redis when unavailable or timed out
     }
 
     const mongo = new MongoConnect();
     await mongo.connectDB();
-    console.log("MongoDB connected");
 
     const app = new App();
     const expressApp = app.getApp();
     const httpServer = http.createServer(expressApp);
     initSocketServer(httpServer);
 
-    const PORT = Number(config.server.PORT) || 3000;
-    httpServer.listen(PORT, () => {
-      console.log(`Server running at port ${PORT}`);
+    const PORT = config.server.PORT;
+    await new Promise<void>((resolve, reject) => {
+      const onError = (err: NodeJS.ErrnoException) => reject(err);
+      httpServer.once("error", onError);
+      httpServer.once("listening", () => {
+        httpServer.removeListener("error", onError);
+        console.log(`Server running on port ${PORT}`);
+        resolve();
+      });
+      httpServer.listen(PORT);
     });
   } catch (error) {
     console.error("Server startup failed:", error);
-    if (error instanceof Error) {
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
-    }
     process.exit(1);
   }
 }

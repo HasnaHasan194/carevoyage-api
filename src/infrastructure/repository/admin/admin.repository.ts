@@ -35,4 +35,9 @@ export class AdminRepository extends BaseRepository<IAdminModel, IAdminEntity>
     ).exec();
     return admin as unknown as IAdminEntity;
   }
+
+  async listAll(): Promise<IAdminEntity[]> {
+    const admins = await adminDB.find({}).exec();
+    return admins as unknown as IAdminEntity[];
+  }
 }

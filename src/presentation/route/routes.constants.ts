@@ -18,6 +18,8 @@ export const ROUTES = {
     FORGOT_PASSWORD: "/forgot-password",
     RESET_PASSWORD: "/reset-password",
     VERIFY_RESET_TOKEN: "/verify-reset-token",
+    VERIFY_OLD_PASSWORD: "/verify-old-password",
+    CHANGE_PASSWORD: "/change-password",
     AGENCY_REVERIFY: "/agency/reverify",
     GOOGLE_AUTH: "/google",
     ME: "/me",
@@ -55,6 +57,7 @@ export const ROUTES = {
     SALES_REPORT_PDF: "/sales-report/pdf",
     SALES_REPORT_EXCEL: "/sales-report/excel",
     REVIEWS: "/reviews",
+    REVIEWS_BY_PACKAGE: "/reviews/by-package",
   },
 
   AGENCY_CATEGORY: {
@@ -102,7 +105,6 @@ export const ROUTES = {
     WISHLIST_BASE: "/wishlist",
     WISHLIST_DETAIL: "/wishlist/:packageId",
     WISHLIST_STATUS: "/wishlist/:packageId/status",
-    AGENCY_REVIEWS: "/agency-reviews",
   },
 
   WALLET: {
@@ -139,6 +141,13 @@ export const ROUTES = {
   CHAT: {
     CONVERSATIONS: "/conversations",
     BOOKING_MESSAGES: "/bookings/:bookingId/messages",
+    ATTACHMENTS_UPLOAD: "/attachments",
+  },
+
+  NOTIFICATIONS: {
+    LIST: "/",
+    MARK_READ: "/:id/read",
+    MARK_ALL_READ: "/read-all",
   },
 } as const;
 
@@ -155,5 +164,6 @@ export const API_MOUNTS = {
   CHAT: `${API_PREFIX}/chat`,
   WALLETS: `${API_PREFIX}/wallets`,
   PAYMENT_WEBHOOK: `${API_PREFIX}/payments/webhook`,
+  NOTIFICATIONS: `${API_PREFIX}/notifications`,
 } as const;
 

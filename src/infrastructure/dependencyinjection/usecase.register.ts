@@ -37,6 +37,10 @@ import { IResetPasswordUsecase } from "../../application/usecase/interfaces/auth
 import { ResetPasswordUsecase } from "../../application/usecase/implementations/auth/reset-password.usecase";
 import { IVerifyResetTokenUsecase } from "../../application/usecase/interfaces/auth/verify-reset-token.interface";
 import { VerifyResetTokenUsecase } from "../../application/usecase/implementations/auth/verify-reset-token.usecase";
+import { IVerifyOldPasswordUseCase } from "../../application/usecase/interfaces/auth/verify-old-password.interface";
+import { VerifyOldPasswordUseCase } from "../../application/usecase/implementations/auth/verify-old-password.usecase";
+import { IChangePasswordUseCase } from "../../application/usecase/interfaces/auth/change-password.interface";
+import { ChangePasswordUseCase } from "../../application/usecase/implementations/auth/change-password.usecase";
 import { IReverifyAgencyUsecase } from "../../application/usecase/interfaces/auth/reverify-agency.interface";
 import { ReverifyAgencyUsecase } from "../../application/usecase/implementations/auth/reverify-agency.usecase";
 import { IGoogleAuthUsecase } from "../../application/usecase/interfaces/auth/google-auth.interface";
@@ -121,10 +125,6 @@ import { IGetWishlistUsecase } from "../../application/usecase/interfaces/wishli
 import { GetWishlistUsecase } from "../../application/usecase/implementations/wishlist/get-wishlist.usecase";
 import { ICheckWishlistStatusUsecase } from "../../application/usecase/interfaces/wishlist/check-wishlist-status.interface";
 import { CheckWishlistStatusUsecase } from "../../application/usecase/implementations/wishlist/check-wishlist-status.usecase";
-import { ICreateAgencyReviewUseCase } from "../../application/usecase/interfaces/review/create-agency-review.interface";
-import { CreateAgencyReviewUseCase } from "../../application/usecase/implementations/review/create-agency-review.usecase";
-import { IListAgencyReviewsUseCase } from "../../application/usecase/interfaces/review/list-agency-reviews.interface";
-import { ListAgencyReviewsUseCase } from "../../application/usecase/implementations/review/list-agency-reviews.usecase";
 import { IListActiveSpecialNeedsMasterUsecase } from "../../application/usecase/interfaces/special-needs-master/list-active-special-needs-master.interface";
 import { ListActiveSpecialNeedsMasterUsecase } from "../../application/usecase/implementations/special-needs-master/list-active-special-needs-master.usecase";
 import { IEnableSpecialNeedUsecase } from "../../application/usecase/interfaces/agency-special-needs/enable-special-need.interface";
@@ -207,6 +207,18 @@ import { IExportSalesReportUseCase } from "../../application/usecase/interfaces/
 import { ExportSalesReportUseCase } from "../../application/usecase/implementations/sales-report/export-sales-report.usecase";
 import { IListChatConversationsUseCase } from "../../application/usecase/interfaces/chat/list-chat-conversations.interface";
 import { ListChatConversationsUseCase } from "../../application/usecase/implementations/chat/list-chat-conversations.usecase";
+import type { IListMyNotificationsUseCase } from "../../application/usecase/interfaces/notification/list-notifications.interface";
+import type { IMarkNotificationReadUseCase } from "../../application/usecase/interfaces/notification/mark-notification-read.interface";
+import type { IMarkAllNotificationsReadUseCase } from "../../application/usecase/interfaces/notification/mark-all-notifications-read.interface";
+import { ListMyNotificationsUseCase } from "../../application/usecase/implementations/notification/list-notifications.usecase";
+import { MarkNotificationReadUseCase } from "../../application/usecase/implementations/notification/mark-notification-read.usecase";
+import { MarkAllNotificationsReadUseCase } from "../../application/usecase/implementations/notification/mark-all-notifications-read.usecase";
+import { IListAgencyReviewsUseCase } from "../../application/usecase/interfaces/review/list-agency-reviews.interface";
+import { ListAgencyReviewsUseCase } from "../../application/usecase/implementations/review/list-agency-reviews.usecase";
+import { ICreateAgencyReviewUseCase } from "../../application/usecase/interfaces/review/create-agency-review.interface";
+import { CreateAgencyReviewUseCase } from "../../application/usecase/implementations/review/create-agency-review.usecase";
+import { IListAgencyReviewsByPackageUseCase } from "../../application/usecase/interfaces/review/list-agency-reviews-by-package.interface";
+import { ListAgencyReviewsByPackageUseCase } from "../../application/usecase/implementations/review/list-agency-reviews-by-package.usecase";
 
 export class UsecaseRegistory {
   static registerUsecase(): void {
@@ -324,6 +336,14 @@ export class UsecaseRegistory {
 
     container.register<IVerifyResetTokenUsecase>("IVerifyResetTokenUsecase", {
       useClass: VerifyResetTokenUsecase,
+    });
+
+    container.register<IVerifyOldPasswordUseCase>("IVerifyOldPasswordUseCase", {
+      useClass: VerifyOldPasswordUseCase,
+    });
+
+    container.register<IChangePasswordUseCase>("IChangePasswordUseCase", {
+      useClass: ChangePasswordUseCase,
     });
     container.register<IReverifyAgencyUsecase>("IReverifyAgencyUsecase", {
       useClass: ReverifyAgencyUsecase,
@@ -489,14 +509,6 @@ export class UsecaseRegistory {
       useClass: CheckWishlistStatusUsecase,
     });
 
-    // Review use cases
-    container.register<ICreateAgencyReviewUseCase>("ICreateAgencyReviewUseCase", {
-      useClass: CreateAgencyReviewUseCase,
-    });
-    container.register<IListAgencyReviewsUseCase>("IListAgencyReviewsUseCase", {
-      useClass: ListAgencyReviewsUseCase,
-    });
-
     // Special Needs Master use cases
     container.register<IListActiveSpecialNeedsMasterUsecase>("IListActiveSpecialNeedsMasterUsecase", {
       useClass: ListActiveSpecialNeedsMasterUsecase,
@@ -654,9 +666,33 @@ export class UsecaseRegistory {
       { useClass: ExportSalesReportUseCase }
     );
 
+    container.register<IListAgencyReviewsUseCase>(
+      "IListAgencyReviewsUseCase",
+      { useClass: ListAgencyReviewsUseCase }
+    );
+    container.register<IListAgencyReviewsByPackageUseCase>(
+      "IListAgencyReviewsByPackageUseCase",
+      { useClass: ListAgencyReviewsByPackageUseCase }
+    );
+    container.register<ICreateAgencyReviewUseCase>(
+      "ICreateAgencyReviewUseCase",
+      { useClass: CreateAgencyReviewUseCase }
+    );
+
     container.register<IListChatConversationsUseCase>(
       "IListChatConversationsUseCase",
       { useClass: ListChatConversationsUseCase }
     );
+
+    // Notification use cases
+    container.register<IListMyNotificationsUseCase>("IListMyNotificationsUseCase", {
+      useClass: ListMyNotificationsUseCase,
+    });
+    container.register<IMarkNotificationReadUseCase>("IMarkNotificationReadUseCase", {
+      useClass: MarkNotificationReadUseCase,
+    });
+    container.register<IMarkAllNotificationsReadUseCase>("IMarkAllNotificationsReadUseCase", {
+      useClass: MarkAllNotificationsReadUseCase,
+    });
   }
 }

@@ -12,9 +12,6 @@ export class ErrorMiddleware implements IErrorMiddleware {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _next: NextFunction
   ): void {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/789d46c6-007a-4f0b-95d7-2eaa9740c6d4',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'error.middleware.ts:handleError',message:'error received',data:{errName:err?.name,errMessage:err?.message,constructorName:err?.constructor?.name,isCustomError:err instanceof CustomError,isNotFoundError:err instanceof NotFoundError,isValidationError:err instanceof ValidationError},hypothesisId:'A',timestamp:Date.now()})}).catch(()=>{});
-    // #endregion agent log
     let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     let message = ERROR_MESSAGE.AUTHENTICATION.SERVER_ERROR;
 

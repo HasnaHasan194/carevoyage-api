@@ -10,6 +10,7 @@ import { ValidationError } from "../../../../domain/errors/validationError";
 import { PackageMapper } from "../../../mapper/package.mapper";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class CompletePackageUsecase implements ICompletePackageUsecase {
@@ -23,7 +24,9 @@ export class CompletePackageUsecase implements ICompletePackageUsecase {
     @inject("ICaretakerProfileRepository")
     private _caretakerProfileRepository: ICaretakerProfileRepository,
     @inject("IChatConversationProvisioner")
-    private readonly _chatConversationProvisioner: IChatConversationProvisioner
+    private readonly _chatConversationProvisioner: IChatConversationProvisioner,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(
@@ -77,11 +80,35 @@ export class CompletePackageUsecase implements ICompletePackageUsecase {
         booking.status
       );
       if (booking.caretakerId) {
+        const caretakerProfile = await this._caretakerProfileRepository.findById(
+          booking.caretakerId
+        );
         await this._caretakerProfileRepository.updateAvailabilityStatus(
           booking.caretakerId,
           "AVAILABLE"
         );
+        if (caretakerProfile?.userId) {
+          await this._notificationService.createAndPublish({
+            recipientUserId: caretakerProfile.userId,
+            recipientRole: "caretaker",
+            type: "PACKAGE_COMPLETED",
+            title: "Trip completed",
+            message: "A trip you worked on has been marked completed.",
+            link: "/caretaker/trips",
+            metadata: { type: "PACKAGE_COMPLETED", packageId },
+          });
+        }
       }
+
+      await this._notificationService.createAndPublish({
+        recipientUserId: booking.clientId,
+        recipientRole: "client",
+        type: "PACKAGE_COMPLETED",
+        title: "Trip completed",
+        message: "Your trip has been completed. You can now leave a review.",
+        link: "/client/bookings",
+        metadata: { type: "PACKAGE_COMPLETED", packageId },
+      });
     }
 
     // Fetch itinerary

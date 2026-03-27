@@ -2,12 +2,15 @@ import { ClientSession } from "mongoose";
 import { inject, injectable } from "tsyringe";
 import { IWalletRepository } from "../../../../domain/repositoryInterfaces/Wallet/wallet.repository.interface";
 import { IWalletTransactionRepository } from "../../../../domain/repositoryInterfaces/Wallet/wallet-transaction.repository.interface";
+import type { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
+import type { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { ValidationError } from "../../../../domain/errors/validationError";
 import { ERROR_MESSAGE } from "../../../../shared/constants/constants";
 import type {
   IDebitWalletUseCase,
   DebitWalletParams,
 } from "../../interfaces/wallet/debit-wallet.interface";
+import { NotificationService } from "../../../services/notification/notification.service";
 
 @injectable()
 export class DebitWalletUseCase implements IDebitWalletUseCase {
@@ -15,7 +18,13 @@ export class DebitWalletUseCase implements IDebitWalletUseCase {
     @inject("IWalletRepository")
     private readonly _walletRepository: IWalletRepository,
     @inject("IWalletTransactionRepository")
-    private readonly _walletTransactionRepository: IWalletTransactionRepository
+    private readonly _walletTransactionRepository: IWalletTransactionRepository,
+    @inject("IAgencyRepository")
+    private readonly _agencyRepository: IAgencyRepository,
+    @inject("ICaretakerProfileRepository")
+    private readonly _caretakerProfileRepository: ICaretakerProfileRepository,
+    @inject(NotificationService)
+    private readonly _notificationService: NotificationService
   ) {}
 
   async execute(
@@ -59,5 +68,49 @@ export class DebitWalletUseCase implements IDebitWalletUseCase {
       },
       clientSession
     );
+
+    const caretakerProfile =
+      params.ownerType === "USER"
+        ? await this._caretakerProfileRepository.findByUserId(params.ownerId)
+        : null;
+
+    const recipientUserId =
+      params.ownerType === "AGENCY"
+        ? (await this._agencyRepository.findById(params.ownerId))?.userId
+        : params.ownerId;
+
+    if (recipientUserId) {
+      const recipientRole =
+        params.ownerType === "USER"
+          ? (caretakerProfile ? ("caretaker" as const) : ("client" as const))
+          : params.ownerType === "AGENCY"
+            ? ("agency_owner" as const)
+            : ("admin" as const);
+
+      await this._notificationService.createAndPublish({
+        recipientUserId,
+        recipientRole,
+        type: "WALLET_DEBITED",
+        title: "Wallet debited",
+        message: params.description?.trim()
+          ? params.description.trim()
+          : `Your wallet was debited by ${params.amount}.`,
+        link:
+          recipientRole === "agency_owner"
+            ? "/agency/wallet"
+            : recipientRole === "admin"
+              ? "/admin/wallet-transactions"
+              : recipientRole === "caretaker"
+                ? "/caretaker/trips"
+                : "/client/wallet",
+        metadata: {
+          type: "WALLET_DEBITED",
+          walletId: wallet._id,
+          amount: params.amount,
+          source: params.source,
+          referenceId: params.referenceId,
+        },
+      });
+    }
   }
 }
