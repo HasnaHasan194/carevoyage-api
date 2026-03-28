@@ -23,6 +23,9 @@ export class App {
   private _app: Application;
   constructor() {
     this._app = express();
+    if (process.env.NODE_ENV === "production") {
+      this._app.set("trust proxy", 1);
+    }
     this.configureMiddleware();
 
     this.configureRoutes();
