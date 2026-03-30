@@ -80,10 +80,19 @@ jobs:
     steps:
       - name: Collect SSH host keys
         id: ssh_known_hosts
+        shell: bash
         run: |
-          echo "known_hosts<<EOF" >> "$GITHUB_OUTPUT"
-          ssh-keyscan -H "${{ secrets.VM_HOST }}" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          KNOWN_HOSTS="$(ssh-keyscan -T 10 -H "${{ secrets.VM_HOST }}" 2>/dev/null)"
+          if [ -z "$KNOWN_HOSTS" ]; then
+            echo "ssh-keyscan produced no output for VM_HOST='${{ secrets.VM_HOST }}'" >&2
+            exit 1
+          fi
+          {
+            echo "known_hosts<<EOF"
+            echo "$KNOWN_HOSTS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: SSH deploy — git pull and docker compose
         uses: appleboy/ssh-action@v1.2.0
