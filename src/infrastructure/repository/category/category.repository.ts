@@ -102,8 +102,14 @@ export class CategoryRepository
     name: string,
     agencyId: string
   ): Promise<ICategoryEntity | null> {
+    const trimmed = name.trim();
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const doc = await categoryDB
-      .findOne({ name: name.trim(), agencyId, isDeleted: false })
+      .findOne({
+        name: { $regex: new RegExp(`^${escaped}$`, "i") },
+        agencyId,
+        isDeleted: false,
+      })
       .exec();
     if (!doc) return null;
     return CategoryMapper.toEntity(doc);

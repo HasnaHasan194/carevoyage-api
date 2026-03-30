@@ -170,6 +170,12 @@ export class AgencyController implements IAgencyController {
       );
     }
 
+    if (status === "AVAILABLE" && profile.verificationStatus !== "verified") {
+      throw new ValidationError(
+        "Only verified caretakers can be set to AVAILABLE"
+      );
+    }
+
     if (status !== "AVAILABLE" && status !== "INACTIVE") {
       throw new ValidationError(
         ERROR_MESSAGE.CARETAKER.INVALID_AVAILABILITY_STATUS
