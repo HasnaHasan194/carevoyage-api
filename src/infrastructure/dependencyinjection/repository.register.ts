@@ -5,8 +5,6 @@ import { IAgencyRepository } from "../../domain/repositoryInterfaces/Agency/agen
 import { AgencyRepository } from "../repository/agency/agency.repository";
 import { IAdminRepository } from "../../domain/repositoryInterfaces/Admin/admin.repository.interface";
 import { AdminRepository } from "../repository/admin/admin.repository";
-import { IEmailService } from "../../domain/service-interfaces/email-service.interface";
-import { EmailService } from "../service/email.service";
 import { ICaretakerProfileRepository } from "../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { CaretakerProfileRepository } from "../repository/caretaker/caretaker-profile.repository";
 import { ITokenService } from "../../domain/service-interfaces/token-service-interfaces";
@@ -67,11 +65,6 @@ export class RepositoryRegister {
     container.register<IAdminRepository>(
       "IAdminRepository",
       { useClass: AdminRepository } as ClassProvider<IAdminRepository>
-    );
-
-    container.register<IEmailService>(
-      "IEmailService",
-      { useClass: EmailService } as ClassProvider<IEmailService>
     );
 
     container.register<ICaretakerProfileRepository>(

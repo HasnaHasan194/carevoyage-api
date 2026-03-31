@@ -257,17 +257,31 @@ export class PackageRepository
       normalizedStartDate.setUTCHours(0, 0, 0, 0);
     }
 
-    const minEndDate =
-      normalizedStartDate && normalizedStartDate > today
-        ? normalizedStartDate
-        : today;
-
-    matchConditions.endDate = { $gte: minEndDate };
-
-    if (endDate) {
+    // Date filtering
+    // Default behavior: only show upcoming packages (endDate >= today).
+    // If the user provides BOTH startDate and endDate, require the package to be fully
+    // within that window (startDate >= filter.startDate AND endDate <= filter.endDate),
+    // while still keeping upcoming-only behavior.
+    if (normalizedStartDate && endDate) {
       const normalizedEndDate = new Date(endDate);
       normalizedEndDate.setUTCHours(23, 59, 59, 999);
-      matchConditions.startDate = { $lte: normalizedEndDate };
+
+      matchConditions.startDate = { $gte: normalizedStartDate };
+      matchConditions.endDate = { $gte: today, $lte: normalizedEndDate };
+    } else {
+      const minEndDate =
+        normalizedStartDate && normalizedStartDate > today
+          ? normalizedStartDate
+          : today;
+
+      matchConditions.endDate = { $gte: minEndDate };
+
+      if (endDate) {
+        const normalizedEndDate = new Date(endDate);
+        normalizedEndDate.setUTCHours(23, 59, 59, 999);
+        // Overlap-style constraint used historically when only endDate is provided.
+        matchConditions.startDate = { $lte: normalizedEndDate };
+      }
     }
 
     // Search filter (PackageName, Category, Tags)

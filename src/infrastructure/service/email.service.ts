@@ -9,6 +9,11 @@ import { eventBus } from "../../shared/eventBus";
 @injectable()
 export class EmailService implements IEmailService {
   private transporter: Transporter;
+  private readonly boundSendMail: (
+    to: string,
+    subject: string,
+    html: string,
+  ) => Promise<void>;
 
   constructor() {
     this.transporter = nodemailer.createTransport({
@@ -19,11 +24,13 @@ export class EmailService implements IEmailService {
       },
     });
 
+    this.boundSendMail = this.sendMail.bind(this);
     this.registerEventListener();
   }
 
   private registerEventListener(): void {
-    eventBus.on(EVENT_EMMITER_TYPE.SENDMAIL, this.sendMail.bind(this));
+    eventBus.removeAllListeners(EVENT_EMMITER_TYPE.SENDMAIL);
+    eventBus.on(EVENT_EMMITER_TYPE.SENDMAIL, this.boundSendMail);
   }
 
   async sendMail(to: string, subject: string, html: string): Promise<void> {
