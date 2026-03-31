@@ -5,6 +5,7 @@ export class BookingMapper {
   static toEntity(doc: IBookingModel): IBookingEntity {
     return {
       _id: String(doc._id),
+      bookingId: (doc as unknown as { bookingId?: string | null }).bookingId ?? undefined,
       clientId: String(doc.clientId),
       packageId: String(doc.packageId),
       agencyId: String(doc.agencyId),

@@ -108,7 +108,11 @@ export class SalesReportRepository implements ISalesReportRepository {
           rows: [
             {
               $project: {
-                bookingId: { $toString: "$_id" },
+                bookingId: {
+                  $toString: {
+                    $ifNull: ["$bookingId", "$_id"],
+                  },
+                },
                 packageName: 1,
                 agencyName: 1,
                 totalAmount: 1,
@@ -277,7 +281,11 @@ export class SalesReportRepository implements ISalesReportRepository {
           rows: [
             {
               $project: {
-                bookingId: { $toString: "$_id" },
+                bookingId: {
+                  $toString: {
+                    $ifNull: ["$bookingId", "$_id"],
+                  },
+                },
                 packageName: 1,
                 agencyName: 1,
                 totalAmount: 1,

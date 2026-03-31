@@ -11,6 +11,13 @@ export interface IBookingModel
 
 export const bookingSchema = new Schema<IBookingModel>(
   {
+    bookingId: {
+      type: String,
+      default: null,
+      unique: true,
+      sparse: true,
+      index: true,
+    },
     clientId: {
       type: Types.ObjectId,
       ref: "user",

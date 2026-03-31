@@ -4,6 +4,7 @@ import { ValidationError } from "../../../../domain/errors/validationError";
 import { IPackageRepository } from "../../../../domain/repositoryInterfaces/Package/package.repository.interface";
 import { IAgencySpecialNeedsRepository } from "../../../../domain/repositoryInterfaces/AgencySpecialNeeds/agency-special-needs.repository.interface";
 import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import { IBookingCheckoutDraftRepository } from "../../../../domain/repositoryInterfaces/BookingCheckoutDraft/booking-checkout-draft.repository.interface";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IPaymentService } from "../../../../domain/service-interfaces/payment-service.interface";
 import {
@@ -17,7 +18,6 @@ import {
 import { config } from "../../../../shared/config";
 import { IPackageEntity } from "../../../../domain/entities/package.entity";
 import { CustomError } from "../../../../domain/errors/customError";
-import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 
 @injectable()
 export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCase {
@@ -28,12 +28,12 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
     private _agencySpecialNeedsRepository: IAgencySpecialNeedsRepository,
     @inject("IBookingRepository")
     private _bookingRepository: IBookingRepository,
+    @inject("IBookingCheckoutDraftRepository")
+    private _bookingCheckoutDraftRepository: IBookingCheckoutDraftRepository,
     @inject("ICaretakerProfileRepository")
     private _caretakerProfileRepository: ICaretakerProfileRepository,
     @inject("IPaymentService")
     private _paymentService: IPaymentService,
-    @inject("IChatConversationProvisioner")
-    private readonly _chatConversationProvisioner: IChatConversationProvisioner,
   ) {}
 
   async execute(
@@ -58,7 +58,7 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
     const bookings = await this._bookingRepository.findByClientId(clientId);
 
     const activeBookings = bookings.filter(
-      (b) => b.status === "CONFIRMED" || b.status === "pending_payment",
+      (b) => b.status === "CONFIRMED",
     );
 
     const packageIds = activeBookings.map((bkg) => bkg.packageId);
@@ -136,24 +136,25 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       );
     }
 
-    const booking = await this._bookingRepository.save({
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+    const draft = await this._bookingCheckoutDraftRepository.save({
       clientId,
       packageId: pkg._id,
       agencyId: pkg.agencyId,
       startDate: pkg.startDate,
+      endDate: pkg.endDate,
       basePrice,
       caretakerFee,
       specialNeedsFee,
       totalAmount,
       currency: "inr",
-      status: "pending_payment",
       caretakerId,
       selectedSpecialNeedIds: selectedSpecialNeedIds.length
         ? selectedSpecialNeedIds
         : undefined,
+      status: "PENDING",
+      expiresAt,
     });
-
-    await this._chatConversationProvisioner.provisionForBooking(booking);
 
     const baseUrl = config.client.URI || "http://localhost:5173";
     const successUrl = `${baseUrl}/booking/success?session_id={CHECKOUT_SESSION_ID}`;
@@ -164,7 +165,7 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       "inr",
       successUrl,
       cancelUrl,
-      { bookingId: String(booking._id) },
+      { checkoutDraftId: String(draft._id) },
       {
         name: pkg.PackageName,
         description: pkg.description,
@@ -172,11 +173,11 @@ export class CreateBookingCheckoutUseCase implements ICreateBookingCheckoutUseCa
       },
     );
 
-    await this._bookingRepository.updateById(booking._id, {
+    await this._bookingCheckoutDraftRepository.updateById(draft._id, {
       stripeSessionId: sessionId,
     });
 
-    return { url, sessionId, bookingId: booking._id };
+    return { url, sessionId, checkoutDraftId: draft._id };
   }
 
   private getTripDays(startDate: Date, endDate: Date): number {

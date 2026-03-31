@@ -1,5 +1,6 @@
 export interface ClientBookingSummaryDTO {
   id: string;
+  bookingId?: string;
   packageId: string;
   packageName: string;
   status: string;

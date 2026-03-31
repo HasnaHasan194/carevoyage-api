@@ -8,6 +8,7 @@ import { PreviewBookingPriceRequestDTO } from "../../../application/dto/request/
 import { ConfirmBookingSuccessRequestDTO } from "../../../application/dto/request/confirm-booking-success-request.dto";
 import { RequestCaretakerRequestDTO } from "../../../application/dto/request/request-caretaker-request.dto";
 import { CancelBookingRequestDTO } from "../../../application/dto/request/cancel-booking-request.dto";
+import { CreateBookingWalletPayRequestDTO } from "../../../application/dto/request/create-booking-wallet-pay-request.dto";
 import {
   bookingController,
   blockedUserMiddleware,
@@ -29,6 +30,12 @@ export class BookingRoutes extends BaseRoute {
       ROUTES.BOOKING.CHECKOUT,
       validationMiddleware(CreateBookingCheckoutRequestDTO),
       asyncHandler(bookingController.createCheckout.bind(bookingController))
+    );
+
+    this.router.post(
+      ROUTES.BOOKING.WALLET_PAY,
+      validationMiddleware(CreateBookingWalletPayRequestDTO),
+      asyncHandler(bookingController.walletPay.bind(bookingController))
     );
     this.router.get(
       ROUTES.BOOKING.PACKAGE_SPECIAL_NEEDS,

@@ -31,6 +31,8 @@ import { IAgencySpecialNeedsMasterRepository } from "../../domain/repositoryInte
 import { AgencySpecialNeedsMasterRepository } from "../repository/agency-special-needs-master/agency-special-needs-master.repository";
 import { IBookingRepository } from "../../domain/repositoryInterfaces/Booking/booking.repository.interface";
 import { BookingRepository } from "../repository/booking/booking.repository";
+import { IBookingCheckoutDraftRepository } from "../../domain/repositoryInterfaces/BookingCheckoutDraft/booking-checkout-draft.repository.interface";
+import { BookingCheckoutDraftRepository } from "../repository/booking-checkout-draft/booking-checkout-draft.repository";
 import { ICaretakerRequestRepository } from "../../domain/repositoryInterfaces/CaretakerRequest/caretaker-request.repository.interface";
 import { CaretakerRequestRepository } from "../repository/caretaker-request/caretaker-request.repository";
 import { IWalletRepository } from "../../domain/repositoryInterfaces/Wallet/wallet.repository.interface";
@@ -130,6 +132,13 @@ export class RepositoryRegister {
     container.register<IBookingRepository>(
       "IBookingRepository",
       { useClass: BookingRepository } as ClassProvider<IBookingRepository>
+    );
+
+    container.register<IBookingCheckoutDraftRepository>(
+      "IBookingCheckoutDraftRepository",
+      {
+        useClass: BookingCheckoutDraftRepository,
+      } as ClassProvider<IBookingCheckoutDraftRepository>
     );
 
     container.register<ICaretakerRequestRepository>(

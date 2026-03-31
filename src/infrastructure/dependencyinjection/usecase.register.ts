@@ -149,6 +149,8 @@ import { IListActiveAgencySpecialNeedsMasterUsecase } from "../../application/us
 import { ListActiveAgencySpecialNeedsMasterUsecase } from "../../application/usecase/implementations/agency-special-needs-master/list-active-agency-special-needs-master.usecase";
 import { ICreateBookingCheckoutUseCase } from "../../application/usecase/interfaces/booking/create-booking-checkout.interface";
 import { CreateBookingCheckoutUseCase } from "../../application/usecase/implementations/booking/create-booking-checkout.usecase";
+import type { ICreateBookingWalletPayUseCase } from "../../application/usecase/interfaces/booking/create-booking-wallet-pay.interface";
+import { CreateBookingWalletPayUseCase } from "../../application/usecase/implementations/booking/create-booking-wallet-pay.usecase";
 import { IHandleStripeWebhookUsecase } from "../../application/usecase/interfaces/payment/handle-stripe-webhook-usecase.interface";
 import { HandleStripeWebhookUsecase } from "../../application/usecase/implementations/payment/handle-stripe-webhook.usecase";
 import { IGetPackageSpecialNeedsForBookingUseCase } from "../../application/usecase/interfaces/booking/get-package-special-needs-for-booking.interface";
@@ -193,6 +195,8 @@ import { IDebitWalletUseCase } from "../../application/usecase/interfaces/wallet
 import { DebitWalletUseCase } from "../../application/usecase/implementations/wallet/debit-wallet.usecase";
 import { ICreditBookingPayoutUseCase } from "../../application/usecase/interfaces/wallet/credit-booking-payout.interface";
 import { CreditBookingPayoutUseCase } from "../../application/usecase/implementations/wallet/credit-booking-payout.usecase";
+import type { ICreateWalletTopupCheckoutUseCase } from "../../application/usecase/interfaces/wallet/create-wallet-topup-checkout.interface";
+import { CreateWalletTopupCheckoutUseCase } from "../../application/usecase/implementations/wallet/create-wallet-topup-checkout.usecase";
 import { IWalletOwnerResolver } from "../../application/usecase/interfaces/wallet/wallet-owner-resolver.interface";
 import { WalletOwnerResolver } from "../../application/usecase/implementations/wallet/wallet-owner-resolver";
 import { IListWalletTransactionsUseCase } from "../../application/usecase/interfaces/admin/list-wallet-transactions.interface";
@@ -560,6 +564,11 @@ export class UsecaseRegistory {
       useClass: CreateBookingCheckoutUseCase,
     });
 
+    container.register<ICreateBookingWalletPayUseCase>(
+      "ICreateBookingWalletPayUseCase",
+      { useClass: CreateBookingWalletPayUseCase }
+    );
+
     container.register<IHandleStripeWebhookUsecase>("IHandleStripeWebhookUsecase", {
       useClass: HandleStripeWebhookUsecase,
     });
@@ -641,6 +650,11 @@ export class UsecaseRegistory {
       {
         useClass: GetMyWalletTransactionsUseCase,
       }
+    );
+
+    container.register<ICreateWalletTopupCheckoutUseCase>(
+      "ICreateWalletTopupCheckoutUseCase",
+      { useClass: CreateWalletTopupCheckoutUseCase }
     );
 
     container.register<IWalletOwnerDisplayService>("IWalletOwnerDisplayService", {

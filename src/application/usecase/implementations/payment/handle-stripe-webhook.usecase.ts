@@ -2,12 +2,17 @@ import Stripe from "stripe";
 import { inject, injectable } from "tsyringe";
 import { IPaymentService } from "../../../../domain/service-interfaces/payment-service.interface";
 import { IBookingRepository } from "../../../../domain/repositoryInterfaces/Booking/booking.repository.interface";
+import { IBookingCheckoutDraftRepository } from "../../../../domain/repositoryInterfaces/BookingCheckoutDraft/booking-checkout-draft.repository.interface";
 import { ICaretakerProfileRepository } from "../../../../domain/repositoryInterfaces/Caretaker/caretaker-profile.repository.interface";
 import { IAgencyRepository } from "../../../../domain/repositoryInterfaces/Agency/agency.repository.interface";
 import { IHandleStripeWebhookUsecase } from "../../interfaces/payment/handle-stripe-webhook-usecase.interface";
 import type { ICreditBookingPayoutUseCase } from "../../interfaces/wallet/credit-booking-payout.interface";
+import type { ICreditWalletUseCase } from "../../interfaces/wallet/credit-wallet.interface";
+import type { IWalletTransactionRepository } from "../../../../domain/repositoryInterfaces/Wallet/wallet-transaction.repository.interface";
 import type { IChatConversationProvisioner } from "../../../services/chat/chat-conversation-provisioner";
 import { NotificationService } from "../../../services/notification/notification.service";
+import { finalizeBookingFromCheckoutDraft } from "../../../services/booking/booking-checkout-finalizer";
+import type { IDBSession } from "../../../../infrastructure/interface/session.interface";
 
 @injectable()
 export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
@@ -16,12 +21,20 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
     private _paymentService: IPaymentService,
     @inject("IBookingRepository")
     private _bookingRepository: IBookingRepository,
+    @inject("IBookingCheckoutDraftRepository")
+    private _bookingCheckoutDraftRepository: IBookingCheckoutDraftRepository,
     @inject("ICaretakerProfileRepository")
     private _caretakerProfileRepository: ICaretakerProfileRepository,
     @inject("IAgencyRepository")
     private readonly _agencyRepository: IAgencyRepository,
+    @inject("IDBSession")
+    private _dbSession: IDBSession,
     @inject("ICreditBookingPayoutUseCase")
     private _creditBookingPayoutUseCase: ICreditBookingPayoutUseCase,
+    @inject("ICreditWalletUseCase")
+    private readonly _creditWalletUseCase: ICreditWalletUseCase,
+    @inject("IWalletTransactionRepository")
+    private readonly _walletTransactionRepository: IWalletTransactionRepository,
     @inject("IChatConversationProvisioner")
     private readonly _chatConversationProvisioner: IChatConversationProvisioner,
     @inject(NotificationService)
@@ -44,73 +57,50 @@ export class HandleStripeWebhookUsecase implements IHandleStripeWebhookUsecase {
     }
 
     const session = event.data.object as Stripe.Checkout.Session;
-    const bookingId = session.metadata?.bookingId;
+    const checkoutDraftId = session.metadata?.checkoutDraftId;
+    const walletTopupOwnerId = session.metadata?.walletTopupOwnerId;
+    const walletTopupOwnerType = session.metadata?.walletTopupOwnerType;
 
-    if (!bookingId) return;
+    if (checkoutDraftId) {
+      await finalizeBookingFromCheckoutDraft({
+        checkoutDraftId,
+        stripeSessionId: session.id,
+        bookingCheckoutDraftRepository: this._bookingCheckoutDraftRepository,
+        bookingRepository: this._bookingRepository,
+        caretakerProfileRepository: this._caretakerProfileRepository,
+        agencyRepository: this._agencyRepository,
+        dbSession: this._dbSession,
+        creditBookingPayoutUseCase: this._creditBookingPayoutUseCase,
+        chatConversationProvisioner: this._chatConversationProvisioner,
+        notificationService: this._notificationService,
+      });
+      return;
+    }
 
-    const booking = await this._bookingRepository.findById(bookingId);
-    if (!booking || booking.status !== "pending_payment") return;
+    // Wallet top-up flow (additive). Only triggers when metadata is present.
+    if (walletTopupOwnerId && walletTopupOwnerType === "USER") {
+      if (session.payment_status !== "paid") return;
 
-    await this._bookingRepository.updateById(bookingId, {
-      status: "CONFIRMED",
-      paidAt: new Date(),
-    });
+      const amountTotal = session.amount_total ?? 0;
+      const amount = Math.round(amountTotal / 100);
+      if (amount <= 0) return;
 
-    const agency = await this._agencyRepository.findById(booking.agencyId);
-    if (agency) {
-      await this._notificationService.createAndPublish({
-        recipientUserId: agency.userId,
-        recipientRole: "agency_owner",
-        type: "BOOKING_CONFIRMED",
-        title: "New booking confirmed",
-        message: "A booking has been confirmed and paid.",
-        link: "/agency/packages",
-        metadata: { type: "BOOKING_CONFIRMED", bookingId },
+      const referenceId = `TOPUP:${session.id}`;
+      const alreadyCredited =
+        await this._walletTransactionRepository.existsByReferenceIdAndSource(
+          referenceId,
+          "PAYMENT"
+        );
+      if (alreadyCredited) return;
+
+      await this._creditWalletUseCase.execute({
+        ownerId: walletTopupOwnerId,
+        ownerType: "USER",
+        amount,
+        source: "PAYMENT",
+        referenceId,
+        description: "Wallet top-up",
       });
     }
-
-    await this._notificationService.createAndPublish({
-      recipientUserId: booking.clientId,
-      recipientRole: "client",
-      type: "BOOKING_CONFIRMED",
-      title: "Booking confirmed",
-      message: "Your booking payment was successful and the booking is confirmed.",
-      link: `/client/bookings/${bookingId}`,
-      metadata: { type: "BOOKING_CONFIRMED", bookingId },
-    });
-
-    if (booking.caretakerId) {
-      const caretakerProfile = await this._caretakerProfileRepository.findById(
-        booking.caretakerId
-      );
-      await this._caretakerProfileRepository.updateAvailabilityStatus(
-        booking.caretakerId,
-        "BUSY"
-      );
-      if (caretakerProfile?.userId) {
-        await this._notificationService.createAndPublish({
-          recipientUserId: caretakerProfile.userId,
-          recipientRole: "caretaker",
-          type: "BOOKING_CONFIRMED",
-          title: "New trip assigned",
-          message: "A booking you’re assigned to is confirmed.",
-          link: "/caretaker/trips",
-          metadata: { type: "BOOKING_CONFIRMED", bookingId },
-        });
-      }
-    }
-
-    await this._creditBookingPayoutUseCase.execute(
-      {
-        bookingId: booking._id,
-        agencyId: booking.agencyId,
-        totalAmount: booking.totalAmount,
-      }
-    );
-
-    await this._chatConversationProvisioner.provisionForBooking({
-      ...booking,
-      status: "CONFIRMED",
-    });
   }
 }

@@ -16,6 +16,7 @@ import { IGetClientBookingDetailUseCase } from "../../../application/usecase/int
 import { ICancelClientBookingUseCase } from "../../../application/usecase/interfaces/booking/cancel-client-booking.interface";
 import { IRequestRefundUseCase } from "../../../application/usecase/interfaces/refund/request-refund.interface";
 import { ICreateCaretakerRequestUseCase } from "../../../application/usecase/interfaces/caretaker-request/create-caretaker-request.interface";
+import type { ICreateBookingWalletPayUseCase } from "../../../application/usecase/interfaces/booking/create-booking-wallet-pay.interface";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 
 @injectable()
@@ -40,7 +41,9 @@ export class BookingController {
     @inject("ICancelClientBookingUseCase")
     private readonly _cancelClientBookingUseCase: ICancelClientBookingUseCase,
     @inject("IRequestRefundUseCase")
-    private readonly _requestRefundUseCase: IRequestRefundUseCase
+    private readonly _requestRefundUseCase: IRequestRefundUseCase,
+    @inject("ICreateBookingWalletPayUseCase")
+    private readonly _createBookingWalletPayUseCase: ICreateBookingWalletPayUseCase
   ) {}
 
   async createCheckout(req: CustomRequest, res: Response): Promise<void> {
@@ -71,6 +74,36 @@ export class BookingController {
       SUCCESS_MESSAGE.BOOKING.CHECKOUT_CREATED,
       result
     );
+  }
+
+  async walletPay(req: CustomRequest, res: Response): Promise<void> {
+    if (!req.user) {
+      ResponseHelper.error(
+        res,
+        ERROR_MESSAGE.GENERAL.UNAUTHORIZED,
+        HTTP_STATUS.UNAUTHORIZED
+      );
+      return;
+    }
+
+    if (req.user.role !== "client") {
+      ResponseHelper.error(res, ERROR_MESSAGE.GENERAL.FORBIDDEN, HTTP_STATUS.FORBIDDEN);
+      return;
+    }
+
+    const { packageId, caretakerId, specialNeedIds } = req.body as {
+      packageId: string;
+      caretakerId?: string;
+      specialNeedIds?: string[];
+    };
+
+    const result = await this._createBookingWalletPayUseCase.execute(req.user.id, {
+      packageId,
+      caretakerId,
+      specialNeedIds,
+    });
+
+    ResponseHelper.success(res, HTTP_STATUS.OK, "Wallet payment successful", result);
   }
 
   async getPackageSpecialNeeds(req: CustomRequest, res: Response): Promise<void> {

@@ -1,7 +1,7 @@
 export interface CreateBookingCheckoutResult {
   url: string;
   sessionId: string;
-  bookingId: string;
+  checkoutDraftId: string;
 }
 
 export interface ICreateBookingCheckoutUseCase {

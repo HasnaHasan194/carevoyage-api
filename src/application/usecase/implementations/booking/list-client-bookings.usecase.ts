@@ -55,6 +55,7 @@ export class ListClientBookingsUseCase implements IListClientBookingsUseCase {
 
       result.push({
         id: booking._id,
+        bookingId: booking.bookingId,
         packageId: booking.packageId,
         packageName: pkg?.PackageName ?? "Unknown package",
         status: booking.status,

@@ -85,6 +85,7 @@ export const ROUTES = {
 
   BOOKING: {
     CHECKOUT: "/checkout",
+    WALLET_PAY: "/wallet-pay",
     PACKAGE_SPECIAL_NEEDS: "/package/:packageId/special-needs",
     PRICE_PREVIEW: "/price-preview",
     PACKAGE_CARETAKERS: "/package/:packageId/caretakers",
@@ -110,6 +111,7 @@ export const ROUTES = {
   WALLET: {
     ME: "/me",
     ME_TRANSACTIONS: "/me/transactions",
+    TOPUP_CHECKOUT: "/topup/checkout",
   },
 
   ADMIN: {

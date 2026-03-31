@@ -7,6 +7,8 @@ export type TBookingStatus =
 
 export interface IBookingEntity {
   _id: string;
+  /** User-readable booking code (e.g. BKG-7F3A92). */
+  bookingId?: string;
   clientId: string;
   packageId: string;
   agencyId: string;

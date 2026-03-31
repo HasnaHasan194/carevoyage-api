@@ -64,7 +64,7 @@ export class ListAgencyPackageBookingsUseCase
 
       result.push({
         id: booking._id,
-        bookingId: booking._id,
+        bookingId: booking.bookingId ?? booking._id,
         packageId: booking.packageId,
         packageName: pkg?.PackageName ?? "Unknown package",
         clientId: booking.clientId,
