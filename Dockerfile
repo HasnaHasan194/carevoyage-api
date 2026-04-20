@@ -21,7 +21,7 @@ COPY --from=build /app/dist ./dist
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-RUN mkdir -p /app/logs && chown -R appuser:appuser /app
+RUN mkdir -p /app/logs && chown -R appuser:appgroup /app
 
 USER appuser
 
