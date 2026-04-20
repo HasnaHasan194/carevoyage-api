@@ -12,7 +12,7 @@ async function main() {
   await mongoose.connect(uri);
 
   // Backfill only documents missing bookingId.
-  const cursor = bookingDB
+  const oldBookingdata = bookingDB
     .find({
       $or: [{ bookingId: { $exists: false } }, { bookingId: null }, { bookingId: "" }],
     })
@@ -22,7 +22,7 @@ async function main() {
   let updated = 0;
   let scanned = 0;
 
-  for await (const doc of cursor) {
+  for await (const doc of oldBookingdata) {
     scanned += 1;
 
     for (let attempt = 0; attempt < 10; attempt += 1) {

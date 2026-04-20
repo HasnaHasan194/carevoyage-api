@@ -46,7 +46,7 @@ export async function finalizeBookingFromCheckoutDraft(params: {
   const sessionId = stripeSessionId ?? draft.stripeSessionId;
   if (!sessionId) return;
 
-  // Idempotency: if booking already exists for this Stripe session, do nothing.
+  //  if booking already exists for this Stripe session, do nothing.
   const existing = await bookingRepository.findByStripeSessionId(sessionId);
   if (existing) {
     await bookingCheckoutDraftRepository.updateById(draft._id, { status: "COMPLETED" });
