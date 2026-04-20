@@ -78,22 +78,6 @@ jobs:
       contents: read
 
     steps:
-      - name: Collect SSH host keys
-        id: ssh_known_hosts
-        shell: bash
-        run: |
-          set -euo pipefail
-          KNOWN_HOSTS="$(ssh-keyscan -T 10 -H "${{ secrets.VM_HOST }}" 2>/dev/null)"
-          if [ -z "$KNOWN_HOSTS" ]; then
-            echo "ssh-keyscan produced no output for VM_HOST='${{ secrets.VM_HOST }}'" >&2
-            exit 1
-          fi
-          {
-            echo "known_hosts<<EOF"
-            echo "$KNOWN_HOSTS"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
       - name: SSH deploy — git pull and docker compose
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -101,7 +85,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           port: 22
-          known_hosts: ${{ steps.ssh_known_hosts.outputs.known_hosts }}
+          fingerprint: ${{ secrets.VM_SSH_FINGERPRINT }}
           script_stop: true
           script: |
             set -euo pipefail
@@ -111,5 +95,9 @@ jobs:
             fi
             cd "$DEPLOY_PATH"
             git pull origin main
+            docker system df || true
+            docker image prune -af || true
+            docker builder prune -af || true
+            docker container prune -f || true
             docker compose pull api
-            docker compose up -d
+            docker compose up -d --no-build api
