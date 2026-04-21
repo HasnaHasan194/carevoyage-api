@@ -27,8 +27,8 @@ export class CreateAgencyReviewRequestDTO {
   @IsNotEmpty({ message: "Review text is required" })
   @MinLength(3, { message: "Review text must be at least 3 characters" })
   @MaxLength(300, { message: "Review text must be at most 300 characters" })
-  @Matches(/^(?!.*\d)[\p{L}\s.,!?'"()-]+$/u, {
-    message: "Review text must contain only letters and punctuation (no numbers)",
+  @Matches(/^[\p{L}\p{N}\s.,!?'"()\-@#$%^&*+=_:;/\\[\]{}<>`~|]+$/u, {
+    message: "Review text may contain letters, numbers, spaces, and symbols",
   })
   reviewText!: string;
 }

@@ -101,6 +101,8 @@ import { IBrowsePackagesUsecase } from "../../application/usecase/interfaces/pac
 import { BrowsePackagesUsecase } from "../../application/usecase/implementations/package/browse-packages.usecase";
 import { IGetUpcomingClientPackagesUsecase } from "../../application/usecase/interfaces/package/get-upcoming-client-packages.interface";
 import { GetUpcomingClientPackagesUsecase } from "../../application/usecase/implementations/package/get-upcoming-client-packages.usecase";
+import { IListBrowsePackageCategoriesUsecase } from "../../application/usecase/interfaces/package/list-browse-package-categories.interface";
+import { ListBrowsePackageCategoriesUsecase } from "../../application/usecase/implementations/package/list-browse-package-categories.usecase";
 import { IGetAgencyProfileUsecase } from "../../application/usecase/interfaces/agency/get-agency-profile.interface";
 import { GetAgencyProfileUsecase } from "../../application/usecase/implementations/agency/get-agency-profile.usecase";
 import { IUpdateAgencyProfileUsecase } from "../../application/usecase/interfaces/agency/update-agency-profile.interface";
@@ -467,6 +469,13 @@ export class UsecaseRegistory {
     container.register("IGetUpcomingClientPackagesUsecase", {
       useClass: GetUpcomingClientPackagesUsecase,
     });
+
+    container.register<IListBrowsePackageCategoriesUsecase>(
+      "IListBrowsePackageCategoriesUsecase",
+      {
+        useClass: ListBrowsePackageCategoriesUsecase,
+      }
+    );
 
     container.register("IUserController",{
        useClass:UserController,

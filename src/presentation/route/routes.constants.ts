@@ -81,6 +81,7 @@ export const ROUTES = {
   PACKAGE_PUBLIC: {
     ROOT: "/",
     UPCOMING: "/upcoming",
+    CATEGORIES: "/categories",
   },
 
   BOOKING: {

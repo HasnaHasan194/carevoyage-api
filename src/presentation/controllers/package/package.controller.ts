@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import { HTTP_STATUS, SUCCESS_MESSAGE } from "../../../shared/constants/constants";
 import { IBrowsePackagesUsecase } from "../../../application/usecase/interfaces/package/browse-packages.interface";
 import { IGetUpcomingClientPackagesUsecase } from "../../../application/usecase/interfaces/package/get-upcoming-client-packages.interface";
+import { IListBrowsePackageCategoriesUsecase } from "../../../application/usecase/interfaces/package/list-browse-package-categories.interface";
 import { BrowsePackagesRequestDTO, PackageSortKey, SortOrder } from "../../../application/dto/request/browse-packages-request.dto";
 import { ResponseHelper } from "../../../infrastructure/config/helper/response.helper";
 
@@ -12,7 +13,9 @@ export class PackageController {
     @inject("IBrowsePackagesUsecase")
     private readonly _browsePackagesUsecase: IBrowsePackagesUsecase,
     @inject("IGetUpcomingClientPackagesUsecase")
-    private readonly _getUpcomingClientPackagesUsecase: IGetUpcomingClientPackagesUsecase
+    private readonly _getUpcomingClientPackagesUsecase: IGetUpcomingClientPackagesUsecase,
+    @inject("IListBrowsePackageCategoriesUsecase")
+    private readonly _listBrowsePackageCategoriesUsecase: IListBrowsePackageCategoriesUsecase
   ) {}
 
   private getPageAndLimit(req: Request): { page: number; limit: number } {
@@ -59,9 +62,20 @@ export class PackageController {
     );
   }
 
+  async listBrowseCategories(_req: Request, res: Response): Promise<void> {
+    const categories = await this._listBrowsePackageCategoriesUsecase.execute();
+
+    ResponseHelper.success(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGE.PACKAGE.BROWSE_CATEGORIES_FETCHED,
+      { categories }
+    );
+  }
+
   /**
    * Client-only: returns only upcoming packages (startDate > today).
-   * Does not affect admin or agency APIs.
+   * 
    */
   async getUpcomingPackages(req: Request, res: Response): Promise<void> {
     const { page, limit } = this.getPageAndLimit(req);

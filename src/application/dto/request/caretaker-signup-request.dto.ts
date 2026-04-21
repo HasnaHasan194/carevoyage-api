@@ -16,7 +16,7 @@ export class CaretakerSignupRequestDTO {
   @IsNotEmpty({ message: "First name is required" })
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   @MinLength(2, { message: "First name must be at least 2 characters long" })
-  @Matches(/^[A-Za-z]+$/, {
+  @Matches(/^(?!([A-Za-z])\1+$)[A-Za-z]+$/, {
     message: "First name must contain only letters",
   })
   firstName!: string;
@@ -25,7 +25,7 @@ export class CaretakerSignupRequestDTO {
   @IsNotEmpty({ message: "Last name is required" })
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   @MinLength(2, { message: "Last name must be at least 2 characters long" })
-  @Matches(/^[A-Za-z]+$/, {
+  @Matches(/^(?!([A-Za-z])\1+$)[A-Za-z]+$/, {
     message: "Last name must contain only letters",
   })
   lastName!: string;
@@ -42,7 +42,7 @@ export class CaretakerSignupRequestDTO {
   @IsString({ message: "Phone must be a string" })
   @IsNotEmpty({ message: "Phone is required" })
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
-  @Matches(/^[6-9]\d{9}$/, { message: "Phone must be 10 digits and start with 6-9" })
+  @Matches(/^(?!([0-9])\1{9})[6-9]\d{9}$/, { message: "Phone must be 10 digits and start with 6-9" })
   phone!: string;
 }
 

@@ -18,7 +18,7 @@ export class RegisterRequestDTO {
   @IsString()
   @IsNotEmpty({ message: "First name is required" })
   @MinLength(2, { message: "First name must be at least 2 characters" })
-  @Matches(/^[A-Za-z]+$/, {
+  @Matches(/^(?!([A-Za-z])\1+$)[A-Za-z]+$/, {
     message: "First name must contain only letters",
   })
   @Transform(({ value }) => value?.trim())
@@ -27,7 +27,7 @@ export class RegisterRequestDTO {
   @IsString()
   @IsNotEmpty({ message: "Last name is required" })
   @MinLength(2, { message: "Last name must be at least 2 characters" })
-  @Matches(/^[A-Za-z]+$/, {
+  @Matches(/^(?!([A-Za-z])\1+$)[A-Za-z]+$/, {
     message: "Last name must contain only letters",
   })
   @Transform(({ value }) => value?.trim())
@@ -59,7 +59,7 @@ export class RegisterRequestDTO {
   confirmPassword!: string;
 
   @IsString()
-  @Matches(/^[6-9]\d{9}$/, {
+  @Matches(/^(?!([0-9])\1{9})[6-9]\d{9}$/, {
     message: "Phone number must be a valid 10-digit Indian number",
   })
   phone!: string;

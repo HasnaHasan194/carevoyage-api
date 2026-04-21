@@ -14,7 +14,7 @@ import { normalizePackageCategory } from "../../../../domain/constants/package-c
 /**
  * Client-only use case: returns only upcoming packages (startDate > today).
  * Business rule: clients can only see packages that have not yet started.
- * Does not affect admin or agency APIs.
+ * 
  */
 @injectable()
 export class GetUpcomingClientPackagesUsecase implements IGetUpcomingClientPackagesUsecase {
@@ -32,16 +32,6 @@ export class GetUpcomingClientPackagesUsecase implements IGetUpcomingClientPacka
   async execute(
     filters: Omit<BrowsePackagesRequestDTO, "startDate" | "endDate">
   ): Promise<BrowsePackagesResponseDTO> {
-    if (filters.category) {
-      const normalized = normalizePackageCategory(filters.category);
-      if (!normalized) {
-        throw new ValidationError(
-          "category must be one of: Sightseeing, Adventure, Cultural, Spiritual, Wellness, Family, Honeymoon, Nature, Heritage"
-        );
-      }
-      filters.category = normalized;
-    }
-
     if (
       filters.minPrice !== undefined &&
       filters.maxPrice !== undefined &&

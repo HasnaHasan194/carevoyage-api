@@ -326,6 +326,7 @@ export const SUCCESS_MESSAGE = {
     COMPLETED: "Package marked as completed",
     CANCELLED: "Package cancelled successfully",
     UPCOMING_LIST_FETCHED: "Upcoming packages retrieved successfully",
+    BROWSE_CATEGORIES_FETCHED: "Browse categories retrieved successfully",
     ACTIVITY_CREATED:"Activity created successfully",
     ACTIVITY_RETRIEVED:"Activity retrieved successfully"
   },

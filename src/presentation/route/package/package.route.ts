@@ -13,6 +13,11 @@ export class PackageRoutes extends BaseRoute {
   }
 
   protected initializeRoutes(): void {
+    this.router.get(
+      ROUTES.PACKAGE_PUBLIC.CATEGORIES,
+      asyncHandler(packageController.listBrowseCategories.bind(packageController))
+    );
+
     //  upcoming packages (startDate > today) 
     this.router.get(
       ROUTES.PACKAGE_PUBLIC.UPCOMING,
