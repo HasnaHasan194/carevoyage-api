@@ -175,6 +175,11 @@ export class AgencyController implements IAgencyController {
         "Only verified caretakers can be set to AVAILABLE"
       );
     }
+    if (status === "AVAILABLE" && (!profile.pricePerDay || profile.pricePerDay <= 0)) {
+      throw new ValidationError(
+        "Set caretaker fee per day before making caretaker AVAILABLE"
+      );
+    }
 
     if (status !== "AVAILABLE" && status !== "INACTIVE") {
       throw new ValidationError(
