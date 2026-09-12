@@ -38,7 +38,7 @@ export const config = {
   },
   email:{
     EMAIL:process.env.EMAIL as string,
-    PASSWORD:process.env.EMAIL_PASSWORD as string,
+    BREVO_API_KEY: process.env.BREVO_API_KEY as string,
   },
   google: {
     CLIENT_ID: process.env.GOOGLE_CLIENT_ID || "",

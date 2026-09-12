@@ -1,4 +1,4 @@
-import nodemailer, { Transporter } from "nodemailer";
+import { BrevoClient } from "@getbrevo/brevo";
 import { injectable } from "tsyringe";
 
 import { IEmailService } from "../../domain/service-interfaces/email-service.interface";
@@ -8,7 +8,7 @@ import { eventBus } from "../../shared/eventBus";
 
 @injectable()
 export class EmailService implements IEmailService {
-  private transporter: Transporter;
+  private readonly client: BrevoClient;
   private readonly boundSendMail: (
     to: string,
     subject: string,
@@ -16,12 +16,8 @@ export class EmailService implements IEmailService {
   ) => Promise<void>;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: config.email.EMAIL,
-        pass: config.email.PASSWORD,
-      },
+    this.client = new BrevoClient({
+      apiKey: config.email.BREVO_API_KEY,
     });
 
     this.boundSendMail = this.sendMail.bind(this);
@@ -34,14 +30,16 @@ export class EmailService implements IEmailService {
   }
 
   async sendMail(to: string, subject: string, html: string): Promise<void> {
-    const mailOptions = {
-      from: `"Care Voyage" <${config.email.EMAIL}>`,
-      to,
+    await this.client.transactionalEmails.sendTransacEmail({
+      sender: {
+        name: "Care Voyage",
+        email: config.email.EMAIL,
+      },
+      to: [{ email: to }],
       subject,
-      html,
-    };
+      htmlContent: html,
+    });
 
-    await this.transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
+    console.log("Email sent successfully via Brevo");
   }
 }
