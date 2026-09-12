@@ -56,6 +56,7 @@ export class App {
 
   private configureRoutes() {
     this._app.use(API_MOUNTS.AUTH, authRoutes.router);
+    this._app.get("/test",(req,res)=>res.json({message:"success"}))
 
     this._app.use(API_MOUNTS.ADMIN, adminRoutes.router);
 
